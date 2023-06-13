@@ -1,0 +1,215 @@
+@import '_variables.scss';
+@import '_animations.scss';
+
+.fieldset {
+    border: 1px solid rgba(54, 54, 54, .2);
+    border-radius: 0.4rem;
+    padding: 0 1rem 1rem 1rem;
+    legend {
+        margin-top: -0.75rem;
+        margin-bottom: 1.5rem;
+        background-color: white;
+        display: inline-block;
+        width: auto;
+        padding: 0 .5rem;
+        font-weight: bold;
+        font-size: 1rem;
+        color: #999;
+    }
+}
+.wizard-navigation-container {
+    max-width: 725px;
+    z-index: 2;
+    .wizard-navigation {
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-image: linear-gradient(to left, transparent 0, darken($green, 5%) 30%, darken($green, 5%) 50%, darken($green, 5%) 70%, transparent 100%);
+        }
+        ol {
+            transition: all ease-in .5s;
+            list-style: none;
+            li {
+                transition: all ease-in .5s;
+                a {
+                    font-size: .9rem;
+                }
+                &.active {
+                    a {
+                        font-weight: 700;
+                        font-size: 1.3rem;
+                        transform: scale(1.1, 1.1);
+                        .index {
+                            margin-top: -1rem;
+                            font-size: 1.2rem;
+                            padding: 1.25rem;
+                            color: black;
+                            width: 1.5rem;
+                            height: 1.5rem;
+                            border-radius: 50%;
+                            background-color: white;
+                            box-shadow: 1px 1px 2px rgba(black, .25), inset 5px 5px 20px rgba(black, .1);
+                        }
+                    }
+                }
+            }
+        }
+        .start-gradient, .end-gradient {
+            position: absolute;
+            z-index: 3;
+            top: 0;
+            width: 8rem;
+            height: 100%;
+        }
+        .start-gradient {
+            left: 0;
+            background-image: linear-gradient(to right, rgba($green, 1) 0, rgba($green, 1) 20%, rgba($green, .4) 50%, transparent 100%);
+        }
+        .end-gradient {
+            right: 0;
+            background-image: linear-gradient(to left, rgba($green, 1) 0, rgba($green, 1) 20%, rgba($green, .4) 50%, transparent 100%);
+        }
+    }
+}
+
+.wizard-steps {
+    max-width: 725px;
+    border: 1px solid white;
+    box-shadow:  20px 30px 100px #4a8538,
+        20px 20px 60px #79d95d,
+        inset 20px 20px 60px rgba(220, 220, 220, 1);
+}
+
+.wizard-outline {
+    li {
+        transition: all ease-in-out .2s;
+        &.active {
+            font-size: 1.3rem;
+            font-weight: 700;
+            a {
+                color: lighten($green, 25%);
+                text-shadow: none;
+            }
+        }
+    }
+}
+
+.tab-container {
+    .tab {
+        position: relative;
+        display: none;
+        &.active {
+            display: block;
+        }
+    }
+}
+
+.slideIn {
+    animation: slideIn .5s ease-in 1 both;
+    &.fadeIn {
+        animation: slideIn .5s ease-in 1 both, fadeIn .5s ease-in 1 both;
+    }
+}
+
+.slideOut {
+    animation: slideOut .5s ease-in 1 both;
+    &.fadeOut {
+        animation: slideOut .5s ease-in 1 both, fadeOut .5s ease-in 1 both;
+    }
+}
+
+.fadeIn {
+    animation: fadeIn .5s ease-in 1 both;
+}
+
+.fadeOut {
+    animation: fadeOut .5s ease-in 1 both;
+}
+
+.custom-shape-divider-top {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    svg {
+        position: relative;
+        display: block;
+        width: calc(195% + 1.3px);
+        height: 150px;
+    }
+    .shape-fill {
+        fill: #f7f7f7;
+    }
+}
+
+/*  BUTTONS  */
+:root {
+    --primary-light: #8affa3;
+    --primary: #5dfc8d;
+    --primary-dark: #0eeb63;
+    
+    --white: #FFFFFF;
+    --greyLight-1: #E4EBF5;
+    --greyLight-2: #c8d0e7;
+    --greyLight-3: #bec8e4;
+    --greyDark: #9baacf;
+  }
+.button {
+    height: 0;
+    border: none;
+    padding: 1.5rem;
+    border-radius: .6rem;
+    box-shadow: $shadow;
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: .3s ease;
+    &.btn_primary {
+        grid-column: 1 / 2;
+        grid-row: 4 / 5;
+        background: var(--primary);
+        box-shadow:inset .2rem .2rem 1rem var(--primary-light), 
+                inset -.2rem -.2rem 1rem var(--primary-dark),
+                $shadow;
+        color: var(--greyLight-1);
+
+        &:hover { color: var(--white); }
+        &:active {
+        box-shadow:inset .2rem .2rem 1rem var(--primary-dark), 
+                inset -.2rem -.2rem 1rem var(--primary-light);
+        }
+    }
+    &.btn_secondary {
+        grid-column: 1 / 2;
+        grid-row: 5 / 6;
+        color: var(--greyDark);
+        &:hover { color: var(--primary); }
+        &:active {
+            box-shadow: $inner-shadow;
+        }
+    }
+ }
+ .css-1e6y48t-MuiButtonBase-root-MuiButton-root {
+    text-transform: initial;
+ }
+.MuiBox-root {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 675px;
+    max-height: 75%;
+    overflow: auto;
+    background-color: white;
+    border-radius: .5rem;
+    padding: 3rem;
+}
