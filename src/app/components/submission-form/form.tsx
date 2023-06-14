@@ -15,7 +15,7 @@ import EditorStep from './editor-step';
 import ReviewersStep from './reviewers-step';
 import FilesStep from './files-step';
 
-const SubmissionForm = ({ handleOpen, setBodyBlurred, modalCalledForm, setModalCalledForm }) => {
+const SubmissionForm = ({ handleOpen, setBodyBlurred, modalCalledForm, setModalCalledForm, modalCalledFormData }) => {
     const steps = [
         {id: 1, title: 'agreement', status: 'incomplete', active: false},
         {id: 2, title: 'types', status: 'incomplete', active: false},
@@ -82,6 +82,7 @@ const SubmissionForm = ({ handleOpen, setBodyBlurred, modalCalledForm, setModalC
                             handleModal={handleModal}
                             modalCalledForm={modalCalledForm}
                             setModalCalledForm={setModalCalledForm}
+                            modalCalledFormData={modalCalledFormData}
                         />
                         <KeywordsStep formStep={formStep} setFormStep={setFormStep} />
                         <ClassificationsStep formStep={formStep} setFormStep={setFormStep} />

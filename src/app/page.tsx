@@ -12,7 +12,8 @@ import ModalContent from './components/modal/modal-content'
 export default function Home() {
   const [modalOpen, setModalOpen] = useState(false);
   const [ modalCalledForm, setModalCalledForm ] = useState(null);
-  const [bodyBlurred, setBodyBlurred ] = useState(false); 
+  const [ modalCalledFormData, setModalCalledFormData ] = useState([]);
+  const [bodyBlurred, setBodyBlurred ] = useState(false);
   const handleOpen = () => {
       setModalOpen(true);
   };
@@ -31,7 +32,7 @@ export default function Home() {
           aria-describedby="parent-modal-description"
       >
           <Box sx={{ width: 400 }}>
-              <ModalContent calledForm={modalCalledForm} />
+              <ModalContent calledForm={modalCalledForm} modalCalledFormData={modalCalledFormData} setModalCalledFormData={setModalCalledFormData}/>
           </Box>
       </Modal>
       <div className={`main-container bg-texture${ bodyBlurred ? ' blurred' : '' }`}>
@@ -50,6 +51,7 @@ export default function Home() {
             setBodyBlurred={setBodyBlurred}
             modalCalledForm={modalCalledForm}
             setModalCalledForm={setModalCalledForm}
+            modalCalledFormData={modalCalledFormData}
           />
         </main>
       </div>

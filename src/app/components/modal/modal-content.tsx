@@ -1,22 +1,43 @@
-import AddAuthorModal from './add-author';
+import { useState, useEffect, useRef } from 'react'
+import AddAuthorModal from './add-author'
+import Divider from '@mui/material/Divider'
+import './../../resources/css/modal.scss'
+import { Button } from '@mui/material'
 
-const ModalContent = ({calledForm}) => {
-    const determineComponentToRender = () => {
-       switch ( calledForm ) {
-            case 'authors': return <AddAuthorModal />;
-       }
-      };
+const ModalContent = ({calledForm, modalCalledFormData, setModalCalledFormData}) => {
+    const [ modalTitle, setModalTitle ] = useState('');
+    const [ renderedComponent, setRenderedComponent ] = useState(null);
+    const childRef = useRef();
+    useEffect(() => {
+        switch (calledForm) {
+          case 'authors':
+            setModalTitle('Add an Author');
+            setRenderedComponent(<AddAuthorModal ref={childRef} modalCalledFormData={modalCalledFormData} setModalCalledFormData={setModalCalledFormData} />);
+            break;
+          default:
+            setModalTitle('');
+            setRenderedComponent(null);
+            break;
+        }
+      }, [calledForm]);
+    const handleAddClick = () => {
+        childRef.current.saveModal();
+    };
 
     return (
         <>
-            <div className="modal-header">
-                <h2 id="parent-modal-title">Text in a modal</h2>
+            <div className="modal-header d-block">
+                <h2 id="parent-modal-title" 
+                className="fs-4 text-center text-green fw-bold container-fluid mb-4">
+                    { modalTitle }
+                </h2>
+                <Divider className="container-fluid mb-4"/>
             </div>
             <div className="modal-body">
-                { determineComponentToRender() }
+                { renderedComponent }
             </div>
             <div className="modal-footer">
-
+                <Button className="button btn_primary" onClick={handleAddClick}>Add</Button>
             </div>
         </>
     );    

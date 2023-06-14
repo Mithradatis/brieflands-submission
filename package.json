@@ -20,12 +20,16 @@
     "bootstrap": "^5.3.0",
     "eslint": "8.42.0",
     "eslint-config-next": "13.4.4",
+    "formik-mui": "^5.0.0-alpha.0",
+    "formik-mui-x-date-pickers": "^0.0.1",
     "next": "13.4.4",
     "react": "18.2.0",
     "react-custom-scrollbars": "^4.2.1",
+    "react-data-table-component": "^7.5.3",
     "react-dom": "18.2.0",
     "react-html-parser": "^2.0.2",
     "sass": "^1.62.1",
+    "styled-components": "^6.0.0-rc.3",
     "transition-hook": "^1.5.2",
     "typescript": "5.1.3"
   }

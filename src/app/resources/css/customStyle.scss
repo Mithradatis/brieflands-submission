@@ -104,6 +104,9 @@ body {
     .checkbox:active ~ .slider::before {
         transform: translate(0);
     }
+    .text-green {
+        color: $green;
+    }
 }
 
 #logo {
