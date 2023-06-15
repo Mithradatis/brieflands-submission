@@ -23,7 +23,7 @@ const WizardNavigation = ({formStep, loadStep, steps}) => {
                             steps.map( (item, index) => (
                                 <li className={`pe-5 ${formStep === item.title ? 'active' : ''}`} key={item.title}>
                                     <a href={`#${item.title}`} onClick={() => loadStep(item.title)} className="d-flex flex-column align-items-center">
-                                        <span className="fw-bold index d-flex align-items-center justify-content-center mb-2">{ index + 1 }</span>
+                                        <span className="fw-bold index d-flex align-items-center justify-content-center">{ index + 1 }</span>
                                         <span className="fs-bold text-shadow">{ item.title }</span>
                                     </a>
                                 </li>

@@ -1,8 +1,16 @@
 import Divider from '@mui/material/Divider'
-import {FormControlLabel, FormGroup } from '@mui/material'
-import { Checkbox } from '@mui/material'
+import {render} from 'react-dom'
+import { CheckboxWithLabel } from 'formik-mui';
+import { Formik, Form, Field, ErrorMessage } from 'formik'
 
-const AgreementStep = ({formStep, setFormStep}) => {
+const AgreementStep = ({formStep, setIsValid, setFormStep}) => {
+    const handleSubmit = (values, { setSubmitting }) => {
+        alert(JSON.stringify(values, null, 2));
+        setSubmitting(false);
+      };
+    const initialValues = {
+        agree: false,
+    };   
 
     return (
         <>
@@ -18,12 +26,44 @@ const AgreementStep = ({formStep, setFormStep}) => {
                         <li>I accept all "Ethical Considerations in Instruction for Authors."</li>
                     </ul>
                 <Divider />
-                <FormGroup>
-                    <FormControlLabel 
-                        control={<Checkbox />} 
-                        label="I've read and agree to all terms that are mentioned above" 
-                    />
-                </FormGroup>
+                <Formik
+                    initialValues={initialValues}
+                    validate={(values) => {
+                        const errors: Partial<Values> = {};
+                        if ( !values.agree ) {
+                            errors.agree = 'Please Check me!';
+                        }
+
+                        return errors;
+                    }}
+                    onSubmit={(values, { setSubmitting }) => {
+                        setTimeout(() => {
+                        setSubmitting(false);
+                        alert(JSON.stringify(values, null, 2));
+                        }, 500);
+                    }}
+                >
+                        {({ submitForm, isSubmitting, isValid }) => (
+                            <Form>
+                                <Field
+                                    Required
+                                    component={CheckboxWithLabel}
+                                    name="agree"
+                                    id="agree"
+                                    type="checkbox"
+                                    Label={{ label: "I've read and agree to all terms that are mentioned above" }}
+                                />
+                                <ErrorMessage name="agree" component="div" className="error" />+
+                                <button
+                                    type="button"
+                                    onClick={() => handleSubmit()}
+                                    disabled={ isSubmitting || !isValid }
+                                    >
+                                    Submit with Click Event
+                                </button>
+                            </Form>
+                        )}
+                </Formik>
             </div>
         </>
     );
