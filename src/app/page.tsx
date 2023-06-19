@@ -50,7 +50,7 @@ export default function Home() {
             </div>
           </div> 
           <div className="logo px-3">
-            <i className="fa-duotone fa-user fa-2x"></i>
+            <i className="fa-duotone fa-circle-user fa-2x"></i>
           </div>
         </div>
         <main className={`${styles.main} pt-4`}>

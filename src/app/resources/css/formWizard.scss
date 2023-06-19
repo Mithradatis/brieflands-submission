@@ -60,6 +60,7 @@
             }
         }
         .start-gradient, .end-gradient {
+            pointer-events: none;
             position: absolute;
             z-index: 3;
             top: 0;

@@ -1,16 +1,59 @@
 import Divider from '@mui/material/Divider'
-import {render} from 'react-dom'
-import { CheckboxWithLabel } from 'formik-mui';
-import { Formik, Form, Field, ErrorMessage } from 'formik'
+import { Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material';
+import { useState, forwardRef, useImperativeHandle, useEffect } from 'react'
 
-const AgreementStep = ({formStep, setIsValid, setFormStep}) => {
-    const handleSubmit = (values, { setSubmitting }) => {
-        alert(JSON.stringify(values, null, 2));
-        setSubmitting(false);
-      };
-    const initialValues = {
-        agree: false,
-    };   
+const AgreementStep = forwardRef(( props, ref ) => {
+    const { formStep } = props;
+    const [formData, setFormData] = useState({
+        termsAndConditions: '',
+        authorName: ''
+      });
+    const [ isChecked , setIsChecked ] = useState( formData.termsAndConditions === 'on' );
+    const [ formIsValid, setFormIsValid ] = useState( true );
+    const [ isValid, setIsValid ] = useState( {
+        termsAndConditions: formData.termsAndConditions !== '',
+        authorName: formData.authorName !== ''
+    });
+    const handleCheckbox = () => {
+        setIsChecked( !isChecked );
+    }
+    const handleInputChange = event => {
+        const { name, value } = event.target;
+        setFormData( prevFormData => ({
+            ...prevFormData,
+            [name]: value,
+        }));
+    }
+    useEffect( () => {
+        setFormData(prevFormData => ({
+            ...prevFormData,
+            termsAndConditions: isChecked ? 'on' : ''
+          }));
+        setIsValid( { ...isValid, termsAndConditions: isChecked } );  
+    }, [isChecked]);
+    useEffect( () => {
+        const isValidKeys = Object.keys(isValid);
+        for ( const [key, value] of Object.entries( formData ) ) {    
+            if ( isValidKeys.includes(key) ) {
+                if ( value === '' ) {
+                    setIsValid({ ...isValid, [key]: false });
+                } else {
+                    setIsValid({ ...isValid, [key]: true });
+                }
+            }
+        }
+    }, [formData]);
+    const formValidator = () => {
+        const allInputsFilled = Object.values( isValid ).every(
+            value => value === true
+        );
+        !allInputsFilled && setFormIsValid( false );
+
+        return allInputsFilled;
+    }
+    useImperativeHandle(ref, () => ({
+        formValidator: formValidator
+    }));
 
     return (
         <>
@@ -26,47 +69,41 @@ const AgreementStep = ({formStep, setIsValid, setFormStep}) => {
                         <li>I accept all "Ethical Considerations in Instruction for Authors."</li>
                     </ul>
                 <Divider />
-                <Formik
-                    initialValues={initialValues}
-                    validate={(values) => {
-                        const errors: Partial<Values> = {};
-                        if ( !values.agree ) {
-                            errors.agree = 'Please Check me!';
-                        }
-
-                        return errors;
-                    }}
-                    onSubmit={(values, { setSubmitting }) => {
-                        setTimeout(() => {
-                        setSubmitting(false);
-                        alert(JSON.stringify(values, null, 2));
-                        }, 500);
-                    }}
-                >
-                        {({ submitForm, isSubmitting, isValid }) => (
-                            <Form>
-                                <Field
-                                    Required
-                                    component={CheckboxWithLabel}
-                                    name="agree"
-                                    id="agree"
-                                    type="checkbox"
-                                    Label={{ label: "I've read and agree to all terms that are mentioned above" }}
+                <form name="agreement-form" id="agreement-form">
+                    <FormControl className="mb-4" fullWidth>
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    required
+                                    name="termsAndConditions"
+                                    id="termsAndConditions"
+                                    checked={ isChecked ? 'checked' : '' }
+                                    onChange={handleCheckbox}
+                                    inputProps={{ 'aria-label': 'Checkbox' }}
                                 />
-                                <ErrorMessage name="agree" component="div" className="error" />+
-                                <button
-                                    type="button"
-                                    onClick={() => handleSubmit()}
-                                    disabled={ isSubmitting || !isValid }
-                                    >
-                                    Submit with Click Event
-                                </button>
-                            </Form>
-                        )}
-                </Formik>
+                            }
+                            label="I've read and agree to all terms that are mentioned above"
+                        />
+                        { 
+                            ( !isChecked && !formIsValid ) 
+                            && <div className="fs-7 text-danger">Please accept the terms and conditions</div> 
+                        }
+                    </FormControl>   
+                    <FormControl className="mb-4" fullWidth>
+                        <TextField
+                            required
+                            error={ !formIsValid && !isValid.authorName } 
+                            name="authorName"
+                            id="author-full-name" 
+                            label="Author's Full Name" 
+                            variant="outlined"
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
+                </form>
             </div>
         </>
     );
-}
+});
 
 export default AgreementStep;

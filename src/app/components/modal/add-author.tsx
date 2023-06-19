@@ -1,4 +1,4 @@
-import { useRef, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import FormControl from '@mui/material/FormControl'
 import Autocomplete from '@mui/material/Autocomplete'
 import { TextField } from '@mui/material';
@@ -32,6 +32,42 @@ const AddAuthrrModal = forwardRef((props, ref) => {
         };    
         setModalCalledFormData( [...modalCalledFormData, authors] );
     }
+    const [formData, setFormData] = useState({
+        termsAndConditions: '',
+        authorName: ''
+    });
+    const [ formIsValid, setFormIsValid ] = useState( true );
+    const [ isValid, setIsValid ] = useState( {
+        termsAndConditions: formData.termsAndConditions !== '',
+        authorName: formData.authorName !== ''
+    });
+    const handleInputChange = event => {
+        const { name, value } = event.target;
+        setFormData( prevFormData => ({
+            ...prevFormData,
+            [name]: value,
+        }));
+    }
+    useEffect( () => {
+        const isValidKeys = Object.keys(isValid);
+        for ( const [key, value] of Object.entries( formData ) ) {    
+            if ( isValidKeys.includes(key) ) {
+                if ( value === '' ) {
+                    setIsValid({ ...isValid, [key]: false });
+                } else {
+                    setIsValid({ ...isValid, [key]: true });
+                }
+            }
+        }
+    }, [formData]);
+    const formValidator = () => {
+        const allInputsFilled = Object.values( isValid ).every(
+            value => value === true
+        );
+        !allInputsFilled && setFormIsValid( false );
+
+        return allInputsFilled;
+    }
     useImperativeHandle(ref, () => ({
         saveModal: saveModal
     }));
@@ -39,16 +75,39 @@ const AddAuthrrModal = forwardRef((props, ref) => {
     return (
         <>
             <FormControl className="mb-4" fullWidth>
-                <TextField id="author-email" label="Email" variant="outlined" inputRef={authorEmail}/>
+                <TextField 
+                    id="author-email" 
+                    label="Email" 
+                    variant="outlined" 
+                    inputRef={authorEmail}
+                    onChange={handleInputChange}
+                />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
-                <TextField id="author-firstname" label="First Name" variant="outlined" inputRef={authorFirstName}/>
+                <TextField 
+                    id="author-firstname" 
+                    label="First Name" 
+                    variant="outlined" 
+                    inputRef={authorFirstName}
+                    onChange={handleInputChange}
+                />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
-                <TextField id="author-middle-name" label="Middle Name" variant="outlined" inputRef={authorMiddleName}/>
+                <TextField 
+                    id="author-middle-name" 
+                    label="Middle Name" 
+                    variant="outlined" 
+                    inputRef={authorMiddleName}
+                />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
-                <TextField id="author-lastname" label="Last Name" variant="outlined" inputRef={authorLastName}/>
+                <TextField 
+                    id="author-lastname" 
+                    label="Last Name" 
+                    variant="outlined" 
+                    inputRef={authorLastName} 
+                    onChange={handleInputChange}
+                />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
                 <TextField id="author-orcid" label="orcid" variant="outlined"/>
@@ -59,6 +118,7 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                     id="author-country"
                     options={countries}
                     renderInput={(params) => <TextField {...params} label="Country" />}
+                    onChange={handleInputChange}
                 />
             </FormControl>
             <fieldset className="fieldset mb-4">
@@ -88,7 +148,12 @@ const AddAuthrrModal = forwardRef((props, ref) => {
             <fieldset className="fieldset mb-4">
                 <legend>Affiliations</legend>
                 <FormControl fullWidth>
-                    <TextField id="author-affiliations" label="Affiliations" variant="outlined"/>
+                    <TextField
+                        id="author-affiliations" 
+                        label="Affiliations"
+                        variant="outlined"
+                        onChange={handleInputChange}
+                    />
                 </FormControl>
             </fieldset>
         </>
