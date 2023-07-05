@@ -1,6 +1,23 @@
 import DataTable from 'react-data-table-component'
-import { Button, Alert, AlertTitle } from '@mui/material'
+import { Button, Alert, AlertTitle, TextField } from '@mui/material'
 import { Scrollbars } from 'react-custom-scrollbars'
+import { useState, useMemo } from 'react'
+
+const FilterComponent = ({ filterText, onFilter, onClear }) => (
+    <>
+        <TextField
+            id="search"
+            type="text"
+            placeholder="Filter By Name"
+            aria-label="Search Input"
+            value={filterText}
+            onChange={onFilter}
+        />
+        <Button type="button" onClick={onClear}>
+            X
+        </Button>
+    </>
+);
 
 const AuthorsStep = ({formStep, handleModal, modalCalledFormData}) => {
     const columns = [
@@ -15,6 +32,35 @@ const AuthorsStep = ({formStep, handleModal, modalCalledFormData}) => {
             sortable: true,
         },
     ];
+    const [filterText, setFilterText] = useState('');
+	const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
+    const filteredItems = modalCalledFormData.filter(item => {
+		const rowValues = Object.values(item);
+        return rowValues.some(value => {
+            if (typeof value === 'string') {
+                const formattedValue = value.replace(/\s/g, '').toLowerCase();
+                const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
+                return formattedValue.includes(formattedFilterText);
+            }
+            return false;
+        });
+    });
+    const subHeaderComponentMemo = useMemo(() => {
+		const handleClear = () => {
+			if (filterText) {
+				setResetPaginationToggle(!resetPaginationToggle);
+				setFilterText('');
+			}
+		};
+
+		return (
+			<FilterComponent   
+                filterText={filterText}
+                onFilter={ event => setFilterText(event.target.value)}
+                onClear={handleClear}
+            />
+		);
+	}, [filterText, resetPaginationToggle]);
 
     return (
         <>
@@ -66,8 +112,13 @@ const AuthorsStep = ({formStep, handleModal, modalCalledFormData}) => {
                 </Scrollbars>
                 <Button className="btn btn-primary btn-lg mb-4" onClick={handleModal}>Add Author</Button>
                 <DataTable
+                    title="Authors"
+                    subHeader
+                    subHeaderComponent={subHeaderComponentMemo}
+                    persistTableHead
+                    pagination
                     columns={columns}
-                    data={modalCalledFormData}
+                    data={filteredItems}
                 />
             </div>
         </>

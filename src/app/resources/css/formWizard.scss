@@ -24,10 +24,12 @@
         &::before {
             content: '';
             position: absolute;
-            top: 0;
+            z-index: -1;
+            top: -5px;
             left: 0;
             width: 100%;
-            height: 3px;
+            height: 5px;
+            border-top: 1px solid rgba(lighten($green, 20%), .2);
             background-image: linear-gradient(to left, transparent 0, darken($green, 5%) 30%, darken($green, 5%) 50%, darken($green, 5%) 70%, transparent 100%);
         }
         ol {
@@ -37,6 +39,9 @@
                 transition: all ease-in .5s;
                 a {
                     font-size: .9rem;
+                    .index {
+                        border-radius: 50%;
+                    }   
                 }
                 &.active {
                     a {
@@ -44,16 +49,42 @@
                         font-size: 1.3rem;
                         transform: scale(1.1, 1.1);
                         .index {
-                            margin-top: -1rem;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            position: relative;
+                            margin-top: -1.2rem;
                             margin-bottom: .5rem;
                             font-size: 1.2rem;
-                            padding: 1.25rem;
-                            color: black;
-                            width: 1.5rem;
-                            height: 1.5rem;
-                            border-radius: 50%;
-                            background-color: white;
-                            box-shadow: 1px 1px 2px rgba(black, .25), inset 5px 5px 20px rgba(black, .1);
+                            color: darken($green, 25%);
+                            text-shadow: 1px 1px 0 lighten($green, 30%);
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            background-image: linear-gradient(45deg, lighten($green, 5%), lighten($green, 20%));
+                            box-shadow: 0 0 10px rgba(black, .1);
+                            &::before {
+                                content: '';
+                                width: 3.5rem;
+                                height: 3.5rem;
+                                position: absolute;
+                                top: -.5rem;
+                                left: -.5rem;
+                                background-color: darken($green, 5%);
+                                border-radius: 50%;
+                                z-index: -2;
+                                box-shadow: inset 0 0 6px rgba(black, .1);
+                            }
+                            &::after {
+                                content: '';
+                                width: 3rem;
+                                height: 3rem;
+                                position: absolute;
+                                top: -.25rem;
+                                left: -.25rem;
+                                background-color: $green;
+                                border-radius: 50%;
+                                z-index: -2;
+                            }                        
                         }
                     }
                 }

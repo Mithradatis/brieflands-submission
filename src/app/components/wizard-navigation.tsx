@@ -14,7 +14,7 @@ const WizardNavigation = ({formStep, loadStep, steps}) => {
 
     return (
         <>
-            <div className="wizard-navigation-container position-relative mb-4 pt-4 overflow-hidden">
+            <div className="wizard-navigation-container position-relative mb-4 pt-5 overflow-hidden">
                 <div className="wizard-navigation position-relative" id="submission-form-wizard">
                     <div className="start-gradient bg-texture"></div>
                     <div className="end-gradient bg-texture"></div>

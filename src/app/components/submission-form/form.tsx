@@ -1,6 +1,6 @@
 'use client'
 
-import { SetStateAction, useState, useRef } from 'react'
+import { SetStateAction, useState, useEffect } from 'react'
 import WizardNavigation from '../wizard-navigation'
 import WizardOutline from '../wizard-outline'
 import AgreementStep from './agreement-step'
@@ -13,13 +13,16 @@ import AbstractStep from './abstract-step'
 import EditorStep from './editor-step'
 import ReviewersStep from './reviewers-step'
 import FilesStep from './files-step'
+import { useDispatch, useSelector } from 'react-redux'
+import { formValidation } from '../../features/submission/submissionSlice'
+import { fetchInitialState } from './../../api/client'
 
 const SubmissionForm = ({ handleOpen, setBodyBlurred, modalCalledForm, setModalCalledForm, modalCalledFormData }) => {
     const steps = [
         {id: 1, title: 'agreement', status: 'incomplete', active: false},
         {id: 2, title: 'types', status: 'incomplete', active: false},
-        {id: 3, title: 'section', status: 'incomplete', active: false},
-        {id: 4, title: 'authors', status: 'incomplete', active: true},
+        {id: 3, title: 'section', status: 'incomplete', active: true},
+        {id: 4, title: 'authors', status: 'incomplete', active: false},
         {id: 5, title: 'keywords', status: 'incomplete', active: false},
         {id: 6, title: 'classifications', status: 'incomplete', active: false},
         {id: 7, title: 'abstract', status: 'incomplete', active: false},
@@ -28,10 +31,12 @@ const SubmissionForm = ({ handleOpen, setBodyBlurred, modalCalledForm, setModalC
         {id: 10, title: 'files', status: 'incomplete', active: false},
     ];
     const [ formStep, setFormStep ] = useState( `${steps.filter( item => item.active )[0].title}` );
-    const [ formData, setFormData ] = useState({});
-    const [ isValid, setIsValid ] = useState(true);
     const [submitReady, setSubmitReady] = useState(false);
-    const childRef = useRef();
+    const formIsValid = useSelector( formValidation );
+    const dispatch = useDispatch();
+    useEffect( () => {
+        dispatch( fetchInitialState(`./../api/${ formStep }.json`) );
+    }, [formStep]);
     const loadStep = ( step: SetStateAction<string> ) => {
         setFormStep( step );
     };
@@ -46,7 +51,7 @@ const SubmissionForm = ({ handleOpen, setBodyBlurred, modalCalledForm, setModalC
         const currentStepIndex = steps.findIndex( item => item.title.includes(formStep));
         const isLastStep = currentStepIndex === steps.length - 1;
         if (!isLastStep) {
-            if ( !childRef.current.formValidator() ) {
+            if ( !formIsValid ) {
                 return;
             }
             setFormStep(steps[currentStepIndex + 1].title);
@@ -72,24 +77,23 @@ const SubmissionForm = ({ handleOpen, setBodyBlurred, modalCalledForm, setModalC
                             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
                         </svg>
                     </div>
-                    <AgreementStep ref={childRef} formStep={formStep} />
-                    <TypesStep formStep={formStep} setIsValid={setIsValid} setFormStep={setFormStep} />
-                    <SectionStep formStep={formStep} setIsValid={setIsValid} setFormStep={setFormStep} />
+                    <AgreementStep formStep={formStep} />
+                    <TypesStep formStep={formStep} setFormStep={setFormStep} />
+                    <SectionStep formStep={formStep} setFormStep={setFormStep} />
                     <AuthorsStep 
                         formStep={formStep}
-                        setIsValid={setIsValid}
                         setFormStep={setFormStep}
                         handleModal={handleModal}
                         modalCalledForm={modalCalledForm}
                         setModalCalledForm={setModalCalledForm}
                         modalCalledFormData={modalCalledFormData}
                     />
-                    <KeywordsStep formStep={formStep} setIsValid={setIsValid} setFormStep={setFormStep} />
-                    <ClassificationsStep formStep={formStep} setIsValid={setIsValid} setFormStep={setFormStep} />
-                    <AbstractStep formStep={formStep} setIsValid={setIsValid} setFormStep={setFormStep} />
-                    <EditorStep formStep={formStep} setIsValid={setIsValid} setFormStep={setFormStep} />
-                    <ReviewersStep formStep={formStep} setIsValid={setIsValid} setFormStep={setFormStep} />
-                    <FilesStep formStep={formStep} setIsValid={setIsValid} setFormStep={setFormStep} />
+                    <KeywordsStep formStep={formStep} setFormStep={setFormStep} />
+                    <ClassificationsStep formStep={formStep} setFormStep={setFormStep} />
+                    <AbstractStep formStep={formStep} setFormStep={setFormStep} />
+                    <EditorStep formStep={formStep} setFormStep={setFormStep} />
+                    <ReviewersStep formStep={formStep} setFormStep={setFormStep} />
+                    <FilesStep formStep={formStep} setFormStep={setFormStep} />
                     <div className="d-flex align-items-center justify-content-end mt-4">
                         <button
                             type="button" 

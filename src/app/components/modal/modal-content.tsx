@@ -4,7 +4,7 @@ import Divider from '@mui/material/Divider'
 import './../../resources/css/modal.scss'
 import { Button } from '@mui/material'
 
-const ModalContent = ({calledForm, modalCalledFormData, setModalCalledFormData}) => {
+const ModalContent = ({calledForm, modalCalledFormData, setModalCalledFormData, handleClose}) => {
     const [ modalTitle, setModalTitle ] = useState('');
     const [ renderedComponent, setRenderedComponent ] = useState(null);
     const childRef = useRef();
@@ -22,6 +22,7 @@ const ModalContent = ({calledForm, modalCalledFormData, setModalCalledFormData})
       }, [calledForm]);
     const handleAddClick = () => {
         childRef.current.saveModal();
+        handleClose();
     };
 
     return (

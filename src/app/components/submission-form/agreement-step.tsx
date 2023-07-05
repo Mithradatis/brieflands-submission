@@ -1,39 +1,21 @@
 import Divider from '@mui/material/Divider'
-import { Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material';
-import { useState, forwardRef, useImperativeHandle, useEffect } from 'react'
-
-const AgreementStep = forwardRef(( props, ref ) => {
-    const { formStep } = props;
-    const [formData, setFormData] = useState({
-        termsAndConditions: '',
-        authorName: ''
-      });
-    const [ isChecked , setIsChecked ] = useState( formData.termsAndConditions === 'on' );
-    const [ formIsValid, setFormIsValid ] = useState( true );
-    const [ isValid, setIsValid ] = useState( {
-        termsAndConditions: formData.termsAndConditions !== '',
-        authorName: formData.authorName !== ''
+import { Checkbox, FormControl, FormControlLabel, TextField } from '@mui/material'
+import { useSelector, useDispatch } from 'react-redux'
+import { useState, useEffect } from 'react'
+import { handleCheckbox, handleInputText, stepState, formValidation, formValidator } from './../../features/submission/submissionSlice'
+ 
+const AgreementStep = ({ formStep }) => {
+    const formData = useSelector( stepState );
+    const formIsValid = useSelector( formValidation );
+    const dispatch = useDispatch();
+    const [ isValid, setIsValid ] = useState({
+        termsAndConditions: false,
+        authorName: false
     });
-    const handleCheckbox = () => {
-        setIsChecked( !isChecked );
-    }
-    const handleInputChange = event => {
-        const { name, value } = event.target;
-        setFormData( prevFormData => ({
-            ...prevFormData,
-            [name]: value,
-        }));
-    }
-    useEffect( () => {
-        setFormData(prevFormData => ({
-            ...prevFormData,
-            termsAndConditions: isChecked ? 'on' : ''
-          }));
-        setIsValid( { ...isValid, termsAndConditions: isChecked } );  
-    }, [isChecked]);
+
     useEffect( () => {
         const isValidKeys = Object.keys(isValid);
-        for ( const [key, value] of Object.entries( formData ) ) {    
+        for ( const [key, value] of Object.entries( formData ) ) {   
             if ( isValidKeys.includes(key) ) {
                 if ( value === '' ) {
                     setIsValid({ ...isValid, [key]: false });
@@ -42,18 +24,8 @@ const AgreementStep = forwardRef(( props, ref ) => {
                 }
             }
         }
+        dispatch( formValidator( formStep ) );
     }, [formData]);
-    const formValidator = () => {
-        const allInputsFilled = Object.values( isValid ).every(
-            value => value === true
-        );
-        !allInputsFilled && setFormIsValid( false );
-
-        return allInputsFilled;
-    }
-    useImperativeHandle(ref, () => ({
-        formValidator: formValidator
-    }));
 
     return (
         <>
@@ -77,15 +49,15 @@ const AgreementStep = forwardRef(( props, ref ) => {
                                     required
                                     name="termsAndConditions"
                                     id="termsAndConditions"
-                                    checked={ isChecked ? 'checked' : '' }
-                                    onChange={handleCheckbox}
-                                    inputProps={{ 'aria-label': 'Checkbox' }}
+                                    checked={ formData.termsAndConditions === 'on' }
+                                    onChange={ event => dispatch ( handleCheckbox({ name: event.target.name }) ) }
+                                    inputProps={{ 'aria-label': 'terms-and-conditions' }}
                                 />
                             }
                             label="I've read and agree to all terms that are mentioned above"
                         />
-                        { 
-                            ( !isChecked && !formIsValid ) 
+                        {
+                            ( formData.termsAndConditions !== 'on' && !formIsValid ) 
                             && <div className="fs-7 text-danger">Please accept the terms and conditions</div> 
                         }
                     </FormControl>   
@@ -94,16 +66,20 @@ const AgreementStep = forwardRef(( props, ref ) => {
                             required
                             error={ !formIsValid && !isValid.authorName } 
                             name="authorName"
-                            id="author-full-name" 
+                            id="authorName" 
                             label="Author's Full Name" 
                             variant="outlined"
-                            onChange={handleInputChange}
+                            value={ formData.authorName }
+                            onChange={ event => dispatch( handleInputText( { name: 'authorName', value: event.target.value } ) ) }
+                            InputLabelProps={{
+                                shrink: formData.authorName !== '',
+                            }}
                         />
                     </FormControl>
                 </form>
             </div>
         </>
     );
-});
+}
 
 export default AgreementStep;

@@ -14,6 +14,17 @@ const AddAuthrrModal = forwardRef((props, ref) => {
     const authorPhoneCountry = useRef('');
     const authorPhoneNumber = useRef('');
     const authorAffiliations = useRef('');
+    const [ formData, setFormData ] = useState({
+        authorEmail: '',
+        authorFirstName: '',
+        authorMiddleName: '',
+        authorLastName: '',
+        authorCountry: '',
+        authorPhoneType: '',
+        authorPhoneCountry: '',
+        authorPhoneNumber: '',
+        authorAffiliations: ''
+    });
     const phoneTypes = [
         { id: 1, label: 'Mobile' },
         { id: 2, label: 'Home' },
@@ -32,10 +43,6 @@ const AddAuthrrModal = forwardRef((props, ref) => {
         };    
         setModalCalledFormData( [...modalCalledFormData, authors] );
     }
-    const [formData, setFormData] = useState({
-        termsAndConditions: '',
-        authorName: ''
-    });
     const [ formIsValid, setFormIsValid ] = useState( true );
     const [ isValid, setIsValid ] = useState( {
         termsAndConditions: formData.termsAndConditions !== '',
@@ -75,8 +82,9 @@ const AddAuthrrModal = forwardRef((props, ref) => {
     return (
         <>
             <FormControl className="mb-4" fullWidth>
-                <TextField 
-                    id="author-email" 
+                <TextField
+                    name="authorEmail"  
+                    id="author-email"
                     label="Email" 
                     variant="outlined" 
                     inputRef={authorEmail}
@@ -84,7 +92,8 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                 />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
-                <TextField 
+                <TextField
+                    name="authorFirstName" 
                     id="author-firstname" 
                     label="First Name" 
                     variant="outlined" 
@@ -93,7 +102,8 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                 />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
-                <TextField 
+                <TextField
+                    name="authorMiddleName" 
                     id="author-middle-name" 
                     label="Middle Name" 
                     variant="outlined" 
@@ -101,7 +111,8 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                 />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
-                <TextField 
+                <TextField
+                    name="authorLastName"  
                     id="author-lastname" 
                     label="Last Name" 
                     variant="outlined" 
@@ -110,11 +121,17 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                 />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
-                <TextField id="author-orcid" label="orcid" variant="outlined"/>
+                <TextField
+                    name="authorOrcId"  
+                    id="author-orcid" 
+                    label="orcid" 
+                    variant="outlined"
+                />
             </FormControl>
             <FormControl fullWidth className="mb-4">
                 <Autocomplete
                     disablePortal
+                    name="authorCountry" 
                     id="author-country"
                     options={countries}
                     renderInput={(params) => <TextField {...params} label="Country" />}
@@ -127,6 +144,7 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                     <FormControl className="pe-3" fullWidth>
                         <Autocomplete
                             disablePortal
+                            name="authorPhoneType" 
                             id="author-phone-type"
                             options={phoneTypes}
                             renderInput={(params) => <TextField {...params} label="Type" />}
@@ -135,13 +153,19 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                     <FormControl className="pe-3" fullWidth>
                         <Autocomplete
                             disablePortal
+                            name="authorPhoneCountry" 
                             id="author-phone-country"
                             options={countries}
                             renderInput={(params) => <TextField {...params} label="Country" />}
                         />
                     </FormControl>
                     <FormControl fullWidth>
-                        <TextField id="author-phone-number" label="Number" variant="outlined"/>
+                        <TextField
+                            name="authorPhoneNumber"  
+                            id="author-phone-number" 
+                            label="Number" 
+                            variant="outlined"
+                        />
                     </FormControl>
                 </div>
             </fieldset>
@@ -149,6 +173,7 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                 <legend>Affiliations</legend>
                 <FormControl fullWidth>
                     <TextField
+                        name="authorAffiliations" 
                         id="author-affiliations" 
                         label="Affiliations"
                         variant="outlined"
