@@ -2,7 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 
 export const fetchInitialState = createAsyncThunk(
   'submission/fetchInitialState',
-  async ( url ) => {
+  async ( url: string ) => {
     try {
       const response = await fetch( url );
       const data = await response.json();

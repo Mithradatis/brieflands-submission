@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import { Autocomplete } from '@mui/joy'
 import { useDispatch, useSelector } from 'react-redux'
-import { handleSelection, stepState, formValidation, formValidator } from './../../features/submission/submissionSlice'
+import { handleSelection, stepState, formValidation, formValidator } from '@/app/features/submission/submissionSlice'
+import { wizardState } from '@/app/features/wizard/wizardSlice'
 
-const SectionStep = ({ formStep }) => {
+const SectionStep = () => {
     const dispatch = useDispatch();
-    const formData = useSelector( stepState );
+    const formState = useSelector( stepState );
+    const wizard = useSelector( wizardState );
     const formIsValid = useSelector( formValidation );
     const [ isValid, setIsValid ] = useState({
         section: '',
     });
     useEffect( () => {
         const isValidKeys = Object.keys(isValid);
-        for ( const [key, value] of Object.entries( formData ) ) {   
+        for ( const [key, value] of Object.entries( formState ) ) {   
             if ( isValidKeys.includes(key) ) {
                 if ( value === '' ) {
                     setIsValid({ ...isValid, [key]: false });
@@ -22,12 +24,12 @@ const SectionStep = ({ formStep }) => {
                 }
             }
         }
-        dispatch( formValidator( formStep ) );
-    }, [formData]);
+        dispatch( formValidator( formState.formStep ) );
+    }, [formState]);
 
     return (
         <>
-            <div id="section" className={`tab${formStep === 'section' ? ' active' : ''}`}>
+            <div id="section" className={`tab${wizard.formStep === 'section' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Section</h3>
                 <FormControl fullWidth>
                     <Autocomplete
@@ -38,8 +40,8 @@ const SectionStep = ({ formStep }) => {
                         disabled={false}
                         name="documentSection"
                         id="documentSection"
-                        options={formData.sections}
-                        value={ formData.sections !== undefined ? formData.sections.find((item) => item.id === formData.documentSection) || null : null }
+                        options={ formState.sections !== undefined ? formState.sections : [] }
+                        value={ formState.sections !== undefined ? formState.sections.find( ( item:any ) => item.id === formState.documentSection) || null : null }
                         onChange={(event, value) => {
                             const selectedId = value ? value.id : '';
                             dispatch(handleSelection({ name: 'documentSection' , value: selectedId }));

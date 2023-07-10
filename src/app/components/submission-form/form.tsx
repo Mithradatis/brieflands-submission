@@ -1,111 +1,66 @@
 'use client'
 
-import { SetStateAction, useState, useEffect } from 'react'
-import WizardNavigation from '../wizard-navigation'
-import WizardOutline from '../wizard-outline'
-import AgreementStep from './agreement-step'
-import TypesStep from './types-step'
-import SectionStep from './section-step'
-import AuthorsStep from './authors-step'
-import KeywordsStep from './keywords-step'
-import ClassificationsStep from './classifications-step'
-import AbstractStep from './abstract-step'
-import EditorStep from './editor-step'
-import ReviewersStep from './reviewers-step'
-import FilesStep from './files-step'
+import { useState, useEffect } from 'react'
+import WizardNavigation from '@/app/components/wizard-navigation'
+import WizardOutline from '@/app/components/wizard-outline'
+import AgreementStep from '@/app/components/submission-form/agreement-step'
+import TypesStep from '@/app/components/submission-form/types-step'
+import SectionStep from '@/app/components/submission-form/section-step'
+import AuthorsStep from '@/app/components/submission-form/authors-step'
+import KeywordsStep from '@/app/components/submission-form/keywords-step'
+import ClassificationsStep from '@/app/components/submission-form/classifications-step'
+import AbstractStep from '@/app/components/submission-form/abstract-step'
+import EditorStep from '@/app/components/submission-form/editor-step'
+import ReviewersStep from '@/app/components/submission-form/reviewers-step'
+import FilesStep from '@/app/components/submission-form/files-step'
 import { useDispatch, useSelector } from 'react-redux'
-import { formValidation } from '../../features/submission/submissionSlice'
-import { fetchInitialState } from './../../api/client'
+import { formValidation } from '@/app/features/submission/submissionSlice'
+import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
+import { fetchInitialState } from '@/app/api/client'
 
-const SubmissionForm = ({ handleOpen, setBodyBlurred, modalCalledForm, setModalCalledForm, modalCalledFormData }) => {
-    const steps = [
-        {id: 1, title: 'agreement', status: 'incomplete', active: false},
-        {id: 2, title: 'types', status: 'incomplete', active: false},
-        {id: 3, title: 'section', status: 'incomplete', active: true},
-        {id: 4, title: 'authors', status: 'incomplete', active: false},
-        {id: 5, title: 'keywords', status: 'incomplete', active: false},
-        {id: 6, title: 'classifications', status: 'incomplete', active: false},
-        {id: 7, title: 'abstract', status: 'incomplete', active: false},
-        {id: 8, title: 'editor', status: 'incomplete', active: false},
-        {id: 9, title: 'reviewers', status: 'incomplete', active: false},
-        {id: 10, title: 'files', status: 'incomplete', active: false},
-    ];
-    const [ formStep, setFormStep ] = useState( `${steps.filter( item => item.active )[0].title}` );
+const SubmissionForm = () => {
+    const wizard = useSelector( wizardState );
     const [submitReady, setSubmitReady] = useState(false);
     const formIsValid = useSelector( formValidation );
-    const dispatch = useDispatch();
+    const dispatch:any = useDispatch();
     useEffect( () => {
-        dispatch( fetchInitialState(`./../api/${ formStep }.json`) );
-    }, [formStep]);
-    const loadStep = ( step: SetStateAction<string> ) => {
-        setFormStep( step );
-    };
-    const prevStep = () => {
-        const currentStepIndex = steps.findIndex( item => item.title.includes(formStep));
-        setSubmitReady(false);
-        if ( currentStepIndex - 1 >= 0 ) {
-            setFormStep( steps[currentStepIndex - 1].title );
-        }
-    }
-    const nextStep = () => {
-        const currentStepIndex = steps.findIndex( item => item.title.includes(formStep));
-        const isLastStep = currentStepIndex === steps.length - 1;
-        if (!isLastStep) {
-            if ( !formIsValid ) {
-                return;
-            }
-            setFormStep(steps[currentStepIndex + 1].title);
-            setSubmitReady(isLastStep);
-        }
-    }
-    const handleModal = () => {
-        setModalCalledForm(formStep);
-        handleOpen();
-        setBodyBlurred( true );
-    }
+        dispatch( fetchInitialState(`./../api/${ wizard.formStep }.json`) );
+    }, [wizard.formStep]);
 
     return (
         <div className="wizard mb-4">
-            <p className="mb-0">Step <b>{ steps.findIndex( item => item.title.includes(formStep) ) + 1 }</b> of <b>{ steps.length }</b></p>
-            <WizardNavigation formStep={formStep} setFormStep={setFormStep} loadStep={loadStep} steps={steps} />
+            <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item.title.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
+            <WizardNavigation />
             <div className="d-flex align-items-start">
-                <WizardOutline formStep={formStep} setFormStep={setFormStep} loadStep={loadStep} steps={steps} />
-                
+                <WizardOutline />
                 <div className="wizard-steps tab-container p-5 rounded-double bg-white flex-fill position-relative overflow-hidden">
                     <div className="custom-shape-divider-top">
                         <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
                             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
                         </svg>
                     </div>
-                    <AgreementStep formStep={formStep} />
-                    <TypesStep formStep={formStep} setFormStep={setFormStep} />
-                    <SectionStep formStep={formStep} setFormStep={setFormStep} />
-                    <AuthorsStep 
-                        formStep={formStep}
-                        setFormStep={setFormStep}
-                        handleModal={handleModal}
-                        modalCalledForm={modalCalledForm}
-                        setModalCalledForm={setModalCalledForm}
-                        modalCalledFormData={modalCalledFormData}
-                    />
-                    <KeywordsStep formStep={formStep} setFormStep={setFormStep} />
-                    <ClassificationsStep formStep={formStep} setFormStep={setFormStep} />
-                    <AbstractStep formStep={formStep} setFormStep={setFormStep} />
-                    <EditorStep formStep={formStep} setFormStep={setFormStep} />
-                    <ReviewersStep formStep={formStep} setFormStep={setFormStep} />
-                    <FilesStep formStep={formStep} setFormStep={setFormStep} />
+                    <AgreementStep />
+                    <TypesStep />
+                    <SectionStep />
+                    <AuthorsStep />
+                    <KeywordsStep />
+                    <ClassificationsStep />
+                    <AbstractStep />
+                    <EditorStep />
+                    <ReviewersStep />
+                    <FilesStep />
                     <div className="d-flex align-items-center justify-content-end mt-4">
                         <button
                             type="button" 
                             id="previous-step" 
-                            className={`button btn_secondary me-2 ${ formStep === steps[0].title ? 'd-none' : '' }`} 
-                            onClick={prevStep}>Back</button>
+                            className={`button btn_secondary me-2 ${ wizard.formStep === wizard.formSteps[0].title ? 'd-none' : '' }`} 
+                            onClick={ () =>dispatch( prevStep() )}>Back</button>
                         <button
                             type={submitReady ? "submit" : "button"}
                             id="next-step"
                             className={`button btn_primary ${ submitReady ? 'd-none' : '' }`} 
-                            onClick={nextStep}>
-                            {formStep === steps[steps.length - 1].title ? "submit" : "next"}
+                            onClick={ () => dispatch( nextStep( formIsValid ) )}>
+                            { wizard.formStep === wizard.formSteps[wizard.formSteps.length - 1].title ? "submit" : "next"}
                         </button>
                     </div>
                 </div>

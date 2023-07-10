@@ -1,7 +1,12 @@
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
+import { useSelector } from 'react-redux'
+import { stepState } from '@/app/features/submission/submissionSlice'
+import { wizardState } from '@/app/features/wizard/wizardSlice'
 
-const KeywordsStep = ({formStep}) => {
+const KeywordsStep = () => {
+    const formState = useSelector( stepState );
+    const wizard = useSelector( wizardState );
     const Keywords = [
         { id: 1, title: 'The Shawshank Redemption', year: 1994 },
         { id: 2, title: 'The Godfather', year: 1972 },
@@ -14,7 +19,7 @@ const KeywordsStep = ({formStep}) => {
 
     return (
         <>
-            <div id="keywords" className={`tab${formStep === 'keywords' ? ' active' : ''}`}>
+            <div id="keywords" className={`tab${wizard.formStep === 'keywords' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Keywords</h3>
                 <Autocomplete
                     multiple

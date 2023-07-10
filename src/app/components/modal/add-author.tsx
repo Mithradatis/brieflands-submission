@@ -1,30 +1,14 @@
-import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { TextField } from '@mui/material'
+import { formValidator } from '@/app/features/submission/submissionSlice'
+import { modalState, handleInputChange } from '@/app/features/modal/modalSlice'
 import FormControl from '@mui/material/FormControl'
 import Autocomplete from '@mui/material/Autocomplete'
-import { TextField } from '@mui/material';
 
-const AddAuthrrModal = forwardRef((props, ref) => {
-    const { modalCalledFormData, setModalCalledFormData } = props;
-    const authorEmail = useRef('');
-    const authorFirstName = useRef('');
-    const authorMiddleName = useRef('');
-    const authorLastName = useRef('');
-    const authorCountry = useRef('');
-    const authorPhoneType = useRef('');
-    const authorPhoneCountry = useRef('');
-    const authorPhoneNumber = useRef('');
-    const authorAffiliations = useRef('');
-    const [ formData, setFormData ] = useState({
-        authorEmail: '',
-        authorFirstName: '',
-        authorMiddleName: '',
-        authorLastName: '',
-        authorCountry: '',
-        authorPhoneType: '',
-        authorPhoneCountry: '',
-        authorPhoneNumber: '',
-        authorAffiliations: ''
-    });
+const AddAuthrrModal = () => {
+    const dispatch = useDispatch();
+    const modalFormData = useSelector( modalState );
     const phoneTypes = [
         { id: 1, label: 'Mobile' },
         { id: 2, label: 'Home' },
@@ -36,28 +20,15 @@ const AddAuthrrModal = forwardRef((props, ref) => {
         { label: 'Afghanistan', id: 2 },
         { label: 'Tajikistan', id: 3 },
     ];
-    const saveModal = () => {
-        const authors = {
-            email: authorEmail.current.value, 
-            name: `${ authorFirstName.current.value } ${ authorMiddleName.current.value } ${ authorLastName.current.value }` 
-        };    
-        setModalCalledFormData( [...modalCalledFormData, authors] );
-    }
-    const [ formIsValid, setFormIsValid ] = useState( true );
     const [ isValid, setIsValid ] = useState( {
-        termsAndConditions: formData.termsAndConditions !== '',
-        authorName: formData.authorName !== ''
+        authorEmail: modalFormData.authorEmail !== '',
+        authorFirstName: modalFormData.authorFirstName !== '',
+        authorLastName: modalFormData.authorLastName !== ''
     });
-    const handleInputChange = event => {
-        const { name, value } = event.target;
-        setFormData( prevFormData => ({
-            ...prevFormData,
-            [name]: value,
-        }));
-    }
+    const [ formIsValid, setFormIsValid ] = useState( true );
     useEffect( () => {
         const isValidKeys = Object.keys(isValid);
-        for ( const [key, value] of Object.entries( formData ) ) {    
+        for ( const [key, value] of Object.entries( modalFormData ) ) {    
             if ( isValidKeys.includes(key) ) {
                 if ( value === '' ) {
                     setIsValid({ ...isValid, [key]: false });
@@ -66,76 +37,62 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                 }
             }
         }
-    }, [formData]);
-    const formValidator = () => {
-        const allInputsFilled = Object.values( isValid ).every(
-            value => value === true
-        );
-        !allInputsFilled && setFormIsValid( false );
-
-        return allInputsFilled;
-    }
-    useImperativeHandle(ref, () => ({
-        saveModal: saveModal
-    }));
+    }, [modalFormData]);
 
     return (
         <>
             <FormControl className="mb-4" fullWidth>
                 <TextField
                     name="authorEmail"  
-                    id="author-email"
+                    id="authorEmail"
                     label="Email" 
                     variant="outlined" 
-                    inputRef={authorEmail}
-                    onChange={handleInputChange}
+                    onChange={ event => dispatch( handleInputChange( { name: 'authorEmail', value: event.target.value } ) ) }
                 />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
                 <TextField
                     name="authorFirstName" 
-                    id="author-firstname" 
+                    id="authorFirstName" 
                     label="First Name" 
-                    variant="outlined" 
-                    inputRef={authorFirstName}
-                    onChange={handleInputChange}
+                    variant="outlined"
+                    onChange={ event => dispatch( handleInputChange( { name: 'authorFirstName', value: event.target.value } ) ) }
                 />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
                 <TextField
                     name="authorMiddleName" 
-                    id="author-middle-name" 
+                    id="authorMiddleName" 
                     label="Middle Name" 
-                    variant="outlined" 
-                    inputRef={authorMiddleName}
+                    variant="outlined"
+                    onChange={ event => dispatch( handleInputChange( { name: 'authorMiddleName', value: event.target.value } ) ) }
                 />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
                 <TextField
                     name="authorLastName"  
-                    id="author-lastname" 
+                    id="authorLastName" 
                     label="Last Name" 
-                    variant="outlined" 
-                    inputRef={authorLastName} 
-                    onChange={handleInputChange}
+                    variant="outlined"
+                    onChange={ event => dispatch( handleInputChange( { name: 'authorLastName', value: event.target.value } ) ) }
                 />
             </FormControl>
             <FormControl className="mb-4" fullWidth>
                 <TextField
                     name="authorOrcId"  
-                    id="author-orcid" 
+                    id="authorOrcId" 
                     label="orcid" 
                     variant="outlined"
+                    onChange={ event => dispatch( handleInputChange( { name: 'authorOrcId', value: event.target.value } ) ) }
                 />
             </FormControl>
             <FormControl fullWidth className="mb-4">
                 <Autocomplete
                     disablePortal
-                    name="authorCountry" 
-                    id="author-country"
+                    id="authorCountry"
                     options={countries}
                     renderInput={(params) => <TextField {...params} label="Country" />}
-                    onChange={handleInputChange}
+                    onChange={ ( event, value ) => dispatch( handleInputChange( { name: 'authorCountry', value: value?.label || '' } ) ) }
                 />
             </FormControl>
             <fieldset className="fieldset mb-4">
@@ -143,28 +100,29 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                 <div className="d-flex align-items-center">
                     <FormControl className="pe-3" fullWidth>
                         <Autocomplete
-                            disablePortal
-                            name="authorPhoneType" 
-                            id="author-phone-type"
+                            disablePortal 
+                            id="authorPhoneType"
                             options={phoneTypes}
                             renderInput={(params) => <TextField {...params} label="Type" />}
+                            onChange={ ( event, value ) => dispatch( handleInputChange( { name: 'authorPhoneType', value: value?.label || '' } ) ) }
                         />
                     </FormControl>
                     <FormControl className="pe-3" fullWidth>
                         <Autocomplete
-                            disablePortal
-                            name="authorPhoneCountry" 
-                            id="author-phone-country"
+                            disablePortal 
+                            id="authorPhoneCountry"
                             options={countries}
                             renderInput={(params) => <TextField {...params} label="Country" />}
+                            onChange={ ( event, value ) => dispatch( handleInputChange( { name: 'authorPhoneCountry', value: value?.label || '' } ) ) }
                         />
                     </FormControl>
                     <FormControl fullWidth>
                         <TextField
                             name="authorPhoneNumber"  
-                            id="author-phone-number" 
+                            id="authorPhoneNumber" 
                             label="Number" 
                             variant="outlined"
+                            onChange={ event => dispatch( handleInputChange( { name: 'authorPhoneNumber', value: event.target.value } ) ) }
                         />
                     </FormControl>
                 </div>
@@ -174,15 +132,15 @@ const AddAuthrrModal = forwardRef((props, ref) => {
                 <FormControl fullWidth>
                     <TextField
                         name="authorAffiliations" 
-                        id="author-affiliations" 
+                        id="authorAffiliations" 
                         label="Affiliations"
                         variant="outlined"
-                        onChange={handleInputChange}
+                        onChange={ event => dispatch( handleInputChange( { name: 'authorAffiliations', value: event.target.value } ) ) }
                     />
                 </FormControl>
             </fieldset>
         </>
     );
-});
+}
 
 export default AddAuthrrModal;

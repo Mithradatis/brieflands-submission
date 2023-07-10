@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { fetchInitialState } from './../../api/client'
+import { fetchInitialState } from '@/app/api/client'
 
 export const submissionSlice = createSlice({
   name: 'submission',
@@ -10,12 +10,12 @@ export const submissionSlice = createSlice({
     formStatus: 'new'
   },
   reducers: {
-    handleCheckbox: ( state, action ) => {
+    handleCheckbox: (state, action) => {
       return {
         ...state,
         value: {
           ...state.value,
-          [ action.payload.name ]: !state.value[ action.payload.name ] ? 'on' : '',
+          [action.payload.name]: action.payload.value === 'on' ? '' : 'on',
         },
       };
     },
@@ -40,7 +40,7 @@ export const submissionSlice = createSlice({
     formValidator: ( state, action ) => {
       let formIsValid = true;
       for ( const [key, value] of Object.entries( state.value ) ) {
-        const input = document.querySelector(`#${action.payload} [name=${ key }]`);
+        const input: any = document.querySelector(`#${action.payload} [name=${ key }]`);
         if ( input !== null ) {
           if ( input.required && value === '' ) {
             formIsValid = false;
@@ -66,15 +66,20 @@ export const submissionSlice = createSlice({
         state.value = action.payload;
       })
       .addCase(fetchInitialState.rejected, ( state, action ) => {
-        state.error = action.error.message;
+        // state.error = action.error.message;
       });
-  }
+  },
 });
 
-export const { handleCheckbox, handleInputText, handleSelection, formValidator } = submissionSlice.actions;
+export const {
+  handleCheckbox, 
+  handleInputText, 
+  handleSelection, 
+  formValidator 
+} = submissionSlice.actions;
 
-export const stepState = state => state.submissionSlice.value;
+export const stepState = ( state: any ) => state.submissionSlice.value;
 
-export const formValidation = state => state.submissionSlice.isFormValid;
+export const formValidation = ( state: any ) => state.submissionSlice.isFormValid;
 
 export default submissionSlice.reducer;

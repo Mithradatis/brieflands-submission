@@ -1,0 +1,8 @@
+{
+    "documentSection": 2,
+    "sections": [
+        { "label": "Section 1", "id": 1 },
+        { "label": "Section 2", "id": 2 },
+        { "label": "Section 3", "id": 3 }
+    ]
+}

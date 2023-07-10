@@ -2,18 +2,20 @@ import { useState, useEffect } from 'react'
 import FormControl from '@mui/material/FormControl'
 import { Autocomplete } from '@mui/joy'
 import { useDispatch, useSelector } from 'react-redux'
-import { handleSelection, stepState, formValidation, formValidator } from './../../features/submission/submissionSlice'
+import { handleSelection, stepState, formValidation, formValidator } from '@/app/features/submission/submissionSlice'
+import { wizardState } from '@/app/features/wizard/wizardSlice'
 
-const TypesStep = ({ formStep }) => {
+const TypesStep = () => {
     const dispatch = useDispatch();
-    const formData = useSelector( stepState );
+    const formState = useSelector( stepState );
+    const wizard = useSelector( wizardState );
     const formIsValid = useSelector( formValidation );
     const [ isValid, setIsValid ] = useState({
         documentType: '',
     });
     useEffect( () => {
         const isValidKeys = Object.keys(isValid);
-        for ( const [key, value] of Object.entries( formData ) ) {   
+        for ( const [key, value] of Object.entries( formState ) ) {   
             if ( isValidKeys.includes(key) ) {
                 if ( value === '' ) {
                     setIsValid({ ...isValid, [key]: false });
@@ -22,12 +24,12 @@ const TypesStep = ({ formStep }) => {
                 }
             }
         }
-        dispatch( formValidator( formStep ) );
-    }, [formData]);
+        dispatch( formValidator( formState.formStep ) );
+    }, [formState]);
 
     return (
         <>
-            <div id="types" className={`tab${formStep === 'types' ? ' active' : ''}`}>
+            <div id="types" className={`tab${wizard.formStep === 'types' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Types</h3>
                 <FormControl fullWidth>
                     <Autocomplete
@@ -38,8 +40,8 @@ const TypesStep = ({ formStep }) => {
                         disabled={false}
                         name="documentType"
                         id="documentType"
-                        options={formData.types}
-                        value={ formData.types !== undefined ? formData.types.find((item) => item.id === formData.documentType) || null : null }
+                        options={ formState.types !== undefined ? formState.types : [] }
+                        value={ formState.types !== undefined ? formState.types.find( ( item: any ) => item.id === formState.documentType) || null : null }
                         onChange={(event, value) => {
                             const selectedId = value ? value.id : '';
                             dispatch(handleSelection({ name: 'documentType' , value: selectedId }));

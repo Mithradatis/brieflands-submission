@@ -1,21 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit'
-import { persistStore, persistReducer } from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
-import autoMergeLevel2 from 'redux-persist/es/stateReconciler/autoMergeLevel2'
-import submissionReducer from './features/submission/submissionSlice'
-
-const persistConfig = {
-  key: 'root',
-  storage,
-  stateReconciler: autoMergeLevel2
-};
-
-const persistedSubmissionReducer = persistReducer(persistConfig, submissionReducer);
+import submissionReducer from '@/app/features/submission/submissionSlice'
+import modalReducer from '@/app/features/modal/modalSlice'
+import addAuthorModalReducer from '@/app/features/modal/addAuthorModalSlice'
+import wizardReducer from '@/app/features/wizard/wizardSlice'
 
 export const store = configureStore({
   reducer: {
-    submissionSlice: persistedSubmissionReducer
+    submissionSlice: submissionReducer,
+    modalSlice: modalReducer,
+    addAuthorModalSlice: addAuthorModalReducer,
+    wizardSlice: wizardReducer
   },
 });
-
-export const persistor = persistStore( store );
