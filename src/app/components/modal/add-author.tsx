@@ -37,7 +37,7 @@ const AddAuthrrModal = () => {
                 }
             }
         }
-    }, [modalFormData]);
+    }, [modalFormData, isValid]);
 
     return (
         <>

@@ -1,10 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const steps = [
-  {id: 1, title: 'agreement', status: 'incomplete', active: false},
+  {id: 1, title: 'agreement', status: 'incomplete', active: true},
   {id: 2, title: 'types', status: 'incomplete', active: false},
   {id: 3, title: 'section', status: 'incomplete', active: false},
-  {id: 4, title: 'authors', status: 'incomplete', active: true},
+  {id: 4, title: 'authors', status: 'incomplete', active: false},
   {id: 5, title: 'keywords', status: 'incomplete', active: false},
   {id: 6, title: 'classifications', status: 'incomplete', active: false},
   {id: 7, title: 'abstract', status: 'incomplete', active: false},

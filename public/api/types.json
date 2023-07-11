@@ -1,5 +1,6 @@
 {
     "documentType": 3, 
+    "documentTitle": "Mushrooms",
     "types": [
         { "label": "Research Article", "id": 1 },
         { "label": "Review Article", "id": 2 },

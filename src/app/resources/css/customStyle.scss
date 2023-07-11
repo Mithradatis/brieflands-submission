@@ -12,6 +12,13 @@ body {
         color: darken($green, 20%);
         text-shadow: 1px 1px 0 lighten($green, 5%);
     }
+    ul {
+        li {
+            ul {
+                list-style: disc;
+            }
+        }
+    }
     .fs-7 {
         font-size: .8rem;
     }
@@ -56,7 +63,7 @@ body {
     }
     
     .text-shadow {
-        text-shadow: 1px 1px 0 lighten($green, 7.5%);
+        text-shadow: 1px 1px 0 lighten($green, 5%);
     }
     
     .text-shadow-white {

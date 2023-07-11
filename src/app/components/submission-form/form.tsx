@@ -14,9 +14,9 @@ import EditorStep from '@/app/components/submission-form/editor-step'
 import ReviewersStep from '@/app/components/submission-form/reviewers-step'
 import FilesStep from '@/app/components/submission-form/files-step'
 import { useDispatch, useSelector } from 'react-redux'
-import { formValidation } from '@/app/features/submission/submissionSlice'
+import { formValidation, formValidator } from '@/app/features/submission/submissionSlice'
 import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
-import { fetchInitialState } from '@/app/api/client'
+import { fetchInitialState, getStepGuide } from '@/app/api/client'
 
 const SubmissionForm = () => {
     const wizard = useSelector( wizardState );
@@ -25,6 +25,7 @@ const SubmissionForm = () => {
     const dispatch:any = useDispatch();
     useEffect( () => {
         dispatch( fetchInitialState(`./../api/${ wizard.formStep }.json`) );
+        dispatch ( getStepGuide( `./../api/${ wizard.formStep }-guide.json` ) );
     }, [wizard.formStep]);
 
     return (
@@ -60,7 +61,7 @@ const SubmissionForm = () => {
                             id="next-step"
                             className={`button btn_primary ${ submitReady ? 'd-none' : '' }`} 
                             onClick={ () => dispatch( nextStep( formIsValid ) )}>
-                            { wizard.formStep === wizard.formSteps[wizard.formSteps.length - 1].title ? "submit" : "next"}
+                            { wizard.formStep === wizard.formSteps[wizard.formSteps.length - 1].title ? "submit" : "next" }
                         </button>
                     </div>
                 </div>
