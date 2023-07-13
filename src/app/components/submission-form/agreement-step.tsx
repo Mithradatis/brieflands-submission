@@ -9,7 +9,7 @@ import { wizardState } from '@/app/features/wizard/wizardSlice'
 const AgreementStep = () => {
     const formState = useSelector( stepState );
     const formIsValid = useSelector( formValidation );
-    const agreementStepGuide = useSelector( stepGuide );
+    const stepInstruction = useSelector( stepGuide );
     const wizard = useSelector( wizardState );
     const dispatch = useDispatch();
     const [ isValid, setIsValid ] = useState({
@@ -37,7 +37,9 @@ const AgreementStep = () => {
         <>
             <div id="agreement" className={`tab${wizard.formStep === 'agreement' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Agreement</h3>
-                { ReactHtmlParser( agreementStepGuide.guide ) }
+                {   stepInstruction.guide !== undefined &&     
+                    ReactHtmlParser( stepInstruction.guide )
+                }
                 <Divider />
                 <form name="agreement-form" id="agreement-form">
                     <FormControl className="mb-4" fullWidth>

@@ -1,19 +1,19 @@
 import ReactHtmlParser from 'react-html-parser'
-import { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from '@mui/material'
-import { stepState, stepGuide } from '@/app/features/submission/submissionSlice'
+import { useSelector } from 'react-redux'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { Alert, FormControl, FormLabel, TextareaAutosize } from '@mui/material'
+import { stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
 
-const FilesStep = () => {
+
+const BuildStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     const stepInstruction = useSelector( stepGuide );
 
     return (
         <>
-            <div id="files" className={`tab${wizard.formStep === 'files' ? ' active' : ''}`}>
-                <h3 className="mb-4 text-shadow-white">Files</h3>
+            <div id="build" className={`tab${wizard.formStep === 'build' ? ' active' : ''}`}>
+                <h3 className="mb-4 text-shadow-white">Build</h3>
                 {   stepInstruction.guide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( stepInstruction.guide ) }
@@ -24,4 +24,4 @@ const FilesStep = () => {
     );
 }
 
-export default FilesStep;
+export default BuildStep;

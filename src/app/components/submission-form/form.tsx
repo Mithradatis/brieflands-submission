@@ -13,10 +13,22 @@ import AbstractStep from '@/app/components/submission-form/abstract-step'
 import EditorStep from '@/app/components/submission-form/editor-step'
 import ReviewersStep from '@/app/components/submission-form/reviewers-step'
 import FilesStep from '@/app/components/submission-form/files-step'
+import CommentStep from '@/app/components/submission-form/comment-step'
+import RegionStep from '@/app/components/submission-form/region-step'
+import AuthorContributionStep from '@/app/components/submission-form/author-contribution-step'
+import FinancialDisclosureStep from '@/app/components/submission-form/finantial-disclosure-step'
+import ClinicalTrialRegistrationCodeStep from '@/app/components/submission-form/clinical-trial-registration-code-step'
+import EthicalApprovalStep from '@/app/components/submission-form/ethical-approval-step'
+import Twitter from '@/app/components/submission-form/twitter-step'
+import ConflictOfInterestStep from '@/app/components/submission-form/conflict-of-interests-step'
+import InformedConsentStep from '@/app/components/submission-form/informed-consent-step'
+import FundingSupportStep from '@/app/components/submission-form/funding-support-step'
+import DataReprodacibilityStep from '@/app/components/submission-form/data-reprodacibility-step'
+import BuildStep from '@/app/components/submission-form/build-step'
 import { useDispatch, useSelector } from 'react-redux'
 import { formValidation, formValidator } from '@/app/features/submission/submissionSlice'
 import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
-import { fetchInitialState, getStepGuide } from '@/app/api/client'
+import { fetchInitialState, getStepGuide, getKeywordsList } from '@/app/api/client'
 
 const SubmissionForm = () => {
     const wizard = useSelector( wizardState );
@@ -25,7 +37,8 @@ const SubmissionForm = () => {
     const dispatch:any = useDispatch();
     useEffect( () => {
         dispatch( fetchInitialState(`./../api/${ wizard.formStep }.json`) );
-        dispatch ( getStepGuide( `./../api/${ wizard.formStep }-guide.json` ) );
+        dispatch( getStepGuide( `./../api/${ wizard.formStep }-guide.json` ) );
+        dispatch( getKeywordsList( `./../api/${ wizard.formStep }-list.json` ) );
     }, [wizard.formStep]);
 
     return (
@@ -50,6 +63,18 @@ const SubmissionForm = () => {
                     <EditorStep />
                     <ReviewersStep />
                     <FilesStep />
+                    <CommentStep />
+                    <RegionStep />
+                    <AuthorContributionStep />
+                    <FinancialDisclosureStep />
+                    <ClinicalTrialRegistrationCodeStep />
+                    <EthicalApprovalStep />
+                    <Twitter />
+                    <ConflictOfInterestStep />
+                    <InformedConsentStep />
+                    <FundingSupportStep />
+                    <DataReprodacibilityStep />
+                    <BuildStep />
                     <div className="d-flex align-items-center justify-content-end mt-4">
                         <button
                             type="button" 

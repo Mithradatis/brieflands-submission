@@ -5,15 +5,15 @@ import { Alert, FormControl, FormLabel, TextareaAutosize } from '@mui/material'
 import { stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
 
 
-const AbstractStep = () => {
+const EthicalApprovalStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     const stepInstruction = useSelector( stepGuide );
 
     return (
         <>
-            <div id="abstract" className={`tab${wizard.formStep === 'abstract' ? ' active' : ''}`}>
-                <h3 className="mb-4 text-shadow-white">Abstract</h3>
+            <div id="ethical-approval" className={`tab${wizard.formStep === 'ethical-approval' ? ' active' : ''}`}>
+                <h3 className="mb-4 text-shadow-white">Ethical Approval</h3>
                 {   stepInstruction.guide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( stepInstruction.guide ) }
@@ -21,11 +21,11 @@ const AbstractStep = () => {
                 }
                 <FormControl className="mb-3" fullWidth>
                     <FormLabel className="fw-bold mb-1">
-                        Manuscript Abstract
+                        Ethical Approval
                     </FormLabel>
                     <TextareaAutosize
-                        name="documentAbstract"
-                        id="documentAbstract"
+                        name="ethicalApproval"
+                        id="ethicalApproval"
                         className="p-4 rounded"
                         aria-label="textarea"
                         placeholder="Enter your text here"
@@ -37,4 +37,4 @@ const AbstractStep = () => {
     );
 }
 
-export default AbstractStep;
+export default EthicalApprovalStep;

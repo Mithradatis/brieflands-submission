@@ -1,8 +1,7 @@
 import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect } from 'react'
-import FormControl from '@mui/material/FormControl'
 import { Alert } from '@mui/material'
-import { Autocomplete, FormLabel } from '@mui/joy'
+import { Autocomplete, FormControl, FormLabel, FormHelperText } from '@mui/joy'
 import { useDispatch, useSelector } from 'react-redux'
 import { handleSelection, stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
@@ -12,7 +11,7 @@ const SectionStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     const formIsValid = useSelector( formValidation );
-    const sectionStepGuide = useSelector( stepGuide );
+    const stepInstruction = useSelector( stepGuide );
     const [ isValid, setIsValid ] = useState({
         section: '',
     });
@@ -28,6 +27,7 @@ const SectionStep = () => {
                     }
                 }
             }
+            console.log( formState.documentSection );
             dispatch( formValidator( wizard.formStep ) );
         }
     }, [formState]);
@@ -36,10 +36,12 @@ const SectionStep = () => {
         <>
             <div id="section" className={`tab${wizard.formStep === 'section' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Section</h3>
-                <Alert severity="info" className="mb-4">
-                    { ReactHtmlParser( sectionStepGuide.guide ) }
-                </Alert>
-                <FormControl className="mb-3" fullWidth>
+                {   stepInstruction.guide !== undefined &&     
+                    <Alert severity="info" className="mb-4">
+                        { ReactHtmlParser( stepInstruction.guide ) }
+                    </Alert>
+                }
+                <FormControl className="mb-3" error={formState.documentSection === '' && !formIsValid}>
                     <FormLabel className="fw-bold mb-1">
                         Please Choose
                     </FormLabel>
@@ -59,6 +61,10 @@ const SectionStep = () => {
                             dispatch(handleSelection({ name: 'documentSection' , value: selectedId }));
                         }}
                     />
+                    {
+                        ( formState.documentSection === '' && !formIsValid ) 
+                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                    }
                 </FormControl>
             </div>
         </>

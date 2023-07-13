@@ -8,7 +8,8 @@ export const submissionSlice = createSlice({
     isLoading: false,
     isFormValid: true,
     formStatus: 'new',
-    stepGuide: ''
+    stepGuide: '',
+    error: ''
   },
   reducers: {
     handleCheckbox: (state, action) => {

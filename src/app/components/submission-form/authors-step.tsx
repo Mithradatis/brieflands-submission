@@ -28,7 +28,7 @@ const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string
 const AuthorsStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const authorsStepGuide = useSelector( stepGuide );
+    const stepInstruction = useSelector( stepGuide );
     const addAuthorModalData = useSelector( addAuthorModalState );
     const dispatch = useDispatch();
     const columns: TableColumn<{ name: string; email: string; }>[] = [
@@ -84,10 +84,11 @@ const AuthorsStep = () => {
                     autoHide
                     autoHideTimeout={500}
                     autoHideDuration={200}>
-                    <Alert severity="info" className="mb-4">
-                        <AlertTitle>Important Note</AlertTitle>
-                        { ReactHtmlParser( authorsStepGuide.guide ) }
-                    </Alert>
+                    {   stepInstruction.guide !== undefined &&     
+                        <Alert severity="info" className="mb-4">
+                            { ReactHtmlParser( stepInstruction.guide ) }
+                        </Alert>
+                    }
                 </Scrollbars>
                 <Button className="btn btn-primary btn-lg mb-4" onClick={() =>dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep} ) )}>
                     Add Author

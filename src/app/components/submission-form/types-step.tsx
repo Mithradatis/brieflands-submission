@@ -1,8 +1,7 @@
 import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect } from 'react'
-import FormControl from '@mui/material/FormControl'
 import { Alert, AlertTitle } from '@mui/material'
-import { Autocomplete, FormHelperText, Input, FormLabel } from '@mui/joy'
+import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { useDispatch, useSelector } from 'react-redux'
 import { handleInputText, handleSelection, stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
@@ -41,7 +40,7 @@ const TypesStep = () => {
                     <AlertTitle>Important Note</AlertTitle>
                     { ReactHtmlParser( typesStepGuide.guide ) }
                 </Alert>
-                <FormControl className="mb-3" fullWidth error>
+                <FormControl className="mb-3" error={formState.documentType === '' && !formIsValid}>
                     <FormLabel className="fw-bold mb-1">
                         Manuscript Type
                     </FormLabel>
@@ -63,22 +62,26 @@ const TypesStep = () => {
                     />
                     {
                         ( formState.documentType === '' && !formIsValid ) 
-                        && <FormHelperText>Oops! something went wrong.</FormHelperText> 
+                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
                     }
                 </FormControl>
-                <FormControl className="mb-3" fullWidth>
+                <FormControl className="mb-3" error={formState.documentTitle === '' && !formIsValid}>
                     <FormLabel className="fw-bold mb-1">
                         Title
                     </FormLabel>
                     <Input
                         required
-                        variant="soft" 
+                        variant="soft"
                         name="documentTitle"
                         id="documentTitle"
                         placeholder="Manuscript Title"
                         value={ formState.documentTitle }
                         onChange={ event => dispatch( handleInputText( { name: event.target.name, value: event.target.value } ) ) }
                     />
+                    {
+                        ( formState.documentTitle === '' && !formIsValid ) 
+                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                    }
                 </FormControl>
             </div>
         </>

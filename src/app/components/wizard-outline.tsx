@@ -13,7 +13,7 @@ const WizardOutline = () => {
                         wizard.formSteps.map( ( item: any ) => (
                             <li className={wizard.formStep === item.title ? 'active' : ''} key={item.title}>
                                 <a href={`#${item.title}`} onClick={() => dispatch( loadStep( item.title ) ) }>
-                                    {item.title}
+                                    { item.title.replace(/-/g, ' ') }
                                 </a>
                             </li>
                         ))

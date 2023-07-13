@@ -5,15 +5,15 @@ import { Alert, FormControl, FormLabel, TextareaAutosize } from '@mui/material'
 import { stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
 
 
-const AbstractStep = () => {
+const ClinicalTrialRegistrationCodeStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     const stepInstruction = useSelector( stepGuide );
 
     return (
         <>
-            <div id="abstract" className={`tab${wizard.formStep === 'abstract' ? ' active' : ''}`}>
-                <h3 className="mb-4 text-shadow-white">Abstract</h3>
+            <div id="clinical-trial-registration-code" className={`tab${wizard.formStep === 'clinical-trial-registration-code' ? ' active' : ''}`}>
+                <h3 className="mb-4 text-shadow-white">Clinical Trial Registration Code</h3>
                 {   stepInstruction.guide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( stepInstruction.guide ) }
@@ -21,11 +21,11 @@ const AbstractStep = () => {
                 }
                 <FormControl className="mb-3" fullWidth>
                     <FormLabel className="fw-bold mb-1">
-                        Manuscript Abstract
+                        Clinical Trial Registration Code
                     </FormLabel>
                     <TextareaAutosize
-                        name="documentAbstract"
-                        id="documentAbstract"
+                        name="clinicalTrialRegistrationCode"
+                        id="clinicalTrialRegistrationCode"
                         className="p-4 rounded"
                         aria-label="textarea"
                         placeholder="Enter your text here"
@@ -37,4 +37,4 @@ const AbstractStep = () => {
     );
 }
 
-export default AbstractStep;
+export default ClinicalTrialRegistrationCodeStep;

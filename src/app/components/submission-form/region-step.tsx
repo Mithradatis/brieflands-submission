@@ -1,25 +1,22 @@
 import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect } from 'react'
 import { Alert } from '@mui/material'
-import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
+import { Autocomplete, FormControl, FormLabel, FormHelperText } from '@mui/joy'
 import { useDispatch, useSelector } from 'react-redux'
 import { handleSelection, stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
-import { keywordsList, handleKeywordsList } from '@/app/features/submission/keywordsSlice'
 
-const KeywordsStep = () => {
+const RegionStep = () => {
     const dispatch = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     const formIsValid = useSelector( formValidation );
     const stepInstruction = useSelector( stepGuide );
-    const keywords = useSelector( keywordsList );
     const [ isValid, setIsValid ] = useState({
-        documentKeywords: '',
+        authorRegion: '',
     });
-    const filter = createFilterOptions();
     useEffect( () => {
-        if ( wizard.formStep === 'keywords' ) {
+        if ( wizard.formStep === 'region' ) {
             const isValidKeys = Object.keys(isValid);
             for ( const [key, value] of Object.entries( formState ) ) {   
                 if ( isValidKeys.includes(key) ) {
@@ -30,55 +27,42 @@ const KeywordsStep = () => {
                     }
                 }
             }
+            console.log( formState.documentSection );
             dispatch( formValidator( wizard.formStep ) );
         }
     }, [formState]);
 
     return (
         <>
-            <div id="keywords" className={`tab${wizard.formStep === 'keywords' ? ' active' : ''}`}>
-                <h3 className="mb-4 text-shadow-white">Keywords</h3>
+            <div id="region" className={`tab${wizard.formStep === 'region' ? ' active' : ''}`}>
+                <h3 className="mb-4 text-shadow-white">Region</h3>
                 {   stepInstruction.guide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( stepInstruction.guide ) }
                     </Alert>
                 }
-                <FormControl className="mb-3" error={formState.documentKeywords === '' && !formIsValid}>
-                    <FormLabel className="fw-bold mb-2">
-                        Please Choose
+                <FormControl className="mb-3" error={formState.documentSection === '' && !formIsValid}>
+                    <FormLabel className="fw-bold mb-1">
+                        Choose Region
                     </FormLabel>
                     <Autocomplete
-                        multiple
                         required
-                        freeSolo
                         color="neutral"
                         size="md"
                         variant="soft"
                         placeholder="Choose one…"
                         disabled={false}
-                        name="documentKeywords"
-                        id="documentKeywords"
-                        options={ Array.isArray( keywords ) ? keywords : [] }
-                        value={formState.documentKeywords || []}
+                        name="authorRegion"
+                        id="authorRegion"
+                        options={ formState.regions !== undefined ? formState.regions : [] }
+                        value={ formState.regions !== undefined ? formState.regions.find( ( item:any ) => item.id === formState.authorRegion) || null : null }
                         onChange={(event, value) => {
-                            dispatch( handleSelection({ name: 'documentKeywords', value }) );
-                            dispatch( handleKeywordsList( value ) );
-                        }}
-                        filterOptions={(options, params) => {
-                            const filtered = filter(options, params);
-                            const { inputValue } = params;
-                            const isExisting = options.some((option) =>
-                                inputValue === option
-                            );
-                            if (inputValue !== '' && !isExisting) {
-                                filtered.push(inputValue);
-                            }
-                        
-                            return filtered;
+                            const selectedId = value ? value.id : '';
+                            dispatch(handleSelection({ name: 'authorRegion' , value: selectedId }));
                         }}
                     />
                     {
-                        ( formState.documentSection === '' && !formIsValid ) 
+                        ( formState.authorRegion === '' && !formIsValid ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
                     }
                 </FormControl>
@@ -87,4 +71,4 @@ const KeywordsStep = () => {
     );
 }
 
-export default KeywordsStep;
+export default RegionStep;

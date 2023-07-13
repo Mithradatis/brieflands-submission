@@ -24,7 +24,7 @@ const WizardNavigation = () => {
 
     return (
         <>
-            <div className="wizard-navigation-container position-relative mb-4 pt-5 overflow-hidden">
+            <div className="wizard-navigation-container position-relative pt-5 overflow-hidden">
                 <div className="wizard-navigation position-relative" id="submission-form-wizard">
                     <div className="start-gradient bg-texture"></div>
                     <div className="end-gradient bg-texture"></div>
@@ -32,9 +32,9 @@ const WizardNavigation = () => {
                         {
                             wizard.formSteps.map( ( item: any, index: number ) => (
                                 <li className={`pe-5 ${wizard.formStep === item.title ? 'active' : ''}`} key={item.title}>
-                                    <a href={`#${item.title}`} onClick={() => dispatch( loadStep( item.title ) )} className="d-flex flex-column align-items-center">
+                                    <a href={`#${item.title}`} onClick={() => dispatch( loadStep( item.title ) )} className="d-flex flex-column align-items-center text-center">
                                         <span className="fw-bold index d-flex align-items-center justify-content-center">{ index + 1 }</span>
-                                        <span className="fs-bold text-shadow">{ item.title }</span>
+                                        <span className="fs-bold text-shadow">{ item.title.replace(/-/g, ' ') }</span>
                                     </a>
                                 </li>
                             ))

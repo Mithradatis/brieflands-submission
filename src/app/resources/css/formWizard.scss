@@ -118,10 +118,11 @@
 }
 
 .wizard-outline {
+    max-width: 15rem;
     li {
         transition: all ease-in-out .2s;
         &.active {
-            font-size: 1.3rem;
+            font-size: 1rem;
             font-weight: 700;
             a {
                 color: lighten($green, 25%);
