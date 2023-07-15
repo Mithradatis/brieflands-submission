@@ -29,7 +29,21 @@ export const getStepGuide = createAsyncThunk(
 );
 
 export const getKeywordsList = createAsyncThunk(
-  'submission/getValuesList',
+  'submission/getKeywordsList',
+  async ( url: string ) => {
+    try {
+      const response = await fetch( url );
+      const data = await response.json();
+
+      return data;
+    } catch( error ) {
+      return error;
+    }
+  }
+);
+
+export const getClassifications = createAsyncThunk(
+  'submission/getClassifications',
   async ( url: string ) => {
     try {
       const response = await fetch( url );

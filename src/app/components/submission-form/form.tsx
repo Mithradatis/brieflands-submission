@@ -28,7 +28,7 @@ import BuildStep from '@/app/components/submission-form/build-step'
 import { useDispatch, useSelector } from 'react-redux'
 import { formValidation, formValidator } from '@/app/features/submission/submissionSlice'
 import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
-import { fetchInitialState, getStepGuide, getKeywordsList } from '@/app/api/client'
+import { fetchInitialState, getStepGuide } from '@/app/api/client'
 
 const SubmissionForm = () => {
     const wizard = useSelector( wizardState );
@@ -38,7 +38,6 @@ const SubmissionForm = () => {
     useEffect( () => {
         dispatch( fetchInitialState(`./../api/${ wizard.formStep }.json`) );
         dispatch( getStepGuide( `./../api/${ wizard.formStep }-guide.json` ) );
-        dispatch( getKeywordsList( `./../api/${ wizard.formStep }-list.json` ) );
     }, [wizard.formStep]);
 
     return (

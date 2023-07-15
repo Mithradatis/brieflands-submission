@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { saveModal } from './modalSlice'
+import { saveModal, setFormIsInvalid } from './modalSlice'
 
 type Author = {
   email: string;
@@ -19,16 +19,34 @@ type RootState = {
   modalSlice: ModalState;
 };
 
-export const buildAuthorTableRow = createAsyncThunk <
+export const buildAuthorsTableRow = createAsyncThunk <
   any,
   undefined,
   { state: RootState, dispatch: any } > (
-  'addAuthorModal/buildAuthorTableRow',
+  'addAuthorsModal/buildAuthorsTableRow',
   async (_, { getState, dispatch }) => {
     const modalFormData = getState().modalSlice.modalFormData;
-    dispatch( saveModal( modalFormData ) );
+    if ( Object.keys(modalFormData).length > 0 ) {
+      if (
+        modalFormData.authorEmail !== '' 
+        && modalFormData.authorFirstName !== ''
+        && modalFormData.authorLastName !== ''
+        && modalFormData.authorAffiliation !== ''
+      ) {
+        dispatch( saveModal( modalFormData ) );
+  
+        return modalFormData;
+      } else {
+        dispatch( setFormIsInvalid() );
 
-    return modalFormData;
+        return false;
+      }
+    } else {
+      dispatch( setFormIsInvalid() );
+
+      return false;
+    }
+    
   }
 );
 
@@ -39,17 +57,19 @@ export const addAuthorModalSlice = createSlice({
   } as AddAuthorModalState,
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(buildAuthorTableRow.fulfilled, (state, action) => {
+    builder.addCase(buildAuthorsTableRow.fulfilled, (state, action) => {
       const modalFormData = action.payload;
-      const authors = {
-        email: modalFormData.authorEmail,
-        name: `
-          ${(modalFormData.authorFirstName) || ''}
-          ${(modalFormData.authorMiddleName) || ''}
-          ${(modalFormData.authorLastName) || ''}
-        `,
-      };
-      state.datatableRows = [...state.datatableRows, authors];
+      if ( modalFormData ) {
+        const authors = {
+          email: modalFormData.authorEmail,
+          name: `
+            ${(modalFormData.authorFirstName) || ''}
+            ${(modalFormData.authorMiddleName) || ''}
+            ${(modalFormData.authorLastName) || ''}
+          `,
+        };
+        state.datatableRows = [...state.datatableRows, authors];
+      }
     });
   },
 });

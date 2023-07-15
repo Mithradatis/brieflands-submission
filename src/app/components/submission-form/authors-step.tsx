@@ -1,8 +1,9 @@
 import ReactHtmlParser from 'react-html-parser'
 import DataTable, { TableColumn } from 'react-data-table-component'
-import { Button, Alert, AlertTitle, TextField } from '@mui/material'
+import { Button, Alert } from '@mui/material'
+import { Input } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { stepState, stepGuide } from '@/app/features/submission/submissionSlice'
 import { handleOpen } from '@/app/features/modal/modalSlice'
@@ -11,17 +12,17 @@ import { wizardState } from '@/app/features/wizard/wizardSlice'
 
 const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string, onFilter: (event: React.ChangeEvent<HTMLInputElement>) => void, onClear: () => void }) => (
     <>
-        <TextField
+        <Input
+            variant="soft"
+            size="sm"
             id="search"
             type="text"
             placeholder="Filter By Name"
             aria-label="Search Input"
-            value={filterText}
+            autoComplete="off"
             onChange={onFilter}
+            endDecorator={<i className="fa-duotone fa-remove" onClick={onClear}></i>}
         />
-        <Button type="button" onClick={onClear}>
-            X
-        </Button>
     </>
 );
 
@@ -93,15 +94,20 @@ const AuthorsStep = () => {
                 <Button className="btn btn-primary btn-lg mb-4" onClick={() =>dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep} ) )}>
                     Add Author
                 </Button>
-                <DataTable
-                    title="Authors"
-                    subHeader
-                    subHeaderComponent={subHeaderComponentMemo}
-                    persistTableHead
-                    pagination
-                    columns={columns}
-                    data={filteredItems}
-                />
+                { 
+                    filteredItems.length > 0 &&
+                    <div className="datatable-container">
+                        <DataTable
+                            title={<h4 className="fs-6 mb-0">Authors List</h4>}
+                            subHeader
+                            subHeaderComponent={subHeaderComponentMemo}
+                            persistTableHead
+                            pagination
+                            columns={columns}
+                            data={filteredItems}
+                        />
+                    </div> 
+                }
             </div>
         </>
     );

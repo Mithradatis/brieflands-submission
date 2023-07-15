@@ -1,14 +1,18 @@
 import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect } from 'react'
+import { AnyAction } from 'redux'
+import { ThunkDispatch } from 'redux-thunk'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
 import { useDispatch, useSelector } from 'react-redux'
 import { handleSelection, stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { keywordsList, handleKeywordsList } from '@/app/features/submission/keywordsSlice'
+import { getKeywordsList } from '@/app/api/client'
 
 const KeywordsStep = () => {
     const dispatch = useDispatch();
+    const thunkDispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     const formIsValid = useSelector( formValidation );
@@ -20,6 +24,7 @@ const KeywordsStep = () => {
     const filter = createFilterOptions();
     useEffect( () => {
         if ( wizard.formStep === 'keywords' ) {
+            thunkDispatch( getKeywordsList( './../api/keywords-list.json' ) );
             const isValidKeys = Object.keys(isValid);
             for ( const [key, value] of Object.entries( formState ) ) {   
                 if ( isValidKeys.includes(key) ) {

@@ -7,7 +7,9 @@ export const modalSlice = createSlice({
     modalOpen: false,
     modalForm: null,
     modalFormData: {},
-    bodyBlurred: false
+    nestedModalOpen: false,
+    nestedModalFormData: {},
+    isFormValid: true,
   },
   reducers: {
     handleOpen: ( state, action ) => {
@@ -16,14 +18,24 @@ export const modalSlice = createSlice({
         modalTitle: action.payload.title,
         modalForm: action.payload.parent,
         modalOpen: true,
-        bodyBlurred: true
       };
     },
     handleClose: ( state ) => {
       return {
         ...state,
         modalOpen: false,
-        bodyBlurred: false
+      };
+    },
+    handleNestedOpen: ( state ) => {
+      return {
+        ...state,
+        nestedModalOpen: true,
+      };
+    },
+    handleNestedClose: ( state ) => {
+      return {
+        ...state,
+        nestedModalOpen: false,
       };
     },
     handleInputChange: ( state, action ) => {
@@ -35,18 +47,43 @@ export const modalSlice = createSlice({
         },
       };
     },
+    handleSelection: ( state, action ) => {
+      return {
+        ...state,
+        value: {
+        ...state.modalFormData,
+        [ action.payload.name ]: action.payload.value,
+        },
+      };
+    },
     saveModal : ( state ) => {
       return {
         ...state,
+        modalFormData: {},
+        isFormValid: true,
         modalOpen: false,
-        bodyBlurred: false
       };
     },
+    setFormIsInvalid: ( state ) => {
+      return {
+        ...state,
+        isFormValid: false
+      }
+    }
   },
 });
 
 
-export const { handleOpen, handleClose, handleInputChange, saveModal } = modalSlice.actions;
+export const {
+  handleOpen, 
+  handleClose,
+  handleNestedOpen,
+  handleNestedClose, 
+  handleInputChange, 
+  saveModal,
+  setFormIsInvalid, 
+  handleSelection 
+} = modalSlice.actions;
 
 export const modalState = ( state: any ) => state.modalSlice;
 

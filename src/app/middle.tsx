@@ -4,8 +4,7 @@ import SubmissionForm from './components/submission-form/form'
 import styles from './page.module.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './resources/css/customStyle.scss'
-import Box from '@mui/material/Box'
-import Modal from '@mui/material/Modal'
+import { Modal, ModalDialog } from '@mui/joy'
 import ModalContent from './components/modal/modal-content'
 import './resources/fontawesome-6/css/all.min.css'
 import { useDispatch, useSelector } from 'react-redux'
@@ -21,14 +20,15 @@ export default function App() {
         <Modal
             id="modal"
             open={modalData.modalOpen}
+            onClose={ () => dispatch( handleClose ) }
             aria-labelledby="parent-modal-title"
             aria-describedby="parent-modal-description"
         >
-            <Box sx={{ width: 400 }}>
+            <ModalDialog sx={{ width: 400 }}>
                 <ModalContent />
-            </Box>
+            </ModalDialog>
         </Modal>
-        <div className={`main-container bg-texture${ modalData.bodyBlurred ? ' blurred' : '' }`}>
+        <div className="main-container bg-texture">
           <div id="logo" className="d-flex align-items-center justify-content-between">
             <div className="logo">
               <div className="d-flex align-items-center">

@@ -111,6 +111,16 @@ body {
     .checkbox:active ~ .slider::before {
         transform: translate(0);
     }
+
+    .datatable-container {
+        header {
+            padding: 0;
+        }
+        header, nav, .rdt_TableHeader, .rdt_Table, .rdt_TableRow {
+            background-color: transparent !important;
+        }
+    }
+
     .text-green {
         color: $green;
     }

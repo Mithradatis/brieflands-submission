@@ -13,7 +13,7 @@ const AuthorContributionStep = () => {
     return (
         <>
             <div id="author-contribution" className={`tab${wizard.formStep === 'author-contribution' ? ' active' : ''}`}>
-                <h3 className="mb-4 text-shadow-white">Author's Contribution</h3>
+                <h3 className="mb-4 text-shadow-white">Author Contribution</h3>
                 {   stepInstruction.guide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( stepInstruction.guide ) }
@@ -21,7 +21,7 @@ const AuthorContributionStep = () => {
                 }
                 <FormControl className="mb-3" fullWidth>
                     <FormLabel className="fw-bold mb-1">
-                        Author's Contribution
+                        Author Contribution
                     </FormLabel>
                     <TextareaAutosize
                         name="authorContribution"

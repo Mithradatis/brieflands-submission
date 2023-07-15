@@ -10,3 +10,9 @@
     border-radius: .5rem;
     padding: 3rem;
 }
+.MuiAutocomplete-listbox {
+    z-index: 10000;
+}
+.MuiModal-backdrop {
+    background-color: rgba(54, 54, 54, .3);
+}
