@@ -1,54 +1,57 @@
-import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect } from 'react'
-import { AnyAction } from 'redux'
-import { ThunkDispatch } from 'redux-thunk'
+import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
-import { useDispatch, useSelector } from 'react-redux'
-import { handleSelection, stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
-import { keywordsList, handleKeywordsList } from '@/app/features/submission/keywordsSlice'
-import { getKeywordsList } from '@/app/api/client'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { stepState, handleInput } from '@/app/features/submission/keywordsSlice'
+import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide } from '@/app/api/keywords'
+import ReactHtmlParser from 'react-html-parser'
 
 const KeywordsStep = () => {
-    const dispatch = useDispatch();
-    const thunkDispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>();
+    const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const formIsValid = useSelector( formValidation );
-    const stepInstruction = useSelector( stepGuide );
-    const keywords = useSelector( keywordsList );
     const [ isValid, setIsValid ] = useState({
-        documentKeywords: '',
+        ids: true,
     });
     const filter = createFilterOptions();
     useEffect( () => {
         if ( wizard.formStep === 'keywords' ) {
-            thunkDispatch( getKeywordsList( './../api/keywords-list.json' ) );
-            const isValidKeys = Object.keys(isValid);
-            for ( const [key, value] of Object.entries( formState ) ) {   
-                if ( isValidKeys.includes(key) ) {
-                    if ( value === '' ) {
-                        setIsValid({ ...isValid, [key]: false });
-                    } else {
-                        setIsValid({ ...isValid, [key]: true });
-                    }
-                }
-            }
-            dispatch( formValidator( wizard.formStep ) );
+            const getAllKeywordsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/keyword`;
+            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
+            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+            dispatch( getKeywordsList( getAllKeywordsFromApi ) );
+            dispatch( getKeywordsStepData( getStepDataFromApi ) );
+            dispatch( getKeywordsStepGuide( getDictionaryFromApi ) );
         }
-    }, [formState]);
+    }, [wizard.formStep]);
+    useEffect(() => {
+        if ( wizard.formStep === 'keywords' ) {
+            const formIsValid = Object.values( formState.value ).every(value => value !== '');
+            dispatch( formValidator( formIsValid ) );
+        }
+    }, [formState.value, wizard.formStep, wizard.workflow]);
+    useEffect(() => {
+        if ( wizard.formStep === 'keywords' ) {
+            if (wizard.isVerified) {
+                setIsValid((prevState) => ({
+                    ...prevState,
+                    ids: formState.value.ids.length > 0,
+                }));
+            }
+        }
+    }, [wizard.isVerified]);
 
     return (
         <>
             <div id="keywords" className={`tab${wizard.formStep === 'keywords' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Keywords</h3>
-                {   stepInstruction.guide !== undefined &&     
+                {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
-                        { ReactHtmlParser( stepInstruction.guide ) }
+                        { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
-                <FormControl className="mb-3" error={formState.documentKeywords === '' && !formIsValid}>
+                <FormControl className="mb-3" error={ formState.ids === '' && !isValid.ids }>
                     <FormLabel className="fw-bold mb-2">
                         Please Choose
                     </FormLabel>
@@ -63,13 +66,29 @@ const KeywordsStep = () => {
                         disabled={false}
                         name="documentKeywords"
                         id="documentKeywords"
-                        options={ Array.isArray( keywords ) ? keywords : [] }
-                        value={formState.documentKeywords || []}
+                        options={ 
+                            Array.isArray( formState.keywordsList ) 
+                            ? formState.keywordsList.map( 
+                                ( item: any ) => {
+                                    return item.attributes?.title || '' 
+                                }
+                               ) : []
+                        }
+                        value={
+                            Array.isArray( formState.keywordsList ) && formState.value.ids.length > 0
+                              ? formState.keywordsList
+                                  .filter( ( item: any ) => formState.value.ids.includes( parseInt( item.id ) ) )
+                                  .map( ( item: any ) => item.attributes.title )
+                              : []
+                        }
                         onChange={(event, value) => {
-                            dispatch( handleSelection({ name: 'documentKeywords', value }) );
-                            dispatch( handleKeywordsList( value ) );
+                            const selectedIds = value.map(
+                                ( title: string ) =>
+                                    parseInt( formState.keywordsList.find( ( item: any ) => item.attributes.title === title)?.id )
+                            );
+                            dispatch( handleInput( { name: 'ids', value: selectedIds } ) );
                         }}
-                        filterOptions={(options, params) => {
+                        filterOptions={ ( options, params ) => {
                             const filtered = filter(options, params);
                             const { inputValue } = params;
                             const isExisting = options.some((option) =>
@@ -83,7 +102,7 @@ const KeywordsStep = () => {
                         }}
                     />
                     {
-                        ( formState.documentSection === '' && !formIsValid ) 
+                        ( formState.ids === '' && !isValid.ids ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
                     }
                 </FormControl>

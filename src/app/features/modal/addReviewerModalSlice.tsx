@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { saveModal, setFormIsInvalid } from './modalSlice'
-import { getClassifications } from '@/app/api/client'
+import { getClassificationsList } from '@/app/api/classifications'
 
 type Reviewer = {
   email: string;
@@ -96,7 +96,7 @@ export const addReviewerModalSlice = createSlice({
         };
         state.datatableRows = [...state.datatableRows, reviewers];
       }
-    }).addCase(getClassifications.fulfilled, (state, action) => {
+    }).addCase(getClassificationsList.fulfilled, (state, action) => {
       state.classifications = action.payload.classifications;
     });
   },

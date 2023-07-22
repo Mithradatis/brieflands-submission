@@ -6,7 +6,6 @@ import { modalState, handleInputChange } from '@/app/features/modal/modalSlice'
 
 const AddAuthorModal = () => {
     const dispatch = useDispatch();
-    const thunkDispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>();
     const modalData = useSelector( modalState );
     const formIsValid = modalData.isFormValid;
     const phoneTypes = [

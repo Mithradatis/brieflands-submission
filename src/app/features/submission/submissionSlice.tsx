@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { fetchInitialState, getStepGuide } from '@/app/api/client'
 
 export const submissionSlice = createSlice({
   name: 'submission',
@@ -12,12 +11,12 @@ export const submissionSlice = createSlice({
     error: ''
   },
   reducers: {
-    handleCheckbox: (state, action) => {
+    handleCheckbox: (state, action ) => {
       return {
         ...state,
         value: {
           ...state.value,
-          [action.payload.name]: action.payload.value === 'on' ? '' : 'on',
+          [action.payload.name]: !action.payload.value,
         },
       };
     },
@@ -53,30 +52,8 @@ export const submissionSlice = createSlice({
         ...state,
         isFormValid: formIsValid
       };
-    },
-  },
-  extraReducers( builder ) {
-    builder
-      .addCase(fetchInitialState.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(fetchInitialState.fulfilled, ( state, action ) => {
-        state.isLoading = false;
-        if ( Object.keys( action.payload ).length > 0 ) {
-          state.formStatus = 'edit';
-        }
-        state.value = action.payload;
-      })
-      .addCase(fetchInitialState.rejected, ( state, action ) => {
-        // state.error = action.error.message;
-      }).addCase(getStepGuide.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(getStepGuide.fulfilled, ( state, action ) => {
-        state.isLoading = false;
-        state.stepGuide = action.payload;
-      });
-  },
+    }
+  }
 });
 
 export const {

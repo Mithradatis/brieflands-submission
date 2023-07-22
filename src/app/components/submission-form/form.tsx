@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
+import { useDispatch, useSelector } from 'react-redux'
+import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
 import WizardNavigation from '@/app/components/wizard-navigation'
 import WizardOutline from '@/app/components/wizard-outline'
 import AgreementStep from '@/app/components/submission-form/agreement-step'
@@ -23,26 +26,23 @@ import Twitter from '@/app/components/submission-form/twitter-step'
 import ConflictOfInterestStep from '@/app/components/submission-form/conflict-of-interests-step'
 import InformedConsentStep from '@/app/components/submission-form/informed-consent-step'
 import FundingSupportStep from '@/app/components/submission-form/funding-support-step'
-import DataReprodacibilityStep from '@/app/components/submission-form/data-reprodacibility-step'
+import DataReproducibilityStep from '@/app/components/submission-form/data-reproducibility-step'
 import BuildStep from '@/app/components/submission-form/build-step'
-import { useDispatch, useSelector } from 'react-redux'
-import { formValidation, formValidator } from '@/app/features/submission/submissionSlice'
-import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
-import { fetchInitialState, getStepGuide } from '@/app/api/client'
 
 const SubmissionForm = () => {
+    const dispatch:any = useDispatch();
     const wizard = useSelector( wizardState );
     const [submitReady, setSubmitReady] = useState(false);
-    const formIsValid = useSelector( formValidation );
-    const dispatch:any = useDispatch();
     useEffect( () => {
-        dispatch( fetchInitialState(`./../api/${ wizard.formStep }.json`) );
-        dispatch( getStepGuide( `./../api/${ wizard.formStep }-guide.json` ) );
-    }, [wizard.formStep]);
+        const getStepsFromApi = 'http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/steps';
+        const getWorkflowFromApi = 'http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365';
+        dispatch( getSubmissionSteps( getStepsFromApi ) );
+        dispatch( getWorkflow( getWorkflowFromApi ) );
+    },[]);
 
     return (
         <div className="wizard mb-4">
-            <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item.title.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
+            <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item.attributes.title?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
             <WizardNavigation />
             <div className="d-flex align-items-start">
                 <WizardOutline />
@@ -72,20 +72,20 @@ const SubmissionForm = () => {
                     <ConflictOfInterestStep />
                     <InformedConsentStep />
                     <FundingSupportStep />
-                    <DataReprodacibilityStep />
+                    <DataReproducibilityStep />
                     <BuildStep />
                     <div className="d-flex align-items-center justify-content-end mt-4">
                         <button
                             type="button" 
                             id="previous-step" 
-                            className={`button btn_secondary me-2 ${ wizard.formStep === wizard.formSteps[0].title ? 'd-none' : '' }`} 
+                            className={`button btn_secondary me-2 ${ wizard.formStep === wizard.formSteps[0]?.title ? 'd-none' : '' }`} 
                             onClick={ () =>dispatch( prevStep() )}>Back</button>
                         <button
                             type={submitReady ? "submit" : "button"}
                             id="next-step"
                             className={`button btn_primary ${ submitReady ? 'd-none' : '' }`} 
-                            onClick={ () => dispatch( nextStep( formIsValid ) )}>
-                            { wizard.formStep === wizard.formSteps[wizard.formSteps.length - 1].title ? "submit" : "next" }
+                            onClick={ () => dispatch( nextStep( wizard.isFormValid ) )}>
+                            { wizard.formStep === wizard.formSteps[wizard.formSteps.length - 1]?.title ? "submit" : "next" }
                         </button>
                     </div>
                 </div>

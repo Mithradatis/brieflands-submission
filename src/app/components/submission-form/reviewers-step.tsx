@@ -97,7 +97,7 @@ const ReviewersStep = () => {
                     Add Reviewer
                 </Button>
                 { 
-                    filteredItems.length > 0 && 
+                    addReviewerModalData.datatableRows.length > 0 &&
                     <DataTable
                         title={<h4 className="fs-6 mb-0">Reviewers List</h4>}
                         subHeader

@@ -1,85 +1,119 @@
-import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect } from 'react'
-import { Alert, AlertTitle } from '@mui/material'
-import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { useDispatch, useSelector } from 'react-redux'
-import { handleInputText, handleSelection, stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { Alert } from '@mui/material'
+import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { stepState, handleInput } from '@/app/features/submission/documentTypesSlice'
+import { getDocumentTypes, getTypesStepData, getTypesStepGuide } from '@/app/api/types'
+import ReactHtmlParser from 'react-html-parser'
 
 const TypesStep = () => {
-    const dispatch = useDispatch();
+    const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
+    const documentTypes = formState.documentTypesList;
     const wizard = useSelector( wizardState );
-    const formIsValid = useSelector( formValidation );
-    const typesStepGuide = useSelector( stepGuide );
     const [ isValid, setIsValid ] = useState({
-        documentType: '',
-        documentTitle: ''
+        doc_type: true,
+        manuscript_title: true
     });
-    useEffect( () => {
+    useEffect(() => {
         if ( wizard.formStep === 'types' ) {
-            const isValidKeys = Object.keys(isValid);
-            for ( const [key, value] of Object.entries( formState ) ) {   
-                if ( isValidKeys.includes(key) ) {
-                    if ( value === '' ) {
-                        setIsValid({ ...isValid, [key]: false });
-                    } else {
-                        setIsValid({ ...isValid, [key]: true });
-                    }
-                }
-            }
-            dispatch( formValidator( wizard.formStep ) );
+            const getAllDocumentTypesFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/type';
+            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/type`;
+            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+            dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
+            dispatch( getTypesStepData( getStepDataFromApi ) );
+            dispatch( getTypesStepGuide( getDictionaryFromApi ) );
         }
-    }, [formState]);
+    }, [wizard.formStep]);
+    useEffect(() => {
+        if ( wizard.formStep === 'types' ) {
+            const formIsValid = Object.values( formState.value ).every(value => value !== '');
+            dispatch( formValidator( formIsValid ) );
+        }
+    }, [formState.value, wizard.formStep, wizard.workflow]);
+    useEffect(() => {
+        if ( wizard.formStep === 'types' ) {
+            if ( wizard.isVerified ) {
+                setIsValid( prevState => ({
+                    ...prevState,
+                    doc_type: formState.value.doc_type !== '',
+                    manuscript_title: formState.value.manuscript_title !== ''
+                }));
+            }
+        }
+    }, [wizard.isVerified]);
 
     return (
         <>
             <div id="types" className={`tab${wizard.formStep === 'types' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Types</h3>
-                <Alert severity="info" className="mb-4">
-                    <AlertTitle>Important Note</AlertTitle>
-                    { ReactHtmlParser( typesStepGuide.guide ) }
-                </Alert>
-                <FormControl className="mb-3" error={formState.documentType === '' && !formIsValid}>
+                {   
+                    formState.stepGuide !== undefined &&
+                        <Alert severity="info" className="mb-4">
+                            { ReactHtmlParser( formState.stepGuide ) }
+                        </Alert>
+                }
+                <FormControl className="mb-3" error={formState.value.doc_type === '' && !isValid.doc_type}>
                     <FormLabel className="fw-bold mb-1">
                         Manuscript Type
                     </FormLabel>
-                    <Autocomplete
-                        required
-                        color="neutral"
-                        size="md"
-                        variant="soft"
-                        placeholder="Choose one…"
-                        disabled={false}
-                        name="documentType"
-                        id="documentType"
-                        options={ formState.types !== undefined ? formState.types : [] }
-                        value={ formState.types !== undefined ? formState.types.find( ( item: any ) => item.id === formState.documentType) || null : null }
-                        onChange={(event, value) => {
-                            const selectedId = value ? value.id : '';
-                            dispatch(handleSelection({ name: 'documentType' , value: selectedId }));
-                        }}
-                    />
+                    { documentTypes ? (
+                        <Autocomplete
+                            required
+                            color="neutral"
+                            size="md"
+                            variant="soft"
+                            placeholder="Choose one…"
+                            disabled={false}
+                            name="doc_type"
+                            id="doc_type"
+                            options={ 
+                                Array.isArray( documentTypes ) 
+                                ? documentTypes.map( 
+                                    item => {
+                                        return item.attributes?.title || '' 
+                                    }
+                                   ) : []
+                            }
+                            value={
+                                formState.value.doc_type !== ''
+                                  ? documentTypes
+                                      .find( ( item: any ) => formState.value.doc_type === item.id )?.attributes?.title
+                                  : null
+                            }
+                            onChange={(event, value) => {
+                                dispatch( handleInput({ 
+                                        name: 'doc_type',
+                                        value: documentTypes.find( 
+                                            ( item: any ) => item.attributes.title === value )?.id || '' } 
+                                            ) 
+                                        )
+                            }}
+                        />
+                        ) : (
+                        <div>Loading document types...</div>
+                    )}
                     {
-                        ( formState.documentType === '' && !formIsValid ) 
+                        ( formState.value.doc_type === '' && !isValid.doc_type ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
                     }
                 </FormControl>
-                <FormControl className="mb-3" error={formState.documentTitle === '' && !formIsValid}>
+                <FormControl className="mb-3" error={formState.value.manuscript_title === '' && !isValid.manuscript_title}>
                     <FormLabel className="fw-bold mb-1">
                         Title
                     </FormLabel>
                     <Input
                         required
                         variant="soft"
-                        name="documentTitle"
-                        id="documentTitle"
+                        name="manuscript_title"
+                        id="manuscript_title"
                         placeholder="Manuscript Title"
-                        value={ formState.documentTitle }
-                        onChange={ event => dispatch( handleInputText( { name: event.target.name, value: event.target.value } ) ) }
+                        value={ formState.value.manuscript_title }
+                        onChange={ event => dispatch( handleInput( { name: event.target.name, value: event.target.value } ) ) }
                     />
                     {
-                        ( formState.documentTitle === '' && !formIsValid ) 
+                        ( formState.value.manuscript_title === '' && !isValid.manuscript_title ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
                     }
                 </FormControl>

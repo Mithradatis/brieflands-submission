@@ -1,14 +1,15 @@
-import ReactHtmlParser from 'react-html-parser'
-import DataTable, { TableColumn } from 'react-data-table-component'
+import { useState, useMemo, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Button, Alert } from '@mui/material'
 import { Input } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
-import { useState, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { stepState, stepGuide } from '@/app/features/submission/submissionSlice'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { stepState, handleInput } from '@/app/features/submission/authorSlice'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { addAuthorModalState } from '@/app/features/modal/addAuthorModalSlice'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { getAuthors, getAuthorStepData, getAuthorStepGuide } from '@/app/api/author'
+import DataTable, { TableColumn } from 'react-data-table-component'
+import ReactHtmlParser from 'react-html-parser'
 
 const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string, onFilter: (event: React.ChangeEvent<HTMLInputElement>) => void, onClear: () => void }) => (
     <>
@@ -27,11 +28,18 @@ const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string
 );
 
 const AuthorsStep = () => {
+    const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const stepInstruction = useSelector( stepGuide );
     const addAuthorModalData = useSelector( addAuthorModalState );
-    const dispatch = useDispatch();
+    useEffect(() => {
+        if ( wizard.formStep === 'authors' ) {
+            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/authors`;
+            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+            dispatch( getAuthorStepData( getStepDataFromApi ) );
+            dispatch( getAuthorStepGuide( getDictionaryFromApi ) );
+        }
+    }, [wizard.formStep]);
     const columns: TableColumn<{ name: string; email: string; }>[] = [
         {
           name: 'name',
@@ -85,17 +93,18 @@ const AuthorsStep = () => {
                     autoHide
                     autoHideTimeout={500}
                     autoHideDuration={200}>
-                    {   stepInstruction.guide !== undefined &&     
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( stepInstruction.guide ) }
-                        </Alert>
+                    {   
+                        formState?.stepGuide !== undefined &&
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( formState.stepGuide ) }
+                            </Alert>
                     }
                 </Scrollbars>
                 <Button className="btn btn-primary btn-lg mb-4" onClick={() =>dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep} ) )}>
                     Add Author
                 </Button>
                 { 
-                    filteredItems.length > 0 &&
+                    addAuthorModalData.datatableRows.length > 0 &&
                     <div className="datatable-container">
                         <DataTable
                             title={<h4 className="fs-6 mb-0">Authors List</h4>}

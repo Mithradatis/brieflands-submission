@@ -1,56 +1,36 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
-export const fetchInitialState = createAsyncThunk(
+export const getSubmissionSteps = createAsyncThunk(
   'submission/fetchInitialState',
-  async ( url: string ) => {
+  async (url: string) => {
     try {
-      const response = await fetch( url );
-      const data = await response.json();
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow'
+      });
 
+      const data = await response.json();
       return data;
-    } catch( error ) {
+    } catch (error) {
       return error;
     }
   }
 );
 
-export const getStepGuide = createAsyncThunk(
-  'submission/getStepGuide',
-  async ( url: string ) => {
+export const getWorkflow = createAsyncThunk(
+  'submission/getWorkflow',
+  async (url: string) => {
     try {
-      const response = await fetch( url );
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow'
+      });
+
       const data = await response.json();
-
       return data;
-    } catch( error ) {
-      return error;
-    }
-  }
-);
-
-export const getKeywordsList = createAsyncThunk(
-  'submission/getKeywordsList',
-  async ( url: string ) => {
-    try {
-      const response = await fetch( url );
-      const data = await response.json();
-
-      return data;
-    } catch( error ) {
-      return error;
-    }
-  }
-);
-
-export const getClassifications = createAsyncThunk(
-  'submission/getClassifications',
-  async ( url: string ) => {
-    try {
-      const response = await fetch( url );
-      const data = await response.json();
-
-      return data;
-    } catch( error ) {
+    } catch (error) {
       return error;
     }
   }

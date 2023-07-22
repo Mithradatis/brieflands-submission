@@ -1,35 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit'
-
-const steps = [
-  {id: 1, title: 'agreement', status: 'incomplete', active: false, required: true},
-  {id: 2, title: 'types', status: 'incomplete', active: false, required: true},
-  {id: 3, title: 'section', status: 'incomplete', active: false, required: false},
-  {id: 4, title: 'authors', status: 'incomplete', active: false, required: true},
-  {id: 5, title: 'keywords', status: 'incomplete', active: true, required: false},
-  {id: 6, title: 'classifications', status: 'incomplete', active: false, required: false},
-  {id: 7, title: 'abstract', status: 'incomplete', active: false, required: false},
-  {id: 8, title: 'editor', status: 'incomplete', active: false, required: false},
-  {id: 9, title: 'reviewers', status: 'incomplete', active: false, required: false},
-  {id: 10, title: 'files', status: 'incomplete', active: false, required: false},
-  {id: 11, title: 'comment', status: 'incomplete', active: false, required: false},
-  {id: 12, title: 'region', status: 'incomplete', active: false, required: false},
-  {id: 13, title: 'author-contribution', status: 'incomplete', active: false, required: false},
-  {id: 14, title: 'financial-disclosure', status: 'incomplete', active: false, required: false},
-  {id: 15, title: 'clinical-trial-registration-code', status: 'incomplete', active: false, required: false},
-  {id: 16, title: 'ethical-approval', status: 'incomplete', active: false, required: false},
-  {id: 17, title: 'twitter', status: 'incomplete', active: false, required: false},
-  {id: 18, title: 'conflict-of-interests', status: 'incomplete', active: false, required: false},
-  {id: 19, title: 'informed-consent', status: 'incomplete', active: false, required: false},
-  {id: 20, title: 'funding-support', status: 'incomplete', active: false, required: false},
-  {id: 21, title: 'data-reproducibility', status: 'incomplete', active: false, required: false},
-  {id: 22, title: 'build', status: 'incomplete', active: false, required: true}
-];
+import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
 
 export const wizardSlice = createSlice({
   name: 'submission',
   initialState: {
-    formStep: steps.filter( item => item.active )[0].title,
-    formSteps: steps
+    isLoading: false,
+    isVerified: false,
+    isFormValid: false,
+    formStep: 'agreement',
+    formSteps: [],
+    workflow: {}
   },
   reducers: {
     loadStep: ( state, action ) => {
@@ -39,36 +19,67 @@ export const wizardSlice = createSlice({
       }
     },
     prevStep: ( state ) => {
-      const currentStepIndex = steps.findIndex( item => item.title.includes( state.formStep ));
+      const currentStepIndex = state.formSteps.findIndex( ( item: any ) => item.attributes.title.toLowerCase().includes( state.formStep ));
         // setSubmitReady(false);
         if ( currentStepIndex - 1 >= 0 ) {
             return {
               ...state,
-              formStep: steps[currentStepIndex - 1].title 
+              formStep: state.formSteps[currentStepIndex - 1].attributes.title.toLowerCase() 
             }
         }
     },
-    nextStep: ( state, action ) => {
-      const currentStepIndex = steps.findIndex( item => item.title.includes( state.formStep ));
-      const isLastStep = currentStepIndex === steps.length - 1;
-      if (!isLastStep) {
-          if ( !action.payload ) {
-              return;
-          }
-          // setSubmitReady(isLastStep);
-          return {
-            ...state,
-            formStep: steps[currentStepIndex + 1].title 
-          }
+    nextStep: (state, action) => {
+      const currentStepIndex = state.formSteps.findIndex((item) =>
+        item.attributes.title.toLowerCase().includes(state.formStep)
+      );
+      const isLastStep = currentStepIndex === state.formSteps.length - 1;
+      // setSubmitReady(isLastStep);
+      if (!isLastStep && action.payload) {
+        return {
+          ...state,
+          formStep: state.formSteps[currentStepIndex + 1].attributes.title.toLowerCase(),
+          isVerified: false
+        };
       }
+      return {
+        ...state,
+        isVerified: true
+      };
     },
-    setStepsByDocumentType: ( state, action ) => {
-      
+    formValidator: ( state, action ) => {
+      return {
+        ...state,
+        isFormValid: action.payload
+      }
     }
+  },
+  extraReducers( builder ) {
+    builder
+      .addCase( getSubmissionSteps.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase( getSubmissionSteps.fulfilled, ( state, action ) => {
+        const activeSteps = action.payload.data.filter(
+          (item: any) => item.attributes.status === 'active'
+        );
+        if ( activeSteps !== undefined ) {
+          state.formSteps = activeSteps;
+          state.formStep = activeSteps[0]?.attributes.title.toLowerCase() || '';
+        }
+      })
+      .addCase( getSubmissionSteps.rejected, ( state ) => {
+        // state.error = action.error.message;
+      }).addCase( getWorkflow.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase( getWorkflow.fulfilled, ( state, action ) => {
+        state.isLoading = false;
+        state.workflow = action.payload.data.attributes;
+      });
   },
 });
 
-export const { loadStep, prevStep, nextStep } = wizardSlice.actions;
+export const { loadStep, prevStep, nextStep, formValidator } = wizardSlice.actions;
 
 export const wizardState = ( state: any ) => state.wizardSlice;
 

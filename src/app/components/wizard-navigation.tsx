@@ -30,14 +30,17 @@ const WizardNavigation = () => {
                     <div className="end-gradient bg-texture"></div>
                     <ol className="d-flex align-items-center text-shado position-relative">
                         {
-                            wizard.formSteps.map( ( item: any, index: number ) => (
-                                <li className={`pe-5 ${wizard.formStep === item.title ? 'active' : ''}`} key={item.title}>
-                                    <a href={`#${item.title}`} onClick={() => dispatch( loadStep( item.title ) )} className="d-flex flex-column align-items-center text-center">
-                                        <span className="fw-bold index d-flex align-items-center justify-content-center">{ index + 1 }</span>
-                                        <span className="fs-bold text-shadow">{ item.title.replace(/-/g, ' ') }</span>
-                                    </a>
-                                </li>
-                            ))
+                            wizard.formSteps.map( ( item: any, index: number ) => {
+                                const formStepTitle = item.attributes.title.toLowerCase();
+                                return (
+                                    <li className={`pe-5 ${wizard.formStep === formStepTitle ? 'active' : ''}`} key={ formStepTitle }>
+                                        <a href={`#${formStepTitle}`} onClick={() => dispatch( loadStep( formStepTitle ) )} className="d-flex flex-column align-items-center text-center">
+                                            <span className="fw-bold index d-flex align-items-center justify-content-center">{ index + 1 }</span>
+                                            <span className="fs-bold text-shadow">{ formStepTitle.replace(/-/g, ' ') }</span>
+                                        </a>
+                                    </li>
+                                )
+                            })
                         }
                     </ol>
                 </div>

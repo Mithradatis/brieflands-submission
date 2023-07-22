@@ -6,7 +6,7 @@ import { List, ListItem, ListItemText } from '@mui/material'
 import { Autocomplete, Input, FormControl, FormLabel, FormHelperText, Textarea, Button, Divider } from '@mui/joy'
 import { modalState, handleInputChange, handleNestedOpen, handleNestedClose } from '@/app/features/modal/modalSlice'
 import { addReviewerModalState, handleSelection, handleClassifications } from '@/app/features/modal/addReviewerModalSlice' 
-import { getClassifications } from '@/app/api/client'
+import { getClassificationsList } from '@/app/api/classifications'
 import { Modal, ModalDialog } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
 
@@ -43,7 +43,8 @@ const AddReviewerModal = () => {
     }
     useEffect( () => {
         if ( modalData.modalForm === 'reviewers' ) {
-            thunkDispatch( getClassifications( './../api/classifications-list.json' ) );
+            const apiUrl = 'http://apcabbr.brieflands.com.test/api/v1/journal/classification';
+            thunkDispatch( getClassificationsList( apiUrl ) );
             const isValidKeys = Object.keys(isValid);
             for ( const [key, value] of Object.entries( modalData.modalFormData ) ) {   
                 if ( isValidKeys.includes(key) ) {
@@ -278,11 +279,12 @@ const AddReviewerModal = () => {
                         disableClearable={true}
                         name="classifications"
                         id="classifications"
-                        options={ addReviewerFormData.classifications }
-                        value={ addReviewerFormData.selectedClassifications }
                         onInputChange={handleInputChange}
+                        options={ Array.isArray( addReviewerFormData.classifications ) ? addReviewerFormData.classifications.map( ( item: any ) => item.attributes?.title || '') : []}
+                        value={ Array.isArray( addReviewerFormData.classifications ) ? addReviewerFormData.classifications.find( ( item: any ) =>  item.id === addReviewerFormData )?.attributes?.title || null : null }
                         onChange={(event, value) => {
-                            dispatch( handleSelection({ name: 'selectedClassifications' , value: value } ) );
+                            const selectedId = value ? addReviewerFormData.classifications.find( ( item:any ) => item.attributes.title === value )?.id : '';
+                            dispatch(handleSelection({ value: selectedId }));
                         }}
                         getOptionDisabled={(option: any) => !!option.disabled}
                         filterOptions={ ( options, state ) => {

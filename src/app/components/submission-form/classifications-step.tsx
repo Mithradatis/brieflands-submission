@@ -1,28 +1,113 @@
-import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect } from 'react'
-import { Alert } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { Autocomplete, FormControl, FormLabel, FormHelperText } from '@mui/joy'
-import { handleSelection, stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { Alert } from '@mui/material'
+import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { stepState, handleInput } from '@/app/features/submission/classificationsSlice'
+import { getClassificationsList, getClassificationsStepData, getClassificationsStepGuide } from '@/app/api/classifications'
+import ReactHtmlParser from 'react-html-parser'
 
 const ClassificationsStep = () => {
+    const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const stepInstruction = useSelector( stepGuide );
     const [ isValid, setIsValid ] = useState({
-        documentClassifications: '',
+        ids: true,
     });
+    const filter = createFilterOptions();
+    useEffect(() => {
+        const getAllClassificationsFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/classification';
+        const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
+        const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+        if (wizard.formStep === 'classifications') {
+          dispatch( getClassificationsList( getAllClassificationsFromApi ) );
+          dispatch( getClassificationsStepData( getStepDataFromApi ) );
+          dispatch( getClassificationsStepGuide( getDictionaryFromApi ) );
+        }
+    }, [wizard.formStep]);
+    useEffect(() => {
+        if ( wizard.formStep === 'classifications' ) {
+            const formIsValid = Object.values( formState.value ).every(value => value !== '');
+            dispatch( formValidator( formIsValid ) );
+        }
+    }, [formState.value, wizard.formStep, wizard.workflow]);
+    useEffect(() => {
+        if ( wizard.formStep === 'classifications' ) {
+            if (wizard.isVerified) {
+                setIsValid((prevState) => ({
+                    ...prevState,
+                    ids: formState.value.ids.length > 0,
+                }));
+            }
+        }
+    }, [wizard.isVerified]);
 
     return (
         <>
             <div id="classifications" className={`tab${wizard.formStep === 'classifications' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Classifications</h3>
-                {   stepInstruction.guide !== undefined &&     
+                {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
-                        { ReactHtmlParser( stepInstruction.guide ) }
+                        { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
+                <FormControl className="mb-3" error={formState.value.ids.length === 0 && !isValid.ids}>
+                    <FormLabel className="fw-bold mb-2">
+                        Please Choose
+                    </FormLabel>
+                    <Autocomplete
+                        multiple
+                        required
+                        freeSolo
+                        color="neutral"
+                        size="md"
+                        variant="soft"
+                        placeholder="Choose one…"
+                        disabled={false}
+                        name="ids"
+                        id="ids"
+                        options={ 
+                            Array.isArray( formState.classificationsList ) 
+                            ? formState.classificationsList.map( 
+                                ( item: any ) => {
+                                    return item.attributes?.title || '' 
+                                }
+                               ) : []
+                        }
+                        value={
+                            Array.isArray( formState.classificationsList ) && formState.value.ids.length > 0
+                              ? formState.classificationsList
+                                  .filter( ( item: any ) => formState.value.ids.includes( item.id ) )
+                                  .map( ( item: any ) => item.attributes.title )
+                              : []
+                        }
+                        onChange={(event, value) => {
+                            const selectedIds = value.map((selectedItem) => {
+                              const selectedOption = formState.classificationsList.find(
+                                ( item: any ) => item.attributes.title === selectedItem
+                              );
+                              return selectedOption ? selectedOption.id : '';
+                            });
+                            dispatch(handleInput({ name: 'ids', value: selectedIds }));
+                        }}
+                        filterOptions={(options, params) => {
+                            const filtered = filter(options, params);
+                            const { inputValue } = params;
+                            const isExisting = options.some((option) =>
+                                inputValue === option
+                            );
+                            if (inputValue !== '' && !isExisting) {
+                                filtered.push(inputValue);
+                            }
+                        
+                            return filtered;
+                        }}
+                    />
+                    {
+                        ( formState.value.ids.length === 0 && !isValid.ids )
+                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                    }
+                </FormControl>
             </div>
         </>
     );

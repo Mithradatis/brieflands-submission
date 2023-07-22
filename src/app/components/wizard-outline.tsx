@@ -10,13 +10,16 @@ const WizardOutline = () => {
             <div className="wizard-outline position-relative pe-4 py-4 text-shadow">
                 <ol className="fs-7">
                     {
-                        wizard.formSteps.map( ( item: any ) => (
-                            <li className={wizard.formStep === item.title ? 'active' : ''} key={item.title}>
-                                <a href={`#${item.title}`} onClick={() => dispatch( loadStep( item.title ) ) }>
-                                    { item.title.replace(/-/g, ' ') }
-                                </a>
-                            </li>
-                        ))
+                        wizard.formSteps.map( ( item: any ) => {
+                            const formStepTitle = item.attributes.title.toLowerCase();
+                            return (
+                                <li className={wizard.formStep === formStepTitle ? 'active' : ''} key={ formStepTitle }>
+                                    <a href={`#${formStepTitle}`} onClick={() => dispatch( loadStep( formStepTitle ) ) }>
+                                        { formStepTitle.replace(/-/g, ' ') }
+                                    </a>
+                                </li>
+                            )
+                        })
                     }
                 </ol>
             </div>

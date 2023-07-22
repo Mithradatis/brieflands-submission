@@ -1,22 +1,31 @@
-import ReactHtmlParser from 'react-html-parser'
-import { useSelector } from 'react-redux'
+import { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
-import { Alert, FormControl, FormLabel, TextareaAutosize } from '@mui/material'
-import { stepState, formValidation, formValidator, stepGuide } from '@/app/features/submission/submissionSlice'
-
+import { Alert } from '@mui/material'
+import { stepState } from '@/app/features/submission/buildSlice'
+import { getBuildStepGuide, getBuildStepData } from '@/app/api/build' 
+import ReactHtmlParser from 'react-html-parser'
 
 const BuildStep = () => {
+    const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const stepInstruction = useSelector( stepGuide );
+    useEffect( () => {
+        if ( wizard.formStep === 'build' ) {
+            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+            dispatch( getBuildStepData( getStepDataFromApi ) );
+            dispatch( getBuildStepGuide( getDictionaryFromApi ) );
+        }
+    }, [wizard.formStep]);
 
     return (
         <>
             <div id="build" className={`tab${wizard.formStep === 'build' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Build</h3>
-                {   stepInstruction.guide !== undefined &&     
+                {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
-                        { ReactHtmlParser( stepInstruction.guide ) }
+                        { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
             </div>
