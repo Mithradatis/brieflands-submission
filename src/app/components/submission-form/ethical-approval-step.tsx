@@ -12,7 +12,7 @@ const EthicalApprovalStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     useEffect( () => {
-        if ( wizard.formStep === 'ethical approval' ) {
+        if ( wizard.formStep === 'ethical_approval' ) {
             const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
             const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getEthicalApprovalStepData( getStepDataFromApi ) );
@@ -22,7 +22,7 @@ const EthicalApprovalStep = () => {
 
     return (
         <>
-            <div id="ethical-approval" className={`tab${wizard.formStep === 'ethical approval' ? ' active' : ''}`}>
+            <div id="ethical-approval" className={`tab${wizard.formStep === 'ethical_approval' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Ethical Approval</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

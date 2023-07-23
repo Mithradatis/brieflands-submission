@@ -12,7 +12,7 @@ const ConflictOfInterestsStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     useEffect( () => {
-        if ( wizard.formStep === 'conflict of interests' ) {
+        if ( wizard.formStep === 'conflict_of_interests' ) {
             const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
             const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
             dispatch( getConflictOfInterestsStepData( getStepDataFromApi ) );
@@ -22,7 +22,7 @@ const ConflictOfInterestsStep = () => {
 
     return (
         <>
-            <div id="conflict-of-interests" className={`tab${wizard.formStep === 'conflict of interests' ? ' active' : ''}`}>
+            <div id="conflict-of-interests" className={`tab${wizard.formStep === 'conflict_of_interests' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Conflict of Interests</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

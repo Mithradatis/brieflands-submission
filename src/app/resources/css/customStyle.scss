@@ -121,6 +121,22 @@ body {
         }
     }
 
+    .dashboard-stat {
+        .dashboard-stat-icon {
+            font-size: 5rem;
+            position: absolute;
+            z-index: 0;
+            top: .75rem;
+            left: -.5rem;
+        }
+        .dashboard-stat-footer {
+            position: relative;
+            z-index: 1;
+            border-radius: 0 0 12px 12px;
+            background-color: #0a54ab;
+        }
+    }
+
     .text-green {
         color: $green;
     }

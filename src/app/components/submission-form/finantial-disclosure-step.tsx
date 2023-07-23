@@ -12,7 +12,7 @@ const FinancialDisclosureStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     useEffect( () => {
-        if ( wizard.formStep === 'financial disclosure' ) {
+        if ( wizard.formStep === 'financial_disclosure' ) {
             const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
             const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
             dispatch( getFinancialDisclosureStepData( getStepDataFromApi ) );
@@ -22,8 +22,10 @@ const FinancialDisclosureStep = () => {
 
     return (
         <>
-            <div id="financial-disclosure" className={`tab${wizard.formStep === 'financial disclosure' ? ' active' : ''}`}>
-                <h3 className="mb-4 text-shadow-white">Financial Disclosure</h3>
+            <div id="financial-disclosure" className={`tab${wizard.formStep === 'financial_disclosure' ? ' active' : ''}`}>
+                <h3 className="mb-4 text-shadow-white">
+                    { wizard.formStep.replace(/_/g, ' ') }
+                </h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( formState.stepGuide ) }

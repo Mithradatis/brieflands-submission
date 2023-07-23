@@ -12,7 +12,7 @@ const FundingSupportStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     useEffect( () => {
-        if ( wizard.formStep === 'funding/support' ) {
+        if ( wizard.formStep === 'funding_support' ) {
             const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
             const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
             dispatch( getFundingSupportStepData( getStepDataFromApi ) );
@@ -22,7 +22,7 @@ const FundingSupportStep = () => {
 
     return (
         <>
-            <div id="funding-support" className={`tab${wizard.formStep === 'funding/support' ? ' active' : ''}`}>
+            <div id="funding-support" className={`tab${wizard.formStep === 'funding_support' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Funding/Support</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

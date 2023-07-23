@@ -15,29 +15,29 @@ export const wizardSlice = createSlice({
     loadStep: ( state, action ) => {
       return {
         ...state,
-        formStep: action.payload 
+        formStep: action.payload
       }
     },
     prevStep: ( state ) => {
-      const currentStepIndex = state.formSteps.findIndex( ( item: any ) => item.attributes.title.toLowerCase().includes( state.formStep ));
-        // setSubmitReady(false);
-        if ( currentStepIndex - 1 >= 0 ) {
-            return {
-              ...state,
-              formStep: state.formSteps[currentStepIndex - 1].attributes.title.toLowerCase() 
-            }
-        }
+      const currentStepIndex = state.formSteps.findIndex( ( item: any ) => item.attributes.slug.includes( state.formStep ));
+      // setSubmitReady(false);
+      if ( currentStepIndex - 1 >= 0 ) {
+          return {
+            ...state,
+            formStep: state.formSteps[currentStepIndex - 1]['attributes']['slug']
+          }
+      }
     },
     nextStep: (state, action) => {
-      const currentStepIndex = state.formSteps.findIndex((item) =>
-        item.attributes.title.toLowerCase().includes(state.formStep)
+      const currentStepIndex = state.formSteps.findIndex((item: any) =>
+        item.attributes.slug.includes(state.formStep)
       );
       const isLastStep = currentStepIndex === state.formSteps.length - 1;
       // setSubmitReady(isLastStep);
       if (!isLastStep && action.payload) {
         return {
           ...state,
-          formStep: state.formSteps[currentStepIndex + 1].attributes.title.toLowerCase(),
+          formStep: state.formSteps[currentStepIndex + 1]['attributes']['slug'],
           isVerified: false
         };
       }
@@ -59,12 +59,13 @@ export const wizardSlice = createSlice({
         state.isLoading = true;
       })
       .addCase( getSubmissionSteps.fulfilled, ( state, action ) => {
-        const activeSteps = action.payload.data.filter(
+        console.log( action.payload );
+        const activeSteps = action.payload.data?.filter(
           (item: any) => item.attributes.status === 'active'
         );
         if ( activeSteps !== undefined ) {
           state.formSteps = activeSteps;
-          state.formStep = activeSteps[0]?.attributes.title.toLowerCase() || '';
+          state.formStep = activeSteps[0]?.attributes.slug || '';
         }
       })
       .addCase( getSubmissionSteps.rejected, ( state ) => {
@@ -74,7 +75,7 @@ export const wizardSlice = createSlice({
       })
       .addCase( getWorkflow.fulfilled, ( state, action ) => {
         state.isLoading = false;
-        state.workflow = action.payload.data.attributes;
+        state.workflow = action.payload.data?.attributes;
       });
   },
 });

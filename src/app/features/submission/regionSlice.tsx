@@ -8,7 +8,7 @@ export const regionSlice = createSlice({
     stepGuide: {},
     regionssList: [{}],
     value: {
-      id: ''
+      ids: ''
     }
   },
   reducers: {

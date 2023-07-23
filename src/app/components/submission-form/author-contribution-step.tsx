@@ -12,7 +12,7 @@ const AuthorContributionStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     useEffect( () => {
-        if ( wizard.formStep === "authors' contribution" ) {
+        if ( wizard.formStep === "authors_contribution" ) {
             const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
             const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
             dispatch( getAuthorContributionStepData( getStepDataFromApi ) );
@@ -22,7 +22,7 @@ const AuthorContributionStep = () => {
 
     return (
         <>
-            <div id="author-contribution" className={`tab${wizard.formStep === "authors' contribution" ? ' active' : ''}`}>
+            <div id="author-contribution" className={`tab${wizard.formStep === "authors_contribution" ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Author Contribution</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

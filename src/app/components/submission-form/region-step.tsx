@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl } from '@mui/joy'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/regionSlice'
 import { getRegions, getRegionStepData, getRegionStepGuide } from '@/app/api/region'
 import ReactHtmlParser from 'react-html-parser'
@@ -12,6 +12,9 @@ const RegionStep = () => {
     const formState = useSelector( stepState );
     const regionsList = formState.regionsList;
     const wizard = useSelector( wizardState );
+    const [ isValid, setIsValid ] = useState({
+        ids: true
+    });
     useEffect(() => {
         if ( wizard.formStep === 'region' ) {
             const getAllEditorsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/${ wizard.formStep }`;
@@ -22,6 +25,22 @@ const RegionStep = () => {
             dispatch( getRegionStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
+    useEffect(() => {
+        if ( wizard.formStep === 'region' ) {
+            const formIsValid = formState.value.terms;
+            dispatch( formValidator( formIsValid ) );
+        }
+    }, [formState.value, wizard.formStep, wizard.workflow]);
+    useEffect( () => {
+        if ( wizard.formStep === 'region' ) {
+            if ( wizard.isVerified ) {
+                setIsValid(prevState => ({
+                    ...prevState,
+                    ids: formState.value.terms
+                }));
+            }
+        }
+    }, [wizard.isVerified]);
 
     return (
         <>

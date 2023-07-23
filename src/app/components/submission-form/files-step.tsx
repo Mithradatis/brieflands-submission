@@ -3,12 +3,10 @@ import { Alert } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { MuiFileInput } from 'mui-file-input'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleFilesTable } from '@/app/features/submission/documentFilesSlice'
+import { stepState } from '@/app/features/submission/documentFilesSlice'
 import { getDocumentFiles, getFilesStepData, getFilesStepGuide } from '@/app/api/files'
 import DataTable, { TableColumn } from 'react-data-table-component'
 import ReactHtmlParser from 'react-html-parser'
-
-
 
 const FilesStep = () => {
     const dispatch: any = useDispatch();
@@ -55,13 +53,13 @@ const FilesStep = () => {
                         { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
-                <MuiFileInput
+                {/* <MuiFileInput
                     placeholder="Insert a file"
                     onChange={
                         ( event: any, value: File ) => dispatch( handleFilesTable( value ) ) 
                     }
-                />
-                { 
+                /> */}
+                {/* { 
                     formState.value.old_files.length > 0 &&
                     <div className="datatable-container">
                         <DataTable
@@ -74,7 +72,7 @@ const FilesStep = () => {
                             data={filteredItems}
                         />
                     </div> 
-                }
+                } */}
             </div>
         </>
     );

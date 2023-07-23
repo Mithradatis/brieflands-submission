@@ -8,10 +8,12 @@ export const buildSlice = createSlice({
     isFormValid: true,
     isVisited: false,
     stepGuide: {},
-    value: {}
+    value: {
+      terms: false
+    }
   },
   reducers: {
-    handleInput: ( state, action ) => {
+    handleCheckbox: ( state, action ) => {
       return {
         ...state,
         value: {
@@ -49,7 +51,7 @@ export const buildSlice = createSlice({
   },
 });
 
-export const { handleInput } = buildSlice.actions;
+export const { handleCheckbox } = buildSlice.actions;
 
 export const stepState = ( state: any ) => state.buildSlice;
 

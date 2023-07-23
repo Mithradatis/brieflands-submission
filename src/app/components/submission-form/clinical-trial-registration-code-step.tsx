@@ -12,7 +12,7 @@ const ClinicalTrialRegistrationCodeStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     useEffect( () => {
-        if ( wizard.formStep === 'clinical trial registration code' ) {
+        if ( wizard.formStep === 'clinical_trial_registration_code' ) {
             const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
             const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.clinical.trial.registration.code`;
             dispatch( getClinicalTrialRegistrationCodeStepData( getStepDataFromApi ) );
@@ -22,7 +22,7 @@ const ClinicalTrialRegistrationCodeStep = () => {
 
     return (
         <>
-            <div id="clinical-trial-registration-code" className={`tab${wizard.formStep === 'clinical trial registration code' ? ' active' : ''}`}>
+            <div id="clinical-trial-registration-code" className={`tab${wizard.formStep === 'clinical_trial_registration_code' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Clinical Trial Registration Code</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

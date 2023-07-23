@@ -12,7 +12,7 @@ const InformedConsentStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     useEffect( () => {
-        if ( wizard.formStep === 'informed consent' ) {
+        if ( wizard.formStep === 'informed_consent' ) {
             const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
             const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
             dispatch( getInformedConsentStepData( getStepDataFromApi ) );
@@ -22,7 +22,7 @@ const InformedConsentStep = () => {
 
     return (
         <>
-            <div id="informed-consent" className={`tab${wizard.formStep === 'informed consent' ? ' active' : ''}`}>
+            <div id="informed-consent" className={`tab${wizard.formStep === 'informed_consent' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Informed Consent</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

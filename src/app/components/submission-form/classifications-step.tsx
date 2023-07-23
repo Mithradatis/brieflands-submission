@@ -58,7 +58,6 @@ const ClassificationsStep = () => {
                     <Autocomplete
                         multiple
                         required
-                        freeSolo
                         color="neutral"
                         size="md"
                         variant="soft"
@@ -93,14 +92,15 @@ const ClassificationsStep = () => {
                         filterOptions={(options, params) => {
                             const filtered = filter(options, params);
                             const { inputValue } = params;
-                            const isExisting = options.some((option) =>
-                                inputValue === option
-                            );
+                            const isExisting = options.some((option) => inputValue === option);
+                    
                             if (inputValue !== '' && !isExisting) {
-                                filtered.push(inputValue);
+                                filtered.push('Nothing found');
                             }
-                        
-                            return filtered;
+                    
+                            return filtered.filter((option) => {
+                                return option !== 'Nothing found' || isExisting;
+                            });
                         }}
                     />
                     {

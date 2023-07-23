@@ -12,7 +12,7 @@ const DataReproducibilityStep = () => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     useEffect( () => {
-        if ( wizard.formStep === 'data reproducibility' ) {
+        if ( wizard.formStep === 'data_reproducibility' ) {
             const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
             const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getDataReproducibilityStepData( getStepDataFromApi ) );
@@ -22,7 +22,7 @@ const DataReproducibilityStep = () => {
 
     return (
         <>
-            <div id="data-reproducibility" className={`tab${wizard.formStep === 'data reproducibility' ? ' active' : ''}`}>
+            <div id="data-reproducibility" className={`tab${wizard.formStep === 'data_reproducibility' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Comment</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
