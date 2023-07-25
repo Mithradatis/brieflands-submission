@@ -1,30 +1,30 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { Checkbox, FormControl, FormLabel, FormHelperText, Card, CardContent } from '@mui/joy'
 import { stepState, handleCheckbox } from '@/app/features/submission/buildSlice'
-import { getBuildStepGuide, getBuildStepData } from '@/app/api/build' 
+import { getBuildStepGuide, getBuildStepData, updateBuildStepData } from '@/app/api/build' 
 import ReactHtmlParser from 'react-html-parser'
 
-const BuildStep = () => {
+const BuildStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     const [ isValid, setIsValid ] = useState({
         terms: true
     });
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
         if ( wizard.formStep === 'build' ) {
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getBuildStepData( getStepDataFromApi ) );
             dispatch( getBuildStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
     useEffect(() => {
         if ( wizard.formStep === 'build' ) {
-            const formIsValid = formState.value.terms;
+            const formIsValid = formState.value?.terms;
             dispatch( formValidator( formIsValid ) );
         }
     }, [formState.value, wizard.formStep, wizard.workflow]);
@@ -38,6 +38,11 @@ const BuildStep = () => {
             }
         }
     }, [wizard.isVerified]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateBuildStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -89,11 +94,11 @@ const BuildStep = () => {
                             name="terms"
                             id="terms"
                             label="I've read and agree to all terms that are mentioned above"
-                            checked={ formState.value.terms || false }
-                            onChange={ event => dispatch ( handleCheckbox( { name: event.target.name, value: formState.value.terms } ) ) }
+                            checked={ formState.value?.terms || false }
+                            onChange={ event => dispatch ( handleCheckbox( { name: event.target.name, value: formState.value?.terms } ) ) }
                         />
                         {
-                            ( !formState.value.ids && !isValid.terms )
+                            ( !formState.value?.terms && !isValid.terms )
                             && <div className="fs-7 text-danger">Please accept the terms and conditions</div> 
                         }
                     </FormControl>
@@ -101,6 +106,6 @@ const BuildStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default BuildStep;

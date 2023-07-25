@@ -36,3 +36,37 @@ export const getAgreementStepData = createAsyncThunk(
   }
 );
 
+export const updateAgreementStepData = createAsyncThunk(
+  'submission/updateAgreementStepData',
+  async ( url: string, { getState } ) => {
+    try {
+      const state: any = getState();
+      const { agreementTerms, value } = state.agreementSlice;
+      const { id, attributes } = agreementTerms;
+      const data = {
+        id: parseInt(id),
+        version: attributes.version,
+        ...value,
+      };
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update agreement step');
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);
+

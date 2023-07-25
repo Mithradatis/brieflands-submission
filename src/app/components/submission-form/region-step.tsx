@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/regionSlice'
-import { getRegions, getRegionStepData, getRegionStepGuide } from '@/app/api/region'
+import { getRegions, getRegionStepData, getRegionStepGuide, updateRegionStepData } from '@/app/api/region'
 import ReactHtmlParser from 'react-html-parser'
 
-const RegionStep = () => {
+const RegionStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const regionsList = formState.regionsList;
@@ -15,11 +15,11 @@ const RegionStep = () => {
     const [ isValid, setIsValid ] = useState({
         ids: true
     });
+    const getAllEditorsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/${ wizard.formStep }`;
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'region' ) {
-            const getAllEditorsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/${ wizard.formStep }`;
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getRegions( getAllEditorsFromApi ) );
             dispatch( getRegionStepData( getStepDataFromApi ) );
             dispatch( getRegionStepGuide( getDictionaryFromApi ) );
@@ -41,6 +41,11 @@ const RegionStep = () => {
             }
         }
     }, [wizard.isVerified]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateRegionStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -95,6 +100,6 @@ const RegionStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default RegionStep;

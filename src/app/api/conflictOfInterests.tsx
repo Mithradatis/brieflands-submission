@@ -28,3 +28,31 @@ export const getConflictOfInterestsStepData = createAsyncThunk(
     return fetchDataFromApi(url);
   }
 );
+
+export const updateConflictOfInterestsStepData = createAsyncThunk(
+  'submission/updateConflictOfInterestsStepData',
+  async ( url: string, { getState } ) => {
+    try {
+      const state: any = getState();
+      const data = state.conflictOfInterestsSlice.value;
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update conflict of interests step');
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
 import { useDispatch, useSelector } from 'react-redux'
 import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
@@ -29,16 +29,122 @@ import FundingSupportStep from '@/app/components/submission-form/funding-support
 import DataReproducibilityStep from '@/app/components/submission-form/data-reproducibility-step'
 import BuildStep from '@/app/components/submission-form/build-step'
 
+interface ChildComponentProps {
+    submitForm: () => void;
+}
+
 const SubmissionForm = () => {
+    const stepComponents = [
+        AgreementStep,
+        TypesStep,
+        SectionStep,
+        AuthorsStep,
+        KeywordsStep,
+        ClassificationsStep,
+        AbstractStep,
+        EditorStep,
+        ReviewersStep,
+        FilesStep,
+        CommentStep,
+        RegionStep,
+        AuthorContributionStep,
+        FinancialDisclosureStep,
+        ClinicalTrialRegistrationCodeStep,
+        EthicalApprovalStep,
+        Twitter,
+        ConflictOfInterestStep,
+        InformedConsentStep,
+        FundingSupportStep,
+        DataReproducibilityStep,
+        BuildStep,
+    ];
+    const stepRefs: { [key: string]: React.MutableRefObject<ChildComponentProps | null> } = {};
+    stepComponents.forEach((StepComponent) => {
+        const ref = useRef<ChildComponentProps>(null);
+        stepRefs[StepComponent.name] = ref;
+    });
+    const agreementChildRef = useRef<ChildComponentProps>( null );
+    const typesChildRef = useRef<ChildComponentProps>( null );
+    const sectionChildRef = useRef<ChildComponentProps>( null );
+    const authorChildRef = useRef<ChildComponentProps>( null );
+    const keywordsChildRef = useRef<ChildComponentProps>( null );
+    const classificationsChildRef = useRef<ChildComponentProps>( null );
+    const abstractChildRef = useRef<ChildComponentProps>( null );
+    const editorChildRef = useRef<ChildComponentProps>( null );
+    const reviewersChildRef = useRef<ChildComponentProps>( null );
+    const filesChildRef = useRef<ChildComponentProps>( null );
+    const commentChildRef = useRef<ChildComponentProps>( null );
+    const regionChildRef = useRef<ChildComponentProps>( null );
+    const authorContributionChildRef = useRef<ChildComponentProps>( null );
+    const financialDisclosureChildRef = useRef<ChildComponentProps>( null );
+    const clinicalTrialRegistrationCodeChildRef = useRef<ChildComponentProps>( null );
+    const ethicalApprovalChildRef = useRef<ChildComponentProps>( null );
+    const twitterChildRef = useRef<ChildComponentProps>( null );
+    const conflictOfInterestChildRef = useRef<ChildComponentProps>( null );
+    const informedConsentChildRef = useRef<ChildComponentProps>( null );
+    const fundingSupportChildRef = useRef<ChildComponentProps>( null );
+    const dataReproducibilityChildRef = useRef<ChildComponentProps>( null );
+    const buildChildRef = useRef<ChildComponentProps>( null );
     const dispatch:any = useDispatch();
     const wizard = useSelector( wizardState );
-    const [submitReady, setSubmitReady] = useState(false);
+    const [submitReady, setSubmitReady] = useState( false );
     useEffect( () => {
         const getStepsFromApi = 'http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/steps';
         const getWorkflowFromApi = 'http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365';
         dispatch( getSubmissionSteps( getStepsFromApi ) );
         dispatch( getWorkflow( getWorkflowFromApi ) );
     },[]);
+    const handleNextStep = () => {
+        const activeStepRef = wizard.formStep === 'agreement'
+            ? agreementChildRef
+            : wizard.formStep === 'types'
+            ? typesChildRef
+            : wizard.formStep === 'section'
+            ? sectionChildRef
+            : wizard.formStep === 'author'
+            ? authorChildRef
+            : wizard.formStep === 'keywords'
+            ? keywordsChildRef
+            : wizard.formStep === 'classifications'
+            ? classificationsChildRef
+            : wizard.formStep === 'abstract'
+            ? abstractChildRef
+            : wizard.formStep === 'editor'
+            ? editorChildRef
+            : wizard.formStep === 'reviewers'
+            ? reviewersChildRef
+            : wizard.formStep === 'files'
+            ? filesChildRef
+            : wizard.formStep === 'comment'
+            ? filesChildRef
+            : wizard.formStep === 'region'
+            ? regionChildRef
+            : wizard.formStep === 'authors_contribution'
+            ? authorContributionChildRef
+            : wizard.formStep === 'financial_disclosure'
+            ? financialDisclosureChildRef
+            : wizard.formStep === 'clinical_trial_registration_code'
+            ? clinicalTrialRegistrationCodeChildRef
+            : wizard.formStep === 'ethical_approval'
+            ? ethicalApprovalChildRef
+            : wizard.formStep === 'twitter'
+            ? twitterChildRef
+            : wizard.formStep === 'conflice_of_interests'
+            ? conflictOfInterestChildRef
+            : wizard.formStep === 'informed_consent'
+            ? informedConsentChildRef
+            : wizard.formStep === 'funding_support'
+            ? fundingSupportChildRef
+            : wizard.formStep === 'data_reproducibility'
+            ? dataReproducibilityChildRef
+            : wizard.formStep === 'build'
+            ? buildChildRef
+            : null;
+        if ( wizard.isFormValid ) {
+            activeStepRef?.current?.submitForm();
+        }    
+        dispatch( nextStep( wizard.isFormValid ) );
+    }
 
     return (
         <div className="wizard mb-4">
@@ -52,28 +158,28 @@ const SubmissionForm = () => {
                             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
                         </svg>
                     </div>
-                    <AgreementStep />
-                    <TypesStep />
-                    <SectionStep />
-                    <AuthorsStep />
-                    <KeywordsStep />
-                    <ClassificationsStep />
-                    <AbstractStep />
-                    <EditorStep />
-                    <ReviewersStep />
-                    <FilesStep />
-                    <CommentStep />
-                    <RegionStep />
-                    <AuthorContributionStep />
-                    <FinancialDisclosureStep />
-                    <ClinicalTrialRegistrationCodeStep />
-                    <EthicalApprovalStep />
-                    <Twitter />
-                    <ConflictOfInterestStep />
-                    <InformedConsentStep />
-                    <FundingSupportStep />
-                    <DataReproducibilityStep />
-                    <BuildStep />
+                    <AgreementStep ref={agreementChildRef} />
+                    <TypesStep ref={typesChildRef} />
+                    <SectionStep ref={sectionChildRef} />
+                    <AuthorsStep ref={authorChildRef} />
+                    <KeywordsStep ref={keywordsChildRef} />
+                    <ClassificationsStep ref={classificationsChildRef} />
+                    <AbstractStep ref={abstractChildRef} />
+                    <EditorStep ref={editorChildRef} />
+                    <ReviewersStep ref={reviewersChildRef} />
+                    <FilesStep ref={filesChildRef} />
+                    <CommentStep ref={commentChildRef} />
+                    <RegionStep ref={regionChildRef} />
+                    <AuthorContributionStep ref={authorContributionChildRef} />
+                    <FinancialDisclosureStep ref={financialDisclosureChildRef} />
+                    <ClinicalTrialRegistrationCodeStep ref={clinicalTrialRegistrationCodeChildRef} />
+                    <EthicalApprovalStep ref={ethicalApprovalChildRef} />
+                    <Twitter ref={twitterChildRef} />
+                    <ConflictOfInterestStep ref={conflictOfInterestChildRef} />
+                    <InformedConsentStep ref={informedConsentChildRef} />
+                    <FundingSupportStep ref={fundingSupportChildRef} />
+                    <DataReproducibilityStep ref={dataReproducibilityChildRef} />
+                    <BuildStep ref={buildChildRef} />
                     <div className="d-flex align-items-center justify-content-end mt-4">
                         <button
                             type="button" 
@@ -84,7 +190,7 @@ const SubmissionForm = () => {
                             type={submitReady ? "submit" : "button"}
                             id="next-step"
                             className={`button btn_primary ${ submitReady ? 'd-none' : '' }`} 
-                            onClick={ () => dispatch( nextStep( wizard.isFormValid ) )}>
+                            onClick={ () => handleNextStep() }>
                             { wizard.formStep === wizard.formSteps[wizard.formSteps.length - 1]?.title ? "submit" : "next" }
                         </button>
                     </div>

@@ -28,3 +28,31 @@ export const getDataReproducibilityStepData = createAsyncThunk(
     return fetchDataFromApi(url);
   }
 );
+
+export const updateDataReproducibilityStepData = createAsyncThunk(
+  'submission/updateDataReproducibilityStepData',
+  async ( url: string, { getState } ) => {
+    try {
+      const state: any = getState();
+      const data = state.dataReproducibilitySlice.value;
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update data reproducibility step');
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);

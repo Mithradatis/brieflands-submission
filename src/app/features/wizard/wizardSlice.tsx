@@ -1,6 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
 
+const currentUrl = new URL( window.location.href );
+const workflowId = currentUrl.pathname.split('/').pop();
+
 export const wizardSlice = createSlice({
   name: 'submission',
   initialState: {
@@ -9,6 +12,7 @@ export const wizardSlice = createSlice({
     isFormValid: false,
     formStep: 'agreement',
     formSteps: [],
+    workflowId: 365,
     workflow: {}
   },
   reducers: {
@@ -20,7 +24,6 @@ export const wizardSlice = createSlice({
     },
     prevStep: ( state ) => {
       const currentStepIndex = state.formSteps.findIndex( ( item: any ) => item.attributes.slug.includes( state.formStep ));
-      // setSubmitReady(false);
       if ( currentStepIndex - 1 >= 0 ) {
           return {
             ...state,
@@ -33,7 +36,6 @@ export const wizardSlice = createSlice({
         item.attributes.slug.includes(state.formStep)
       );
       const isLastStep = currentStepIndex === state.formSteps.length - 1;
-      // setSubmitReady(isLastStep);
       if (!isLastStep && action.payload) {
         return {
           ...state,
@@ -59,7 +61,6 @@ export const wizardSlice = createSlice({
         state.isLoading = true;
       })
       .addCase( getSubmissionSteps.fulfilled, ( state, action ) => {
-        console.log( action.payload );
         const activeSteps = action.payload.data?.filter(
           (item: any) => item.attributes.status === 'active'
         );

@@ -1,13 +1,15 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getAuthorStepGuide, getAuthors, getAuthorStepData } from '@/app/api/author'
+import { getReviewersStepGuide, getReviewers, getReviewersStepData } from '@/app/api/reviewers'
 
-export const authorSlice = createSlice({
+export const reviewersSlice = createSlice({
   name: 'authors',
   initialState: {
     isLoading: false,
     stepGuide: {},
     authorsList: [{}],
-    value: {}
+    value: {
+        
+    }
   },
   reducers: {
     handleInput: ( state, action ) => {
@@ -22,32 +24,32 @@ export const authorSlice = createSlice({
   },
   extraReducers( builder ) {
     builder
-    .addCase(getAuthorStepGuide.pending, ( state ) => {
+    .addCase(getReviewersStepGuide.pending, ( state ) => {
       state.isLoading = true;
     })
-    .addCase(getAuthorStepGuide.fulfilled, ( state, action ) => {
+    .addCase(getReviewersStepGuide.fulfilled, ( state, action ) => {
       state.isLoading = false;
       state.stepGuide = action.payload.data.value;
     })
-    .addCase(getAuthors.pending, ( state ) => {
+    .addCase(getReviewers.pending, ( state ) => {
       state.isLoading = true;
     })
-    .addCase(getAuthors.fulfilled, ( state, action: any ) => {
+    .addCase(getReviewers.fulfilled, ( state, action: any ) => {
       state.isLoading = false;
       state.authorsList = action.payload.data;
     })
-    .addCase(getAuthorStepData.pending, ( state ) => {
+    .addCase(getReviewersStepData.pending, ( state ) => {
       state.isLoading = true;
     })
-    .addCase(getAuthorStepData.fulfilled, ( state, action ) => {
+    .addCase(getReviewersStepData.fulfilled, ( state, action ) => {
       state.isLoading = false;
       state.value = action.payload.data.step_data;
     });
   },
 });
 
-export const { handleInput } = authorSlice.actions;
+export const { handleInput } = reviewersSlice.actions;
 
-export const stepState = ( state: any ) => state.authorSlice;
+export const stepState = ( state: any ) => state.reviewersSlice;
 
-export default authorSlice.reducer;
+export default reviewersSlice.reducer;

@@ -1,14 +1,15 @@
-import ReactHtmlParser from 'react-html-parser'
-import DataTable, { TableColumn } from 'react-data-table-component'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Alert } from '@mui/material'
 import { Input } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
-import { stepState, stepGuide } from '@/app/features/submission/submissionSlice'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { stepState, handleInput } from '@/app/features/submission/reviewersSlice'
+import { getReviewersStepGuide, getReviewers, getReviewersStepData, updateReviewersStepData } from '@/app/api/reviewers'
 import { addReviewerModalState } from '@/app/features/modal/addReviewerModalSlice'
+import DataTable, { TableColumn } from 'react-data-table-component'
+import ReactHtmlParser from 'react-html-parser'
 
 const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string, onFilter: (event: React.ChangeEvent<HTMLInputElement>) => void, onClear: () => void }) => (
     <>
@@ -26,12 +27,24 @@ const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string
     </>
 );
 
-const ReviewersStep = () => {
+const ReviewersStep = forwardRef( ( prop, ref) => {
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const stepInstruction = useSelector( stepGuide );
     const addReviewerModalData = useSelector( addReviewerModalState );
     const dispatch = useDispatch();
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    useEffect(() => {
+        if ( wizard.formStep === 'reviewers' ) {
+            dispatch( getReviewersStepData( getStepDataFromApi ) );
+            dispatch( getReviewersStepGuide( getDictionaryFromApi ) );
+        }
+    }, [wizard.formStep]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateReviewersStepData( getStepDataFromApi ) );
+        }
+    }));
     const columns: TableColumn<{ name: string; email: string; }>[] = [
         {
           name: 'name',
@@ -78,7 +91,7 @@ const ReviewersStep = () => {
         <>
             <div id="reviewers" className={`tab${wizard.formStep === 'reviewers' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Reviewers</h3>
-                {   stepInstruction.guide !== undefined &&     
+                {   formState.stepGuide !== undefined &&     
                     <Scrollbars
                         className="mb-4"
                         style={{ width: 500, height: 200 }}
@@ -86,9 +99,9 @@ const ReviewersStep = () => {
                         autoHide
                         autoHideTimeout={500}
                         autoHideDuration={200}>
-                        {   stepInstruction.guide !== undefined &&     
+                        {   formState.stepGuide !== undefined &&     
                             <Alert severity="info" className="mb-4">
-                                { ReactHtmlParser( stepInstruction.guide ) }
+                                { ReactHtmlParser( formState.stepGuide ) }
                             </Alert>
                         }
                     </Scrollbars>
@@ -111,6 +124,6 @@ const ReviewersStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default ReviewersStep;

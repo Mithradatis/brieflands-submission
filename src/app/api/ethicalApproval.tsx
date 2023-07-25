@@ -28,3 +28,31 @@ export const getEthicalApprovalStepData = createAsyncThunk(
     return fetchDataFromApi(url);
   }
 );
+
+export const updateEthicalApprovalStepData = createAsyncThunk(
+  'submission/updateEthicalApprovalStepData',
+  async ( url: string, { getState } ) => {
+    try {
+      const state: any = getState();
+      const data = state.ethicalApprovalSlice.value;
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update ethical approval step');
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);

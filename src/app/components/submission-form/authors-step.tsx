@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Alert } from '@mui/material'
 import { Input } from '@mui/joy'
@@ -7,7 +7,7 @@ import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/authorSlice'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { addAuthorModalState } from '@/app/features/modal/addAuthorModalSlice'
-import { getAuthors, getAuthorStepData, getAuthorStepGuide } from '@/app/api/author'
+import { getAuthors, getAuthorStepData, getAuthorStepGuide, updateAuthorStepData } from '@/app/api/author'
 import DataTable, { TableColumn } from 'react-data-table-component'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -27,19 +27,24 @@ const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string
     </>
 );
 
-const AuthorsStep = () => {
+const AuthorsStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
     const addAuthorModalData = useSelector( addAuthorModalState );
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/authors`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'authors' ) {
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/authors`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getAuthorStepData( getStepDataFromApi ) );
             dispatch( getAuthorStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateAuthorStepData( getStepDataFromApi ) );
+        }
+    }));
     const columns: TableColumn<{ name: string; email: string; }>[] = [
         {
           name: 'name',
@@ -120,6 +125,6 @@ const AuthorsStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default AuthorsStep;

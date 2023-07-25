@@ -28,3 +28,31 @@ export const getInformedConsentStepData = createAsyncThunk(
     return fetchDataFromApi(url);
   }
 );
+
+export const updateInformedConsentStepData = createAsyncThunk(
+  'submission/updateInformedConsentStepData',
+  async ( url: string, { getState } ) => {
+    try {
+      const state: any = getState();
+      const data = state.informedConsentSlice.value;
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update informed consent step');
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);

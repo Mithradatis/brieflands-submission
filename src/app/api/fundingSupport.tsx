@@ -28,3 +28,31 @@ export const getFundingSupportStepData = createAsyncThunk(
     return fetchDataFromApi(url);
   }
 );
+
+export const updateFundingSupportStepData = createAsyncThunk(
+  'submission/updateFundingSupportStepData',
+  async ( url: string, { getState } ) => {
+    try {
+      const state: any = getState();
+      const data = state.fundingSupportSlice.value;
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update funding/support step');
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);

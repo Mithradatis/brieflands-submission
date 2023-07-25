@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect,forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput } from '@/app/features/submission/documentTypesSlice'
-import { getDocumentTypes, getTypesStepData, getTypesStepGuide } from '@/app/api/types'
+import { stepState, handleInput, updateStep } from '@/app/features/submission/documentTypesSlice'
+import { getDocumentTypes, getTypesStepData, getTypesStepGuide, updateTypesStepData } from '@/app/api/types'
 import ReactHtmlParser from 'react-html-parser'
 
-const TypesStep = () => {
+const TypesStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const documentTypes = formState.documentTypesList;
@@ -16,11 +16,11 @@ const TypesStep = () => {
         doc_type: true,
         manuscript_title: true
     });
+    const getAllDocumentTypesFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/type';
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/type`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'types' ) {
-            const getAllDocumentTypesFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/type';
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/type`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
             dispatch( getTypesStepData( getStepDataFromApi ) );
             dispatch( getTypesStepGuide( getDictionaryFromApi ) );
@@ -43,6 +43,11 @@ const TypesStep = () => {
             }
         }
     }, [wizard.isVerified]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateTypesStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -120,6 +125,6 @@ const TypesStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default TypesStep;

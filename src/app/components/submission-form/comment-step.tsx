@@ -1,28 +1,33 @@
-import { useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { stepState, handleInput } from '@/app/features/submission/commentSlice'
-import { getCommentStepGuide, getCommentStepData } from '@/app/api/comment' 
+import { getCommentStepGuide, getCommentStepData, updateCommentStepData } from '@/app/api/comment' 
 import ReactHtmlParser from 'react-html-parser'
 
-const CommentStep = () => {
+const CommentStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
-        if ( wizard.formStep === 'comment' ) {
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/comments`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+        if ( wizard.formStep === 'comments' ) {
             dispatch( getCommentStepData( getStepDataFromApi ) );
             dispatch( getCommentStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateCommentStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
-            <div id="comment" className={`tab${wizard.formStep === 'comment' ? ' active' : ''}`}>
+            <div id="comments" className={`tab${wizard.formStep === 'comments' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Comment</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
@@ -51,6 +56,6 @@ const CommentStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default CommentStep;

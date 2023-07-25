@@ -1,24 +1,29 @@
-import { useEffect } from 'react'
+import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { stepState, handleInput } from '@/app/features/submission/informedConsentSlice'
-import { getInformedConsentStepGuide, getInformedConsentStepData } from '@/app/api/informedConsent' 
+import { getInformedConsentStepGuide, getInformedConsentStepData, updateInformedConsentStepData } from '@/app/api/informedConsent' 
 import ReactHtmlParser from 'react-html-parser'
 
-const InformedConsentStep = () => {
+const InformedConsentStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
         if ( wizard.formStep === 'informed_consent' ) {
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
             dispatch( getInformedConsentStepData( getStepDataFromApi ) );
             dispatch( getInformedConsentStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateInformedConsentStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -51,6 +56,6 @@ const InformedConsentStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default InformedConsentStep;

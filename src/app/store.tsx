@@ -24,6 +24,7 @@ import twitterReducer from './features/submission/twitterSlice'
 import conflictOfInterestsReducer from './features/submission/conflictOfInterestsSlice'
 import informedConsentReducer from './features/submission/informedConsentSlice'
 import dataReproducibilityReducer from './features/submission/dataReproducibilitySlice'
+import reviewersReducer from './features/submission/reviewersSlice'
 import buildReducer from './features/submission/buildSlice'
 
 export const store = configureStore({
@@ -53,6 +54,7 @@ export const store = configureStore({
     conflictOfInterestsSlice: conflictOfInterestsReducer,
     informedConsentSlice: informedConsentReducer,
     dataReproducibilitySlice: dataReproducibilityReducer,
+    reviewersSlice: reviewersReducer,
     buildSlice: buildReducer
   }
 });

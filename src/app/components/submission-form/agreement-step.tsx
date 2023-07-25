@@ -1,25 +1,25 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { Checkbox, FormControl, FormControlLabel, Alert } from '@mui/material'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleCheckbox } from '@/app/features/submission/agreementSlice' 
-import { getAgreementStepData, getAgreementStepGuide, getAgreementTerms } from '@/app/api/agreement'
+import { getAgreementStepData, getAgreementStepGuide, getAgreementTerms, updateAgreementStepData } from '@/app/api/agreement'
 import Divider from '@mui/material/Divider'
 import ReactHtmlParser from 'react-html-parser'
 
-const AgreementStep = () => {
+const AgreementStep = forwardRef(( props, ref ) => {
     const dispatch: any = useDispatch();
     const wizard = useSelector( wizardState );
     const formState = useSelector( stepState );
     const [ isValid, setIsValid ] = useState({
         terms: true
     });
+    const getAgreementTermsFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/${ wizard.workflowId }/agreement/current`;
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
         if ( wizard.formStep === 'agreement' ) {
-            const getAgreementTermsFromApi = 'http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/agreement/current';
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getAgreementTerms( getAgreementTermsFromApi ) );
             dispatch( getAgreementStepData( getStepDataFromApi ) );
             dispatch( getAgreementStepGuide( getDictionaryFromApi ) );
@@ -41,6 +41,11 @@ const AgreementStep = () => {
             }
         }
     }, [wizard.isVerified]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateAgreementStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -59,37 +64,35 @@ const AgreementStep = () => {
                     autoHide
                     autoHideTimeout={627}
                     autoHideDuration={200}>
-                    {   formState.agreementTerms !== undefined &&
+                    {   formState.agreementTerms.attributes?.translated_content !== undefined &&
                         <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.agreementTerms ) }
+                            { ReactHtmlParser( formState.agreementTerms.attributes?.translated_content ) }
                         </Alert>
                     }
                 </Scrollbars>
                 <Divider />
-                <form name="agreement-form" id="agreement-form">
-                    <FormControl className="mb-4" fullWidth>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    required
-                                    name="terms"
-                                    id="terms"
-                                    checked={ formState.value.terms || false }
-                                    onChange={ event => dispatch ( handleCheckbox( { name: event.target.name, value: formState.value.terms } ) ) }
-                                    inputProps={{ 'aria-label': 'terms' }}
-                                />
-                            }
-                            label="I've read and agree to all terms that are mentioned above"
-                        />
-                        {
-                            ( !formState.value.terms && !isValid.terms ) 
-                            && <div className="fs-7 text-danger">Please accept the terms and conditions</div> 
+                <FormControl className="mb-4" fullWidth>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                required
+                                name="terms"
+                                id="terms"
+                                checked={ formState.value.terms || false }
+                                onChange={ event => dispatch ( handleCheckbox( { name: event.target.name, value: formState.value.terms } ) ) }
+                                inputProps={{ 'aria-label': 'terms' }}
+                            />
                         }
-                    </FormControl>
-                </form>
+                        label="I've read and agree to all terms that are mentioned above"
+                    />
+                    {
+                        ( !formState.value.terms && !isValid.terms ) 
+                        && <div className="fs-7 text-danger">Please accept the terms and conditions</div> 
+                    }
+                </FormControl>
             </div>
         </>
     );
-}
+});
 
 export default AgreementStep;

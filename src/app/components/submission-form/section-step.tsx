@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { handleInput, stepState } from '@/app/features/submission/documentSectionSlice'
-import { getDocumentSections, getSectionStepData, getSectionStepGuide } from '@/app/api/section'
+import { getDocumentSections, getSectionStepData, getSectionStepGuide, updateSectionStepData } from '@/app/api/section'
 import ReactHtmlParser from 'react-html-parser'
 
-const SectionStep = () => {
+const SectionStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const documentSections = formState.documentSectionsList;
@@ -15,11 +15,11 @@ const SectionStep = () => {
     const [ isValid, setIsValid ] = useState({
         id: true,
     });
+    const getAllDocumentTypesFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/section';
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/section`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'section' ) {
-            const getAllDocumentTypesFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/section';
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/section`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getDocumentSections( getAllDocumentTypesFromApi ) );
             dispatch( getSectionStepData( getStepDataFromApi ) );
             dispatch( getSectionStepGuide( getDictionaryFromApi ) );
@@ -41,6 +41,11 @@ const SectionStep = () => {
             }
         }
     }, [wizard.isVerified]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateSectionStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -96,6 +101,6 @@ const SectionStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default SectionStep;

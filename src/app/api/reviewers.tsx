@@ -15,33 +15,33 @@ const fetchDataFromApi = async (url: string) => {
   }
 };
 
-export const getFilesStepGuide = createAsyncThunk(
-  'submission/getFilesStepGuide',
+export const getReviewersStepGuide = createAsyncThunk(
+  'submission/getReviewersStepGuide',
   async (url: string) => {
     return fetchDataFromApi(url);
   }
 );
 
-export const getDocumentFiles = createAsyncThunk(
-  'submission/getDocumentFiles',
+export const getReviewers = createAsyncThunk(
+  'submission/getReviewers',
   async (url: string) => {
     return fetchDataFromApi(url);
   }
 );
 
-export const getFilesStepData = createAsyncThunk(
-  'submission/getFilesStepData',
+export const getReviewersStepData = createAsyncThunk(
+  'submission/getReviewersStepData',
   async (url: string) => {
     return fetchDataFromApi(url);
   }
 );
 
-export const updateFilesStepData = createAsyncThunk(
-  'submission/updateFilesStepData',
+export const updateReviewersStepData = createAsyncThunk(
+  'submission/updateReviewersStepData',
   async ( url: string, { getState } ) => {
     try {
       const state: any = getState();
-      const data = state.documentFilesSlice.value;
+      const data = state.reviewersSlice.value;
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',
@@ -52,7 +52,7 @@ export const updateFilesStepData = createAsyncThunk(
         body: JSON.stringify(data),
       });
       if (!response.ok) {
-        throw new Error('Failed to update files step');
+        throw new Error('Failed to update reviewers step');
       }
       const jsonData = await response.json();
 

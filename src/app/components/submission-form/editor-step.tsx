@@ -1,31 +1,36 @@
-import { useState, useEffect } from 'react'
+import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl } from '@mui/joy'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/editorSlice'
-import { getEditors, getEditorStepData, getEditorStepGuide } from '@/app/api/editor'
+import { getEditors, getEditorStepData, getEditorStepGuide, updateEditorStepData } from '@/app/api/editor'
 import ReactHtmlParser from 'react-html-parser'
 
-const EditorStep = () => {
+const EditorStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const editorsList = formState.editorsList;
     const wizard = useSelector( wizardState );
+    const getAllEditorsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/${ wizard.formStep }`;
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        if ( wizard.formStep === 'editor' ) {
-            const getAllEditorsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/${ wizard.formStep }`;
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+        if ( wizard.formStep === 'editors' ) {
             dispatch( getEditors( getAllEditorsFromApi ) );
             dispatch( getEditorStepData( getStepDataFromApi ) );
             dispatch( getEditorStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateEditorStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
-            <div id="editor" className={`tab${wizard.formStep === 'editor' ? ' active' : ''}`}>
+            <div id="editors" className={`tab${wizard.formStep === 'editors' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Editor</h3>
                 {   
                     formState.stepGuide !== undefined &&
@@ -76,6 +81,6 @@ const EditorStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default EditorStep;

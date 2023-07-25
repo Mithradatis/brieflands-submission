@@ -1,5 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getAgreementTerms, getAgreementStepGuide, getAgreementStepData } from '@/app/api/agreement'
+import { 
+  getAgreementTerms, 
+  getAgreementStepGuide, 
+  getAgreementStepData, 
+  updateAgreementStepData } from '@/app/api/agreement'
 
 export const agreementSlice = createSlice({
   name: 'agreement',
@@ -12,7 +16,7 @@ export const agreementSlice = createSlice({
     },
   },
   reducers: {
-    handleCheckbox: (state, action ) => {
+    handleCheckbox: ( state, action ) => {
       return {
         ...state,
         value: {
@@ -20,7 +24,7 @@ export const agreementSlice = createSlice({
           [action.payload.name]: !action.payload.value,
         },
       };
-    }
+    },
   },
   extraReducers(builder) {
     builder
@@ -36,7 +40,7 @@ export const agreementSlice = createSlice({
       })
       .addCase(getAgreementTerms.fulfilled, ( state, action ) => {
         state.isLoading = false;
-        state.agreementTerms = action.payload.data.attributes.translated_content;
+        state.agreementTerms = action.payload.data;
       })
       .addCase(getAgreementStepData.pending, ( state ) => {
         state.isLoading = true;
@@ -44,6 +48,12 @@ export const agreementSlice = createSlice({
       .addCase(getAgreementStepData.fulfilled, ( state, action ) => {
         state.isLoading = false;
         state.value = action.payload.data.step_data;
+      }).addCase(updateAgreementStepData.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase(updateAgreementStepData.fulfilled, ( state, action ) => {
+        state.isLoading = false;
+        state.value.terms = action.payload.data.attributes.storage.agreement.terms;
       });
   },
 });

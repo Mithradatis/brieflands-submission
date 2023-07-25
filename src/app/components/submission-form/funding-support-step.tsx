@@ -1,24 +1,29 @@
-import { useEffect } from 'react'
+import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { stepState, handleInput } from '@/app/features/submission/fundingSupportSlice'
-import { getFundingSupportStepData, getFundingSupportStepGuide } from '@/app/api/fundingSupport' 
+import { getFundingSupportStepData, getFundingSupportStepGuide, updateFundingSupportStepData } from '@/app/api/fundingSupport' 
 import ReactHtmlParser from 'react-html-parser'
 
-const FundingSupportStep = () => {
+const FundingSupportStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
         if ( wizard.formStep === 'funding_support' ) {
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
             dispatch( getFundingSupportStepData( getStepDataFromApi ) );
             dispatch( getFundingSupportStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateFundingSupportStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -51,6 +56,6 @@ const FundingSupportStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default FundingSupportStep;

@@ -1,24 +1,29 @@
-import { useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { stepState, handleInput } from '@/app/features/submission/clinicalTrialRegistrationCodeSlice'
-import { getClinicalTrialRegistrationCodeStepGuide, getClinicalTrialRegistrationCodeStepData } from '@/app/api/clinicalTrialRegistrationCode' 
+import { getClinicalTrialRegistrationCodeStepGuide, getClinicalTrialRegistrationCodeStepData, updateClinicalTrialRegistrationCodeStepData } from '@/app/api/clinicalTrialRegistrationCode' 
 import ReactHtmlParser from 'react-html-parser'
 
-const ClinicalTrialRegistrationCodeStep = () => {
+const ClinicalTrialRegistrationCodeStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.clinical.trial.registration.code`;
     useEffect( () => {
         if ( wizard.formStep === 'clinical_trial_registration_code' ) {
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.clinical.trial.registration.code`;
             dispatch( getClinicalTrialRegistrationCodeStepData( getStepDataFromApi ) );
             dispatch( getClinicalTrialRegistrationCodeStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateClinicalTrialRegistrationCodeStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -51,6 +56,6 @@ const ClinicalTrialRegistrationCodeStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default ClinicalTrialRegistrationCodeStep;

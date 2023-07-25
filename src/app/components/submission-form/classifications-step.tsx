@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/classificationsSlice'
-import { getClassificationsList, getClassificationsStepData, getClassificationsStepGuide } from '@/app/api/classifications'
+import { getClassificationsList, getClassificationsStepData, getClassificationsStepGuide, updateClassificationsStepData } from '@/app/api/classifications'
 import ReactHtmlParser from 'react-html-parser'
 
-const ClassificationsStep = () => {
+const ClassificationsStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
@@ -15,10 +15,10 @@ const ClassificationsStep = () => {
         ids: true,
     });
     const filter = createFilterOptions();
+    const getAllClassificationsFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/classification';
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        const getAllClassificationsFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/classification';
-        const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
-        const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
         if (wizard.formStep === 'classifications') {
           dispatch( getClassificationsList( getAllClassificationsFromApi ) );
           dispatch( getClassificationsStepData( getStepDataFromApi ) );
@@ -41,6 +41,11 @@ const ClassificationsStep = () => {
             }
         }
     }, [wizard.isVerified]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateClassificationsStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -111,6 +116,6 @@ const ClassificationsStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default ClassificationsStep;

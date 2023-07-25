@@ -1,24 +1,29 @@
-import { useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { stepState, handleInput } from '@/app/features/submission/conflictOfInterestsSlice'
-import { getConflictOfInterestsStepGuide, getConflictOfInterestsStepData } from '@/app/api/conflictOfInterests' 
+import { getConflictOfInterestsStepGuide, getConflictOfInterestsStepData, updateConflictOfInterestsStepData } from '@/app/api/conflictOfInterests' 
 import ReactHtmlParser from 'react-html-parser'
 
-const ConflictOfInterestsStep = () => {
+const ConflictOfInterestsStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
         if ( wizard.formStep === 'conflict_of_interests' ) {
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
             dispatch( getConflictOfInterestsStepData( getStepDataFromApi ) );
             dispatch( getConflictOfInterestsStepGuide( getDictionaryFromApi ) );
         }
     }, [wizard.formStep]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateConflictOfInterestsStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -51,6 +56,6 @@ const ConflictOfInterestsStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default ConflictOfInterestsStep;

@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/keywordsSlice'
-import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide } from '@/app/api/keywords'
+import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide, updateKeywordsStepData } from '@/app/api/keywords'
 import ReactHtmlParser from 'react-html-parser'
 
-const KeywordsStep = () => {
+const KeywordsStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
@@ -15,11 +15,11 @@ const KeywordsStep = () => {
         ids: true,
     });
     const filter = createFilterOptions();
+    const getAllKeywordsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/keyword`;
+    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
+    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
         if ( wizard.formStep === 'keywords' ) {
-            const getAllKeywordsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/keyword`;
-            const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
-            const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
             dispatch( getKeywordsList( getAllKeywordsFromApi ) );
             dispatch( getKeywordsStepData( getStepDataFromApi ) );
             dispatch( getKeywordsStepGuide( getDictionaryFromApi ) );
@@ -41,6 +41,11 @@ const KeywordsStep = () => {
             }
         }
     }, [wizard.isVerified]);
+    useImperativeHandle(ref, () => ({
+        submitForm () {
+          dispatch( updateKeywordsStepData( getStepDataFromApi ) );
+        }
+    }));
 
     return (
         <>
@@ -109,6 +114,6 @@ const KeywordsStep = () => {
             </div>
         </>
     );
-}
+});
 
 export default KeywordsStep;
