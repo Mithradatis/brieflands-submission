@@ -1,7 +1,7 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
-import { Autocomplete, FormLabel, FormControl } from '@mui/joy'
+import { Autocomplete, FormLabel, FormControl, FormHelperText } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/regionSlice'
 import { getRegions, getRegionStepData, getRegionStepGuide, updateRegionStepData } from '@/app/api/region'
@@ -15,9 +15,9 @@ const RegionStep = forwardRef( ( prop, ref ) => {
     const [ isValid, setIsValid ] = useState({
         ids: true
     });
-    const getAllEditorsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/${ wizard.formStep }`;
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const getAllEditorsFromApi = `${ wizard.baseUrl }/api/v1/journal/${ wizard.formStep }`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'region' ) {
             dispatch( getRegions( getAllEditorsFromApi ) );
@@ -27,7 +27,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
     }, [wizard.formStep]);
     useEffect(() => {
         if ( wizard.formStep === 'region' ) {
-            const formIsValid = formState.value.terms;
+            const formIsValid = Object.values( formState.value ).every(value => value !== '');
             dispatch( formValidator( formIsValid ) );
         }
     }, [formState.value, wizard.formStep, wizard.workflow]);
@@ -42,7 +42,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
         }
     }, [wizard.isVerified]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
+        submitForm () { 
           dispatch( updateRegionStepData( getStepDataFromApi ) );
         }
     }));
@@ -57,7 +57,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
                 }
-                <FormControl className="mb-3">
+                <FormControl className="mb-3" error= { formState.value.ids === '' && !isValid.ids }>
                     <FormLabel className="fw-bold mb-1">
                         Region
                     </FormLabel>
@@ -96,10 +96,16 @@ const RegionStep = forwardRef( ( prop, ref ) => {
                         ) : (
                         <div>Loading regions...</div>
                     )}
+                    {
+                        ( formState.value.ids === '' && !isValid.ids ) 
+                        && <FormHelperText className="fs-7 text-danger mt-1">Please select a region</FormHelperText> 
+                    }
                 </FormControl>
             </div>
         </>
     );
 });
+
+RegionStep.displayName = 'RegionStep';
 
 export default RegionStep;

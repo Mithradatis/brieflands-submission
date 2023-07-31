@@ -1,4 +1,5 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { handleOpen, setModalData, setModalActionButton, saveModal, setFormIsInvalid } from '@/app/features/modal/modalSlice'
 
 const fetchDataFromApi = async (url: string) => {
   try {
@@ -36,6 +37,72 @@ export const getAuthorStepData = createAsyncThunk(
   }
 );
 
+export const addAuthor = createAsyncThunk(
+  'addAuthorModal/addAuthor',
+  async ( modalFormData: any, { getState, dispatch }) => {
+    const state: any = getState();
+    let url: string = '';
+    switch ( state.modalSlice.modalActionButton.action ) {
+      case 'add': 
+        url = `${ state.wizardSlice.baseUrl }/api/v1/submission/workflow/${ state.wizardSlice.workflowId }/authors/add`;
+        break;
+      case 'edit': 
+        url = `${ state.wizardSlice.baseUrl }/api/v1/submission/workflow/${ state.wizardSlice.workflowId }/authors/edit`;
+        break;  
+    }
+    const response = await fetch( url, {
+      method: 'POST',
+      credentials: 'include',
+      redirect: 'follow',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify( modalFormData ),
+    });
+    if ( !response.ok ) {
+      throw new Error('Failed to update author step');
+    }
+    const jsonData = await response.json();
+    dispatch( saveModal() );
+
+    return jsonData;
+  }
+); 
+
+export const handleAuthorOperation = createAsyncThunk(
+  'addAuthorsModal/handleAuthorOperation',
+  async (_, { getState, dispatch }) => {
+    const state: any = getState();
+    const modalFormData = state.addAuthorModalSlice.value;
+    if ( Object.keys( modalFormData ).length > 0 ) {
+      if (
+        ( modalFormData?.['email'] !== '' || modalFormData['email'] !== undefined )
+        && ( modalFormData['first-name'] !== '' && modalFormData['first-name'] !== undefined )
+        && ( modalFormData['last-name'] !== '' && modalFormData['last-name'] !== undefined )
+        && ( modalFormData['phone_type'] !== '' && modalFormData['phone_type'] !== undefined )
+        && ( modalFormData['country_phone'] != '' && modalFormData['country_phone'] !== undefined )
+        && ( modalFormData['phone_number'] !== '' && modalFormData['phone_number'] !== undefined )
+        && ( modalFormData['affiliations'] !== '' && modalFormData['affiliations'] !== undefined )
+      ) {
+        try {
+          dispatch( addAuthor( modalFormData ) );
+        } catch (error) {
+          console.log('Error in addAuthor:', error);
+          throw error;
+        }
+      } else {
+        dispatch( setFormIsInvalid() );
+
+        return false;
+      }
+    } else {
+      dispatch( setFormIsInvalid() );
+
+      return false;
+    }
+  }
+);
+
 export const updateAuthorStepData = createAsyncThunk(
   'submission/updateAuthorStepData',
   async ( url: string, { getState } ) => {
@@ -57,6 +124,93 @@ export const updateAuthorStepData = createAsyncThunk(
       const jsonData = await response.json();
 
       return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);
+
+export const loadEditAuthorForm = createAsyncThunk(
+  'submission/loadEditAuthorForm',
+  async (authorEmail: string, { getState, dispatch }) => {
+    const state: any = getState();
+    const authorSliceData = state.authorSlice.value;
+    let authorData;
+    for (const [key, value] of Object.entries( authorSliceData )) {
+      const authorItem: any = value;
+      if ( authorItem.email === authorEmail ) {
+        authorData = value;
+      }
+    }
+    dispatch( setModalData( authorData ) );
+    dispatch( handleOpen( { title: 'Edit Author', parent: 'authors' } ) );
+    dispatch( setModalActionButton( { action: 'edit', caption: 'edit' } ) );
+  }
+);
+
+export const deleteAuthor = createAsyncThunk(
+  'submission/deleteAuthor',
+  async ( payload: any, { getState } ) => {
+    try {
+      const state: any = getState();
+      const stepData = state.authorSlice.value;
+      const { url, author } = payload;
+      let data;
+      for ( const [ key, value ] of Object.entries( stepData ) ) {
+        const authorItem: any = value;
+        if ( authorItem.email === author ) {
+          data = {
+            "id": key
+          };
+        }
+      }
+      const response = await fetch( url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update author step');
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);
+
+export const searchPeople = createAsyncThunk(
+  'addAuthorsModal/searchPeople',
+  async ( email: any, { getState, dispatch }) => {
+    try {
+      const state: any = getState();
+      const url = `${ state.wizardSlice.baseUrl }/api/v1/submission/workflow/${ state.wizardSlice.workflowId }/authors/find`;
+      const data = {
+        "email": email
+      };
+      const response = await fetch( url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify( data ),
+      });
+      if (!response.ok) {
+        throw new Error('No author has been find!');
+      }
+      const jsonData = await response.json();
+
+      return { email: email, data: jsonData };
     } catch (error) {
       console.log(error);
       throw error;

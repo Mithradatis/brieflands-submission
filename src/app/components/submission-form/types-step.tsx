@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput, updateStep } from '@/app/features/submission/documentTypesSlice'
+import { stepState, handleInput } from '@/app/features/submission/documentTypesSlice'
 import { getDocumentTypes, getTypesStepData, getTypesStepGuide, updateTypesStepData } from '@/app/api/types'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -16,9 +16,9 @@ const TypesStep = forwardRef( ( prop, ref ) => {
         doc_type: true,
         manuscript_title: true
     });
-    const getAllDocumentTypesFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/type';
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/type`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const getAllDocumentTypesFromApi = `${ wizard.baseUrl }/api/v1/journal/type`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/type`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'types' ) {
             dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
@@ -126,5 +126,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
         </>
     );
 });
+
+TypesStep.displayName = 'TypesStep';
 
 export default TypesStep;

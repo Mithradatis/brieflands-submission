@@ -11,8 +11,8 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
         if ( wizard.formStep === 'financial_disclosure' ) {
             dispatch( getFinancialDisclosureStepData( getStepDataFromApi ) );
@@ -51,7 +51,7 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
                         maxRows={10}
                         defaultValue={ formState.value.text ? formState.value.text : '' }
                         onChange={( event: any ) => {
-                            dispatch( handleInput( {name: event.target.name, value: event.target.value} ) );
+                            dispatch( handleInput( event.target.value ) );
                         }}
                     />
                 </FormControl>
@@ -59,5 +59,7 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
         </>
     );
 });
+
+FinancialDisclosureStep.displayName = 'FinancialDisclosureStep';
 
 export default FinancialDisclosureStep;

@@ -12,6 +12,9 @@ body {
         color: darken($green, 20%);
         text-shadow: 1px 1px 0 lighten($green, 5%);
     }
+    p {
+        margin-bottom: 0;
+    }
     ul {
         li {
             ul {
@@ -137,8 +140,37 @@ body {
         }
     }
 
+    .dropzone {
+        border-radius: .425rem;
+        border: 2px dashed rgba(34, 34, 34, .2);
+        &.drag-active {
+            border: 2px dashed rgb(27, 130, 190, 1);
+        }
+    }
+
     .text-green {
         color: $green;
+    }
+
+    .MuiBox-root {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 600px;
+        max-height: 75%;
+        overflow: auto;
+        background-color: white;
+        border-radius: .5rem;
+        padding: 3rem;
+    }
+
+    .MuiAutocomplete-listbox {
+        z-index: 10000;
+    }
+    
+    .MuiModal-backdrop {
+        background-color: rgba(54, 54, 54, .3);
     }
 }
 

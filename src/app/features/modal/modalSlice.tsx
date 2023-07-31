@@ -6,6 +6,10 @@ export const modalSlice = createSlice({
     modalTitle: '',
     modalOpen: false,
     modalForm: null,
+    modalActionButton: {
+      action: 'add',
+      caption: 'add'
+    },
     modalFormData: {},
     nestedModalOpen: false,
     nestedModalFormData: {},
@@ -38,36 +42,34 @@ export const modalSlice = createSlice({
         nestedModalOpen: false,
       };
     },
-    handleInputChange: ( state, action ) => {
-      return {
-        ...state,
-        modalFormData: {
-          ...state.modalFormData,
-          [ action.payload.name ]: action.payload.value,
-        },
-      };
-    },
-    handleSelection: ( state, action ) => {
-      return {
-        ...state,
-        value: {
-        ...state.modalFormData,
-        [ action.payload.name ]: action.payload.value,
-        },
-      };
-    },
     saveModal : ( state ) => {
       return {
         ...state,
         modalFormData: {},
         isFormValid: true,
         modalOpen: false,
+        modalActionButton: {
+          action: 'add',
+          caption: 'add'
+        }
+      };
+    },
+    setModalData: ( state, action ) => {
+      return {
+        ...state,
+        modalFormData: action.payload
       };
     },
     setFormIsInvalid: ( state ) => {
       return {
         ...state,
         isFormValid: false
+      }
+    },
+    setModalActionButton: ( state, action ) => {
+      return {
+        ...state,
+        modalActionButton: action.payload
       }
     }
   },
@@ -78,11 +80,11 @@ export const {
   handleOpen, 
   handleClose,
   handleNestedOpen,
-  handleNestedClose, 
-  handleInputChange, 
+  handleNestedClose,  
   saveModal,
-  setFormIsInvalid, 
-  handleSelection 
+  setModalData,
+  setFormIsInvalid,
+  setModalActionButton
 } = modalSlice.actions;
 
 export const modalState = ( state: any ) => state.modalSlice;

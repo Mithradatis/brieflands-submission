@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react'
-import { AnyAction } from 'redux'
 import { useDispatch, useSelector } from 'react-redux'
-import { ThunkDispatch } from 'redux-thunk'
 import { List, ListItem, ListItemText } from '@mui/material'
-import { Autocomplete, Input, FormControl, FormLabel, FormHelperText, Textarea, Button, Divider } from '@mui/joy'
-import { modalState, handleInputChange, handleNestedOpen, handleNestedClose } from '@/app/features/modal/modalSlice'
-import { addReviewerModalState, handleSelection, handleClassifications } from '@/app/features/modal/addReviewerModalSlice' 
+import { Autocomplete, Input, FormControl, FormLabel, FormHelperText, Textarea, Button, Divider, createFilterOptions } from '@mui/joy'
+import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { modalState, handleNestedOpen, handleNestedClose } from '@/app/features/modal/modalSlice'
+import { addReviewerModalState, handleSelection, handleInput, handleClassifications } from '@/app/features/modal/addReviewerModalSlice' 
 import { getClassificationsList } from '@/app/api/classifications'
 import { Modal, ModalDialog } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
 
 const AddReviewerModal = () => {
-    const dispatch = useDispatch();
-    const thunkDispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>();
+    const filter = createFilterOptions();
+    const dispatch: any = useDispatch();
+    const wizard = useSelector( wizardState );
     const modalData = useSelector( modalState );
     const addReviewerFormData = useSelector( addReviewerModalState );
     const [ selectedClassifications , setSelectedClassifications ] = useState<{ classification: string }[]>([]);
@@ -43,8 +43,8 @@ const AddReviewerModal = () => {
     }
     useEffect( () => {
         if ( modalData.modalForm === 'reviewers' ) {
-            const apiUrl = 'http://apcabbr.brieflands.com.test/api/v1/journal/classification';
-            thunkDispatch( getClassificationsList( apiUrl ) );
+            const classificationsUrl = `${ wizard.baseUrl }/api/v1/journal/classification`;
+            dispatch( getClassificationsList( classificationsUrl ) );
             const isValidKeys = Object.keys(isValid);
             for ( const [key, value] of Object.entries( modalData.modalFormData ) ) {   
                 if ( isValidKeys.includes(key) ) {
@@ -57,10 +57,6 @@ const AddReviewerModal = () => {
             }
         }
     }, [modalData.modalFormData]);
-
-    useEffect( () => {
-       
-    }, [addReviewerFormData]);
 
     return (
         <>
@@ -88,22 +84,22 @@ const AddReviewerModal = () => {
                                 <div className="border-end flex-fill pe-4">
                                     <h5 className="fs-7 fw-bold text-muted">Available Classifications</h5>
                                     <List>
-                                        {
-                                            addReviewerFormData.classifications.map( ( item: any, index: number ) => {
-                                                return (
-                                                    <ListItem className="mb-2 bg-light rounded" key={index}>
-                                                        <ListItemText>
-                                                            { item }
-                                                        </ListItemText>
-                                                        <Button size="sm" 
-                                                            onClick={ () => selectClassification( item ) } 
-                                                            disabled={ disabledClassifications[item] }>
-                                                            <i className="fa-duotone fa-angle-right"></i>
-                                                        </Button>
-                                                    </ListItem>
-                                                );
-                                            })
-                                        }
+                                        {addReviewerFormData.classificationsList?.map((item: any, index: number) => {
+                                            return (
+                                            <ListItem className="mb-2 bg-light rounded" key={index}>
+                                                <ListItemText>
+                                                    { item.attributes.title }
+                                                </ListItemText>
+                                                <Button
+                                                size="sm"
+                                                onClick={() => selectClassification(item.attributes.title)}
+                                                disabled={disabledClassifications[item.attributes.title]}
+                                                >
+                                                <i className="fa-duotone fa-angle-right"></i>
+                                                </Button>
+                                            </ListItem>
+                                            );
+                                        })}
                                     </List>
                                 </div>
                                 <div className="flex-fill ps-4">
@@ -144,14 +140,30 @@ const AddReviewerModal = () => {
                     size="md"
                     variant="soft"
                     placeholder="Choose one…"
-                    disabled={false}
                     disableClearable={true}
                     name="suggestOrOppose"
                     id="suggestOrOppose"
-                    options={ addReviewerFormData.suggestOrOpposeList }
-                    value={ addReviewerFormData.suggestOrOppose }
+                    options={
+                        Array.isArray( addReviewerFormData.suggestOrOpposeList ) 
+                        ? addReviewerFormData.suggestOrOpposeList.map( 
+                            ( item: any ) => {
+                                return item.title || '' 
+                            }
+                           ) : []
+                    }
+                    value={
+                        addReviewerFormData.value['suggest-or-oppose'] !== ''
+                          ? addReviewerFormData.suggestOrOpposeList
+                              .find( ( item: any ) => addReviewerFormData.value['suggest-or-oppose'] === item.id )?.title
+                          : null
+                    }
                     onChange={(event, value) => {
-                        dispatch( handleSelection( { name: 'suggestOrOppose' , value: value } ) );
+                        dispatch( handleInput({ 
+                                name: 'suggest-or-oppose',
+                                value: addReviewerFormData.suggestOrOpposeList.find( 
+                                    ( item: any ) => item.title === value )?.id || '' } 
+                                    ) 
+                                )
                     }}
                 />
             </FormControl>
@@ -165,7 +177,7 @@ const AddReviewerModal = () => {
                     name="reviewerEmail"
                     id="reviewerEmail"
                     placeholder="Reviewer's Email"
-                    onChange={ event => dispatch( handleInputChange( { name: 'reviewerEmail', value: event.target.value } ) ) }
+                    onChange={ event => dispatch( handleInput( { name: 'email', value: event.target.value } ) ) }
                 />
                 {
                     ( !isValid.reviewerEmail && !formIsValid ) 
@@ -182,7 +194,7 @@ const AddReviewerModal = () => {
                     name="reviewerFirstName"
                     id="reviewerFirstName"
                     placeholder="Reviewer's First Name"
-                    onChange={ event => dispatch( handleInputChange( { name: event.target.name, value: event.target.value } ) ) }
+                    onChange={ event => dispatch( handleInput( { name: 'first-name', value: event.target.value } ) ) }
                 />
                 {
                     ( !isValid.reviewerFirstName && !formIsValid ) 
@@ -198,7 +210,7 @@ const AddReviewerModal = () => {
                     name="reviewerMiddleName"
                     id="reviewerMiddleName"
                     placeholder="Reviewer's Middle Name"
-                    onChange={ event => dispatch( handleInputChange( { name: event.target.name, value: event.target.value } ) ) }
+                    onChange={ event => dispatch( handleInput( { name: 'middle-name', value: event.target.value } ) ) }
                 />
             </FormControl>
             <FormControl className="mb-3" error={ !isValid.reviewerLastName && !formIsValid }>
@@ -211,7 +223,7 @@ const AddReviewerModal = () => {
                     name="reviewerLastName"
                     id="reviewerLastName"
                     placeholder="Reviewer's Last Name"
-                    onChange={ event => dispatch( handleInputChange( { name: event.target.name, value: event.target.value } ) ) }
+                    onChange={ event => dispatch( handleInput( { name: 'last-name', value: event.target.value } ) ) }
                 />
                 {
                     ( !isValid.reviewerLastName && !formIsValid ) 
@@ -235,7 +247,7 @@ const AddReviewerModal = () => {
                     options={ addReviewerFormData.academicDegreeList }
                     value={ addReviewerFormData.academicDegree }
                     onChange={(event, value) => {
-                        dispatch( handleSelection({ name: 'academicDegree' , value: value } ) );
+                        dispatch( handleSelection({ name: 'academic-degree' , value: value } ) );
                     }}
                 />
             </FormControl>
@@ -248,7 +260,7 @@ const AddReviewerModal = () => {
                     name="reviewerDepartment"
                     id="reviewerDepartment"
                     placeholder="Reviewer's Department"
-                    onChange={ event => dispatch( handleInputChange( { name: event.target.name, value: event.target.value } ) ) }
+                    onChange={ event => dispatch( handleInput( { name: 'department', value: event.target.value } ) ) }
                 />
             </FormControl>
             <FormControl className="mb-3">
@@ -260,7 +272,7 @@ const AddReviewerModal = () => {
                     name="reviewerUniversity"
                     id="reviewerUniversity"
                     placeholder="Reviewer's University"
-                    onChange={ event => dispatch( handleInputChange( { name: event.target.name, value: event.target.value } ) ) }
+                    onChange={ event => dispatch( handleInput( { name: 'university', value: event.target.value } ) ) }
                 />
             </FormControl>
             <FormControl className="mb-3">
@@ -279,24 +291,43 @@ const AddReviewerModal = () => {
                         disableClearable={true}
                         name="classifications"
                         id="classifications"
-                        onInputChange={handleInputChange}
-                        options={ Array.isArray( addReviewerFormData.classifications ) ? addReviewerFormData.classifications.map( ( item: any ) => item.attributes?.title || '') : []}
-                        value={ Array.isArray( addReviewerFormData.classifications ) ? addReviewerFormData.classifications.find( ( item: any ) =>  item.id === addReviewerFormData )?.attributes?.title || null : null }
+                        onInputChange={handleInput}
+                        options={
+                            Array.isArray( addReviewerFormData.classificationsList ) 
+                            ? addReviewerFormData.classificationsList.map( 
+                                ( item: any ) => {
+                                    return item.attributes?.title || '' 
+                                }
+                               ) : []
+                        }
+                        value={
+                            Array.isArray( addReviewerFormData.classificationsList ) && addReviewerFormData.value?.ids?.length > 0
+                              ? addReviewerFormData.classificationsList
+                                  .filter( ( item: any ) => addReviewerFormData.value.ids.includes( item.id ) )
+                                  .map( ( item: any ) => item.attributes.title )
+                              : []
+                        }
                         onChange={(event, value) => {
-                            const selectedId = value ? addReviewerFormData.classifications.find( ( item:any ) => item.attributes.title === value )?.id : '';
-                            dispatch(handleSelection({ value: selectedId }));
+                            const selectedIds = value.map((selectedItem) => {
+                              const selectedOption = addReviewerFormData.classificationsList.find(
+                                ( item: any ) => item.attributes.title === selectedItem
+                              );
+                              return selectedOption ? selectedOption.id : '';
+                            });
+                            dispatch( handleInput( { name: 'classifications', value: selectedIds } ) );
                         }}
-                        getOptionDisabled={(option: any) => !!option.disabled}
-                        filterOptions={ ( options, state ) => {
-                            if ( state.inputValue.length >= 3 ) {
-                            options = addReviewerFormData.classifications;
-                            return options.filter((item) =>
-                                String(item).toLowerCase().includes(state.inputValue.toLowerCase())
-                            );
-                            } else {
-                                options = [{ label: 'Please enter 3 or more characters...', disabled: true }];
+                        filterOptions={(options, params) => {
+                            const filtered = filter( options, params );
+                            const { inputValue } = params;
+                            const isExisting = options.some((option) => inputValue === option);
+                    
+                            if (inputValue !== '' && !isExisting) {
+                                filtered.push('Nothing found');
                             }
-                            return options;
+                    
+                            return filtered.filter( ( option: any ) => {
+                                return option !== 'Nothing found' || isExisting;
+                            });
                         }}
                     />
                     <Button className="btn btn-primary ms-2" onClick={ () => dispatch( handleNestedOpen() ) }>
@@ -315,6 +346,7 @@ const AddReviewerModal = () => {
                     minRows={3}
                     aria-label="textarea"
                     placeholder="Describe your Reason..."
+                    onChange={ event => dispatch( handleInput( { name: 'reason', value: event.target.value } ) ) }
                 />
             </FormControl>
         </>

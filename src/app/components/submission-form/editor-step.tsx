@@ -12,9 +12,9 @@ const EditorStep = forwardRef( ( prop, ref ) => {
     const formState = useSelector( stepState );
     const editorsList = formState.editorsList;
     const wizard = useSelector( wizardState );
-    const getAllEditorsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/${ wizard.formStep }`;
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const getAllEditorsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/editor/get_all`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/editor`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'editors' ) {
             dispatch( getEditors( getAllEditorsFromApi ) );
@@ -54,22 +54,22 @@ const EditorStep = forwardRef( ( prop, ref ) => {
                             options={ 
                                 Array.isArray( editorsList ) 
                                 ? editorsList.map( 
-                                    ( item: any ) => {
-                                        return item.attributes?.title || '' 
+                                    item => {
+                                        return item.name || '' 
                                     }
                                    ) : []
                             }
                             value={
                                 formState.value.id !== ''
                                   ? editorsList
-                                      .find( ( item: any ) => formState.value.id === item.id )?.attributes?.title
+                                      .find( ( item: any ) => formState.value.id === item.id )?.name
                                   : null
                             }
                             onChange={(event, value) => {
                                 dispatch( handleInput({ 
                                         name: 'id',
                                         value: editorsList.find( 
-                                            ( item: any ) => item.attributes.title === value )?.id || '' } 
+                                            ( item: any ) => item.name === value )?.id || '' } 
                                             ) 
                                         )
                             }}
@@ -82,5 +82,7 @@ const EditorStep = forwardRef( ( prop, ref ) => {
         </>
     );
 });
+
+EditorStep.displayName = 'EditorStep';
 
 export default EditorStep;

@@ -17,8 +17,8 @@ export const financialDisclosureSlice = createSlice({
       return {
         ...state,
         value: {
-        ...state.value,
-        [ action.payload.name ]: action.payload.value,
+          ...state.value,
+          text: action.payload,
         },
       };
     }

@@ -2,9 +2,10 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
-import { Checkbox, FormControl, FormLabel, FormHelperText, Card, CardContent } from '@mui/joy'
+import { Checkbox, FormControl, Card, CardContent } from '@mui/joy'
 import { stepState, handleCheckbox } from '@/app/features/submission/buildSlice'
-import { getBuildStepGuide, getBuildStepData, updateBuildStepData } from '@/app/api/build' 
+import { getBuildStepGuide, getBuildStepData, updateBuildStepData } from '@/app/api/build'
+import FlashMessage from '@/app/components/snackbar/snackbar' 
 import ReactHtmlParser from 'react-html-parser'
 
 const BuildStep = forwardRef( ( prop, ref ) => {
@@ -14,8 +15,8 @@ const BuildStep = forwardRef( ( prop, ref ) => {
     const [ isValid, setIsValid ] = useState({
         terms: true
     });
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
         if ( wizard.formStep === 'build' ) {
             dispatch( getBuildStepData( getStepDataFromApi ) );
@@ -46,6 +47,7 @@ const BuildStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
+            <FlashMessage open={ formState.hasError } message={ formState.errorMessage }/>
             <div id="build" className={`tab${wizard.formStep === 'build' ? ' active' : ''}`}>
                 <h3 className="mb-4 text-shadow-white">Build</h3>
                 {   formState.stepGuide !== undefined &&     
@@ -107,5 +109,7 @@ const BuildStep = forwardRef( ( prop, ref ) => {
         </>
     );
 });
+
+BuildStep.displayName = 'BuildStep';
 
 export default BuildStep;

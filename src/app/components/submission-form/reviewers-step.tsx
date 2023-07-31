@@ -5,9 +5,9 @@ import { Input } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput } from '@/app/features/submission/reviewersSlice'
-import { getReviewersStepGuide, getReviewers, getReviewersStepData, updateReviewersStepData } from '@/app/api/reviewers'
-import { addReviewerModalState } from '@/app/features/modal/addReviewerModalSlice'
+import { stepState } from '@/app/features/submission/reviewersSlice'
+import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
+import { getReviewersStepGuide, getReviewersStepData, loadEditReviewerForm } from '@/app/api/reviewers'
 import DataTable, { TableColumn } from 'react-data-table-component'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -28,12 +28,12 @@ const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string
 );
 
 const ReviewersStep = forwardRef( ( prop, ref) => {
+    const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const addReviewerModalData = useSelector( addReviewerModalState );
-    const dispatch = useDispatch();
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const [filteredItems, setFilteredItems] = useState([]);
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'reviewers' ) {
             dispatch( getReviewersStepData( getStepDataFromApi ) );
@@ -41,35 +41,72 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
         }
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateReviewersStepData( getStepDataFromApi ) );
-        }
+        submitForm () {}
     }));
-    const columns: TableColumn<{ name: string; email: string; }>[] = [
+    const deleteReviewerUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/remove`;
+    const columns: TableColumn<{ email: string, firstname: string, lastname: string, suggested_opposed: string, actions: any }>[] = [
         {
-          name: 'name',
-          selector: row => row.name,
-          sortable: true,
-        },
-        {
-          name: 'email',
+          name: 'Email',
           selector: row => row.email,
           sortable: true,
+          reorder: true
+        },
+        {
+            name: 'First Name',
+            selector: row => row.firstname,
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'Last Name',
+            selector: row => row.lastname,
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'Suggested/Opposed',
+            selector: row => row.suggested_opposed,
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'Actions',
+            cell: ( row ) => (
+              <div className="d-flex align-items-center justify-content-center flex-wrap">
+                <Button
+                  className="me-2 py-2"  
+                  variant="contained"
+                  color="primary"
+                  size="small"
+                  sx={{ minWidth: 0 }}
+                  onClick={ () => dispatch( loadEditReviewerForm( row.email ) ) }
+                >
+                  <i className="fa-duotone fa-edit"></i>
+                </Button>
+                <Button
+                  className="py-2"
+                  variant="contained"
+                  color="secondary"
+                  size="small"
+                  sx={{ minWidth: 0 }}
+                  onClick={ () => dispatch( handleDialogOpen( 
+                    { 
+                        action: deleteReviewerUrl, 
+                        data: row.email, 
+                        dialogTitle: 'Delete Reviewer', 
+                        dialogContent: 'Are you sure?', 
+                        dialogAction: 'delete-reviewer' } 
+                        ) ) 
+                    }
+                >
+                  <i className="fa-duotone fa-trash"></i>
+                </Button>
+              </div>
+            ),
         },
     ];
     const [filterText, setFilterText] = useState('');
 	const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
-    const filteredItems = addReviewerModalData.datatableRows.filter((item: { [key: string]: string }) => {
-        const rowValues = Object.values(item);
-        return rowValues.some(value => {
-            if (typeof value === 'string') {
-                const formattedValue = value.replace(/\s/g, '').toLowerCase();
-                const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
-                return formattedValue.includes(formattedFilterText);
-            }
-            return false;
-        });
-    });
     const subHeaderComponentMemo = useMemo(() => {
 		const handleClear = () => {
 			if (filterText) {
@@ -86,6 +123,22 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
             />
 		);
 	}, [filterText, resetPaginationToggle]);
+    useEffect(() => {
+        if ( wizard.formStep === 'reviewers' ) {
+          const filteredData = formState.reviewersList.filter( ( item: any ) => {
+            const rowValues = Object.values( item );
+            return rowValues.some((value) => {
+              if (typeof value === 'string') {
+                const formattedValue = value.replace(/\s/g, '').toLowerCase();
+                const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
+                return formattedValue.includes(formattedFilterText);
+              }
+              return false;
+            });
+          });
+          setFilteredItems( filteredData );
+        }
+      }, [formState.reviewersList, filterText, wizard.formStep]);
 
     return (
         <>
@@ -106,24 +159,26 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
                         }
                     </Scrollbars>
                 }
-                <Button className="btn btn-primary btn-lg mb-4" onClick={() =>dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep} ) )}>
+                <Button className="btn btn-primary btn-lg mb-4" onClick={ () => dispatch( handleOpen( { title: 'Add an Reviewer', parent: wizard.formStep } ) ) }>
                     Add Reviewer
                 </Button>
                 { 
-                    addReviewerModalData.datatableRows.length > 0 &&
-                    <DataTable
-                        title={<h4 className="fs-6 mb-0">Reviewers List</h4>}
-                        subHeader
-                        subHeaderComponent={subHeaderComponentMemo}
-                        persistTableHead
-                        pagination
-                        columns={columns}
-                        data={filteredItems}
-                    />
+                    formState.reviewersList.length > 0 &&
+                        <DataTable className="datatable-container"
+                            title={<h4 className="fs-6 mb-0">Reviewers List</h4>}
+                            subHeader
+                            subHeaderComponent={subHeaderComponentMemo}
+                            persistTableHead
+                            pagination
+                            columns={columns}
+                            data={filteredItems}
+                        />
                 }
             </div>
         </>
     );
 });
+
+ReviewersStep.displayName = 'ReviewersStep';
 
 export default ReviewersStep;

@@ -48,12 +48,6 @@ export const agreementSlice = createSlice({
       .addCase(getAgreementStepData.fulfilled, ( state, action ) => {
         state.isLoading = false;
         state.value = action.payload.data.step_data;
-      }).addCase(updateAgreementStepData.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(updateAgreementStepData.fulfilled, ( state, action ) => {
-        state.isLoading = false;
-        state.value.terms = action.payload.data.attributes.storage.agreement.terms;
       });
   },
 });

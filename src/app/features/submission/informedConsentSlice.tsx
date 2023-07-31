@@ -17,8 +17,8 @@ export const informedConsentSlice = createSlice({
       return {
         ...state,
         value: {
-        ...state.value,
-        [ action.payload.name ]: action.payload.value,
+          ...state.value,
+          text: action.payload,
         },
       };
     }

@@ -26,6 +26,8 @@ import informedConsentReducer from './features/submission/informedConsentSlice'
 import dataReproducibilityReducer from './features/submission/dataReproducibilitySlice'
 import reviewersReducer from './features/submission/reviewersSlice'
 import buildReducer from './features/submission/buildSlice'
+import dialogReducer from './features/dialog/dialogSlice'
+import snackbarReducer from './features/snackbar/snackbarSlice'
 
 export const store = configureStore({
   reducer: {
@@ -55,6 +57,8 @@ export const store = configureStore({
     informedConsentSlice: informedConsentReducer,
     dataReproducibilitySlice: dataReproducibilityReducer,
     reviewersSlice: reviewersReducer,
-    buildSlice: buildReducer
+    buildSlice: buildReducer,
+    dialogSlice: dialogReducer,
+    snackbarSlice: snackbarReducer
   }
 });

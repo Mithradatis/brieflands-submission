@@ -1,25 +1,22 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getAuthorStepGuide, getAuthors, getAuthorStepData } from '@/app/api/author'
+import { getAuthorStepGuide, getAuthors, getAuthorStepData, deleteAuthor, addAuthor } from '@/app/api/author'
+
+interface Author {
+  id: number,
+  email: string,
+  firstname: string,
+  lastname: string
+}
 
 export const authorSlice = createSlice({
   name: 'authors',
   initialState: {
     isLoading: false,
     stepGuide: {},
-    authorsList: [{}],
+    authorsList: [] as Author[],
     value: {}
   },
-  reducers: {
-    handleInput: ( state, action ) => {
-      return {
-        ...state,
-        value: {
-          ...state.value,
-          [ action.payload.name ]: action.payload.value,
-        },
-      };
-    }
-  },
+  reducers: {},
   extraReducers( builder ) {
     builder
     .addCase(getAuthorStepGuide.pending, ( state ) => {
@@ -41,12 +38,73 @@ export const authorSlice = createSlice({
     })
     .addCase(getAuthorStepData.fulfilled, ( state, action ) => {
       state.isLoading = false;
-      state.value = action.payload.data.step_data;
+      const authors = action.payload.data.step_data;
+      state.authorsList = [];
+      const keys = Object.keys(authors);
+      if ( keys.length ) {
+        for (let index = 0; index < keys.length; index++) {
+          const key: any = keys[index];
+          const value: any = authors[key];
+          state.authorsList.push(
+            {
+              id: ( index + 1 ),
+              email: value['email'], 
+              firstname: value['first-name'] || value['first_name'] || '',
+              lastname: value['last-name'] || value['last_name'] || ''
+            }
+          );
+        }
+      }
+      state.value = authors;
+    }).addCase(deleteAuthor.pending, ( state ) => {
+      state.isLoading = true;
+    })
+    .addCase(deleteAuthor.fulfilled, ( state, action ) => {
+      state.isLoading = false;
+      const authors = action.payload.data.attributes.storage.authors;
+      state.authorsList = [];
+      const keys = Object.keys(authors);
+      if ( keys.length ) {
+        for (let index = 0; index < keys.length; index++) {
+          const key: any = keys[index];
+          const value: any = authors[key];
+          state.authorsList.push(
+            {
+              id: ( index + 1 ),
+              email: value['email'], 
+              firstname: value['first-name'] || value['first_name'] || '',
+              lastname: value['last-name'] || value['last_name'] || '' 
+            }
+          );
+        }
+      }
+      state.value = authors;
+    }).addCase(addAuthor.pending, ( state ) => {
+      state.isLoading = true;
+    })
+    .addCase(addAuthor.fulfilled, ( state, action: any ) => {
+      state.isLoading = false;
+      const authors = action.payload?.data.attributes.storage.authors;
+      const keys = Object.keys(authors);
+      state.authorsList = [];
+      if ( keys.length ) {
+        for (let index = 0; index < keys.length; index++) {
+          const key: any = keys[index];
+          const value: any = authors[key];
+          state.authorsList.push(
+            {
+              id: ( index + 1 ),
+              email: value['email'], 
+              firstname: value['first-name'] || value['first_name'] || '',
+              lastname: value['last-name'] || value['last_name'] || '' 
+            }
+          );
+        }
+      }
+      state.value = authors;
     });
   },
 });
-
-export const { handleInput } = authorSlice.actions;
 
 export const stepState = ( state: any ) => state.authorSlice;
 

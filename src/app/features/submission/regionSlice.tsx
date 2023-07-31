@@ -6,9 +6,9 @@ export const regionSlice = createSlice({
   initialState: {
     isLoading: false,
     stepGuide: {},
-    regionssList: [{}],
+    regionsList: [{}],
     value: {
-      ids: ''
+      id: ''
     }
   },
   reducers: {
@@ -36,7 +36,7 @@ export const regionSlice = createSlice({
     })
     .addCase(getRegions.fulfilled, ( state, action: any ) => {
       state.isLoading = false;
-      state.regionssList = action.payload.data;
+      state.regionsList = action.payload.data;
     })
     .addCase(getRegionStepData.pending, (state) => {
       state.isLoading = true;
@@ -44,9 +44,7 @@ export const regionSlice = createSlice({
     .addCase(getRegionStepData.fulfilled, ( state, action ) => {
       state.isLoading = false;
       const stepData = action.payload.data.step_data;
-      if ( Object.keys(stepData).length > 0 ) {
-        state.value = stepData;
-      }
+      state.value.id = stepData;
     });
   },
 });

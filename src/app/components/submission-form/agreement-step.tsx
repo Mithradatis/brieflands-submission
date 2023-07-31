@@ -15,9 +15,9 @@ const AgreementStep = forwardRef(( props, ref ) => {
     const [ isValid, setIsValid ] = useState({
         terms: true
     });
-    const getAgreementTermsFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/${ wizard.workflowId }/agreement/current`;
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
+    const getAgreementTermsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/agreement/current`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
         if ( wizard.formStep === 'agreement' ) {
             dispatch( getAgreementTerms( getAgreementTermsFromApi ) );
@@ -94,5 +94,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
         </>
     );
 });
+
+AgreementStep.displayName = 'AgreementStep';
 
 export default AgreementStep;

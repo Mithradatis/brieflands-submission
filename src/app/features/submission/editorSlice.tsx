@@ -36,7 +36,19 @@ export const editorSlice = createSlice({
     })
     .addCase(getEditors.fulfilled, ( state, action: any ) => {
       state.isLoading = false;
-      state.editorsList = action.payload.data;
+      const editors = action.payload.data;
+      if ( Object.keys( editors ).length > 0 ) {
+        state.editorsList = [];
+        for ( const [ key, value ] of Object.entries( editors ) ) {
+          const editor: any = value; 
+          state.editorsList.push(
+            {
+              id: editor.id,
+              name: `${ editor.attributes.first_name } ${ editor.attributes.middle_name } ${ editor.attributes.last_name }`
+            }
+          );
+        }
+      }
     })
     .addCase(getEditorStepData.pending, (state) => {
       state.isLoading = true;
@@ -44,9 +56,7 @@ export const editorSlice = createSlice({
     .addCase(getEditorStepData.fulfilled, ( state, action ) => {
       state.isLoading = false;
       const stepData = action.payload.data.step_data;
-      if ( Object.keys(stepData).length > 0 ) {
-        state.value = stepData;
-      }
+      state.value.id = stepData.length > 0 ? stepData : '';
     });
   },
 });

@@ -11,8 +11,8 @@ const ClinicalTrialRegistrationCodeStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${ wizard.formStep }`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.clinical.trial.registration.code`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.clinical.trial.registration.code`;
     useEffect( () => {
         if ( wizard.formStep === 'clinical_trial_registration_code' ) {
             dispatch( getClinicalTrialRegistrationCodeStepData( getStepDataFromApi ) );
@@ -49,7 +49,7 @@ const ClinicalTrialRegistrationCodeStep = forwardRef( ( prop, ref ) => {
                         maxRows={10}
                         defaultValue={ formState.value?.text ? formState.value.text : '' }
                         onChange={( event: any ) => {
-                            dispatch( handleInput( {name: event.target.name, value: event.target.value} ) );
+                            dispatch( handleInput( event.target.value ) );
                         }}
                     />
                 </FormControl>
@@ -57,5 +57,7 @@ const ClinicalTrialRegistrationCodeStep = forwardRef( ( prop, ref ) => {
         </>
     );
 });
+
+ClinicalTrialRegistrationCodeStep.displayName = 'ClinicalTrialRegistrationCodeStep';
 
 export default ClinicalTrialRegistrationCodeStep;

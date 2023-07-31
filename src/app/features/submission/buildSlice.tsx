@@ -7,6 +7,8 @@ export const buildSlice = createSlice({
     isLoading: false,
     isFormValid: true,
     isVisited: false,
+    hasError: false,
+    errorMessage: '',
     stepGuide: {},
     value: {
       terms: false
@@ -37,13 +39,21 @@ export const buildSlice = createSlice({
       .addCase(getBuildStepData.pending, ( state ) => {
         state.isLoading = true;
       })
-      .addCase(getBuildStepData.fulfilled, (state, action: any) => {
-        const { data } = action.payload;
-        return {
-          ...state,
-          isLoading: false,
-          value: data.step_data,
-        };
+      .addCase(getBuildStepData.fulfilled, ( state, action: any ) => {
+        if ( action.payload.hasOwnProperty('hasError') ) {
+          return {
+            ...state,
+            hasError: true,
+            errorMessage: JSON.parse( action.payload.error ).data.message
+          };
+        } else {
+          const { data } = action.payload;
+          return {
+            ...state,
+            isLoading: false,
+            value: data.step_data,
+          };
+        }
       })
       .addCase( getBuildStepData.rejected, ( state ) => {
         // state.error = action.error.message;

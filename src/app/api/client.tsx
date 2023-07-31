@@ -18,6 +18,26 @@ export const getSubmissionSteps = createAsyncThunk(
   }
 );
 
+export const buildNewWorkflow = createAsyncThunk(
+  'submission/buildNewWorkflow',
+  async (url: string) => {
+    try {
+      const response = await fetch( url, {
+          method: 'POST',
+          credentials: 'include',
+          redirect: 'follow'
+      });
+      if (!response.ok) {
+        throw new Error('build a new workflow has failed!');
+      }
+      const data = await response.json();
+      return data;
+    } catch( error ) {
+      return error;
+    }
+  }
+);
+
 export const getWorkflow = createAsyncThunk(
   'submission/getWorkflow',
   async (url: string) => {
@@ -27,8 +47,11 @@ export const getWorkflow = createAsyncThunk(
         credentials: 'include',
         redirect: 'follow'
       });
-
+      if (!response.ok) {
+        throw new Error('workflow not found!');
+      }
       const data = await response.json();
+
       return data;
     } catch (error) {
       return error;

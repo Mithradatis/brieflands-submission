@@ -1,18 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
+import { buildNewWorkflow, getSubmissionSteps, getWorkflow } from '@/app/api/client'
 
-const currentUrl = new URL( window.location.href );
-const workflowId = currentUrl.pathname.split('/').pop();
+// const currentUrl = new URL( window.location.href );
+// const workflowId = currentUrl.pathname.split('/').pop();
 
 export const wizardSlice = createSlice({
   name: 'submission',
   initialState: {
+    baseUrl: `http://apcabbr.brieflands.com.test`,
     isLoading: false,
     isVerified: false,
     isFormValid: false,
     formStep: 'agreement',
     formSteps: [],
-    workflowId: 365,
+    workflowId: 364,
     workflow: {}
   },
   reducers: {
@@ -31,7 +32,7 @@ export const wizardSlice = createSlice({
           }
       }
     },
-    nextStep: (state, action) => {
+    nextStep: ( state, action ) => {
       const currentStepIndex = state.formSteps.findIndex((item: any) =>
         item.attributes.slug.includes(state.formStep)
       );
@@ -77,6 +78,12 @@ export const wizardSlice = createSlice({
       .addCase( getWorkflow.fulfilled, ( state, action ) => {
         state.isLoading = false;
         state.workflow = action.payload.data?.attributes;
+      }).addCase( buildNewWorkflow.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase( buildNewWorkflow.fulfilled, ( state, action ) => {
+        state.isLoading = false;
+        state.workflowId = action.payload?.id;
       });
   },
 });

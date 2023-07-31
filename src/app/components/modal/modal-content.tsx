@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { ThunkDispatch } from 'redux-thunk'
 import { Button } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
-import { modalState } from '@/app/features/modal/modalSlice'
-import { buildAuthorsTableRow } from '@/app/features/modal/addAuthorModalSlice'
+import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { modalState, saveModal } from '@/app/features/modal/modalSlice'
+import { handleAuthorOperation } from '@/app/api/author'
+import { handleReviewerOperation } from '@/app/api/reviewers'
 import { Scrollbars } from 'react-custom-scrollbars'
 import AddAuthorModal from '@/app/components/modal/add-author'
 import AddReviewerModal from '@/app/components/modal/add-reviewer'
@@ -12,8 +13,10 @@ import '@/app/resources/css/modal.scss'
 
 const ModalContent = () => {
     const [renderedComponent, setRenderedComponent] = useState<React.ReactNode | null>(null);
+    const [ action, setAction ] = useState<React.ReactNode | null>( null );
+    const wizard = useSelector( wizardState );
     const modalData = useSelector( modalState );
-    const dispatch = useDispatch<ThunkDispatch<any, any, any>>();
+    const dispatch: any = useDispatch();
     useEffect(() => {
         switch ( modalData.modalForm ) {
           case 'authors':
@@ -27,6 +30,29 @@ const ModalContent = () => {
             break;
         }
       }, [modalData.modalForm]);
+      useEffect(() => {
+        switch ( modalData.modalForm ) {
+            case 'authors':
+                setAction(
+                    <Button className="btn btn_primary" 
+                        onClick={ () => dispatch( handleAuthorOperation() ) }>
+                      {modalData.modalActionButton.caption}
+                    </Button>
+                );
+              break;
+            case 'reviewers':
+              setAction( 
+                  <Button className="btn btn_primary"
+                      onClick={() => dispatch( handleReviewerOperation() )}>
+                      { modalData.modalActionButton.caption }
+                  </Button>
+              );
+              break;
+            default:
+              setRenderedComponent(null);
+              break;
+          }
+      }, [modalData.modalActionButton]);
 
     return (
         <>
@@ -49,9 +75,9 @@ const ModalContent = () => {
                 </Scrollbars>
             </div>
             <div className="modal-footer">
-                <Button className="button btn_primary"
-                    onClick={() => dispatch( buildAuthorsTableRow() )}>
-                    Add
+                { action }
+                <Button className="btn btn-default" onClick={ () => dispatch( saveModal() ) }>
+                    close    
                 </Button>
             </div>
         </>

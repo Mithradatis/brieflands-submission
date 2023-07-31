@@ -38,9 +38,9 @@ export const getClassificationsStepData = createAsyncThunk(
 
 export const getClassificationsList = createAsyncThunk(
     'submission/getClassifications',
-    async (url: string) => {
+    async ( url: string ) => {
       try {
-        const response = await fetch(url, {
+        const response = await fetch( url, {
           method: 'GET',
           credentials: 'include',
           redirect: 'follow'

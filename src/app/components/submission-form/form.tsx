@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
+import { getSubmissionSteps, getWorkflow, buildNewWorkflow } from '@/app/api/client'
 import { useDispatch, useSelector } from 'react-redux'
 import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
+import { dialogState } from '@/app/features/dialog/dialogSlice'
 import WizardNavigation from '@/app/components/wizard-navigation'
 import WizardOutline from '@/app/components/wizard-outline'
 import AgreementStep from '@/app/components/submission-form/agreement-step'
@@ -28,12 +29,14 @@ import InformedConsentStep from '@/app/components/submission-form/informed-conse
 import FundingSupportStep from '@/app/components/submission-form/funding-support-step'
 import DataReproducibilityStep from '@/app/components/submission-form/data-reproducibility-step'
 import BuildStep from '@/app/components/submission-form/build-step'
+import DialogComponent from '@/app/components/dialog/dialog'
 
 interface ChildComponentProps {
     submitForm: () => void;
 }
 
 const SubmissionForm = () => {
+    const dialog = useSelector( dialogState );
     const stepComponents = [
         AgreementStep,
         TypesStep,
@@ -58,11 +61,6 @@ const SubmissionForm = () => {
         DataReproducibilityStep,
         BuildStep,
     ];
-    const stepRefs: { [key: string]: React.MutableRefObject<ChildComponentProps | null> } = {};
-    stepComponents.forEach((StepComponent) => {
-        const ref = useRef<ChildComponentProps>(null);
-        stepRefs[StepComponent.name] = ref;
-    });
     const agreementChildRef = useRef<ChildComponentProps>( null );
     const typesChildRef = useRef<ChildComponentProps>( null );
     const sectionChildRef = useRef<ChildComponentProps>( null );
@@ -87,12 +85,15 @@ const SubmissionForm = () => {
     const buildChildRef = useRef<ChildComponentProps>( null );
     const dispatch:any = useDispatch();
     const wizard = useSelector( wizardState );
-    const [submitReady, setSubmitReady] = useState( false );
+    const getWorkflowFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }`;
+    const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
     useEffect( () => {
-        const getStepsFromApi = 'http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/steps';
-        const getWorkflowFromApi = 'http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365';
-        dispatch( getSubmissionSteps( getStepsFromApi ) );
-        dispatch( getWorkflow( getWorkflowFromApi ) );
+        // if ( workflowId === '' ) {
+        //     dispatch( buildNewWorkflow( buildNewWorkflowUrl ) );
+        // } else {
+            dispatch( getWorkflow( getWorkflowFromApi ) );
+            dispatch( getSubmissionSteps( getStepsFromApi ) );
+        // }
     },[]);
     const handleNextStep = () => {
         const activeStepRef = wizard.formStep === 'agreement'
@@ -101,7 +102,7 @@ const SubmissionForm = () => {
             ? typesChildRef
             : wizard.formStep === 'section'
             ? sectionChildRef
-            : wizard.formStep === 'author'
+            : wizard.formStep === 'authors'
             ? authorChildRef
             : wizard.formStep === 'keywords'
             ? keywordsChildRef
@@ -109,13 +110,13 @@ const SubmissionForm = () => {
             ? classificationsChildRef
             : wizard.formStep === 'abstract'
             ? abstractChildRef
-            : wizard.formStep === 'editor'
+            : wizard.formStep === 'editors'
             ? editorChildRef
             : wizard.formStep === 'reviewers'
             ? reviewersChildRef
             : wizard.formStep === 'files'
             ? filesChildRef
-            : wizard.formStep === 'comment'
+            : wizard.formStep === 'comments'
             ? filesChildRef
             : wizard.formStep === 'region'
             ? regionChildRef
@@ -129,7 +130,7 @@ const SubmissionForm = () => {
             ? ethicalApprovalChildRef
             : wizard.formStep === 'twitter'
             ? twitterChildRef
-            : wizard.formStep === 'conflice_of_interests'
+            : wizard.formStep === 'conflict_of_interests'
             ? conflictOfInterestChildRef
             : wizard.formStep === 'informed_consent'
             ? informedConsentChildRef
@@ -148,6 +149,7 @@ const SubmissionForm = () => {
 
     return (
         <div className="wizard mb-4">
+            <DialogComponent/>
             <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item.attributes.title?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
             <WizardNavigation />
             <div className="d-flex align-items-start">
@@ -187,9 +189,9 @@ const SubmissionForm = () => {
                             className={`button btn_secondary me-2 ${ wizard.formStep === wizard.formSteps[0]?.title ? 'd-none' : '' }`} 
                             onClick={ () =>dispatch( prevStep() )}>Back</button>
                         <button
-                            type={submitReady ? "submit" : "button"}
+                            type="button"
                             id="next-step"
-                            className={`button btn_primary ${ submitReady ? 'd-none' : '' }`} 
+                            className={`button btn_primary`} 
                             onClick={ () => handleNextStep() }>
                             { wizard.formStep === wizard.formSteps[wizard.formSteps.length - 1]?.title ? "submit" : "next" }
                         </button>

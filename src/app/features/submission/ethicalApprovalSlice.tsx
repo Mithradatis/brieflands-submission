@@ -18,7 +18,7 @@ export const ethicalApprovalSlice = createSlice({
         ...state,
         value: {
         ...state.value,
-        [ action.payload.name ]: action.payload.value,
+          text: action.payload,
         },
       };
     }

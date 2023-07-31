@@ -1,14 +1,14 @@
 'use client'
 
 import SubmissionForm from './components/submission-form/form'
-import styles from './page.module.css'
+import styles from '@/app/page.module.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import './resources/css/customStyle.scss'
+import '@/app/resources/css/customStyle.scss'
 import { Modal, ModalDialog } from '@mui/joy'
 import ModalContent from './components/modal/modal-content'
-import './resources/fontawesome-6/css/all.min.css'
+import '@/app/resources/fontawesome-6/css/all.min.css'
 import { useDispatch, useSelector } from 'react-redux'
-import { modalState, handleClose } from './features/modal/modalSlice'
+import { modalState, handleClose } from '@/app/features/modal/modalSlice'
 import Image from 'next/image'
 
 export default function App() {
@@ -24,7 +24,7 @@ export default function App() {
             aria-labelledby="parent-modal-title"
             aria-describedby="parent-modal-description"
         >
-            <ModalDialog sx={{ width: 400 }}>
+            <ModalDialog sx={{ width: 500 }}>
                 <ModalContent />
             </ModalDialog>
         </Modal>

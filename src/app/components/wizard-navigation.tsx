@@ -36,7 +36,7 @@ const WizardNavigation = () => {
                                     <li className={`pe-5 ${wizard.formStep === formStepTitle ? 'active' : ''}`} key={ formStepTitle }>
                                         <a href={`#${formStepTitle}`} onClick={() => dispatch( loadStep( formStepTitle ) )} className="d-flex flex-column align-items-center text-center">
                                             <span className="fw-bold index d-flex align-items-center justify-content-center">{ index + 1 }</span>
-                                            <span className="fs-bold text-shadow">{ formStepTitle.replace(/_/g, ' ') }</span>
+                                            <span className="fs-bold text-shadow text-capitalize">{ formStepTitle.replace(/_/g, ' ') }</span>
                                         </a>
                                     </li>
                                 )

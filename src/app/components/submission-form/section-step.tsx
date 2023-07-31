@@ -15,9 +15,9 @@ const SectionStep = forwardRef( ( prop, ref ) => {
     const [ isValid, setIsValid ] = useState({
         id: true,
     });
-    const getAllDocumentTypesFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/section';
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/section`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const getAllDocumentTypesFromApi = '${ wizard.baseUrl }/api/v1/journal/section';
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/section`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if ( wizard.formStep === 'section' ) {
             dispatch( getDocumentSections( getAllDocumentTypesFromApi ) );
@@ -102,5 +102,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
         </>
     );
 });
+
+SectionStep.displayName = 'SectionStep';
 
 export default SectionStep;

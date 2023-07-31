@@ -15,9 +15,9 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
         ids: true,
     });
     const filter = createFilterOptions();
-    const getAllKeywordsFromApi = `http://apcabbr.brieflands.com.test/api/v1/journal/keyword`;
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const getAllKeywordsFromApi = `${ wizard.baseUrl }/api/v1/journal/keyword`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${wizard.formStep}`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
         if ( wizard.formStep === 'keywords' ) {
             dispatch( getKeywordsList( getAllKeywordsFromApi ) );
@@ -115,5 +115,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
         </>
     );
 });
+
+KeywordsStep.displayName = 'KeywordsStep';
 
 export default KeywordsStep;

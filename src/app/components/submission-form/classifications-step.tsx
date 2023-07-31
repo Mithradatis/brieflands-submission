@@ -15,9 +15,9 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
         ids: true,
     });
     const filter = createFilterOptions();
-    const getAllClassificationsFromApi = 'http://apcabbr.brieflands.com.test/api/v1/journal/classification';
-    const getStepDataFromApi = `http://apcabbr.brieflands.com.test/api/v1/submission/workflow/365/${wizard.formStep}`;
-    const getDictionaryFromApi = `http://apcabbr.brieflands.com.test/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const getAllClassificationsFromApi = `${ wizard.baseUrl }/api/v1/journal/classification`;
+    const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${wizard.formStep}`;
+    const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
         if (wizard.formStep === 'classifications') {
           dispatch( getClassificationsList( getAllClassificationsFromApi ) );
@@ -103,7 +103,7 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
                                 filtered.push('Nothing found');
                             }
                     
-                            return filtered.filter((option) => {
+                            return filtered.filter( ( option: any ) => {
                                 return option !== 'Nothing found' || isExisting;
                             });
                         }}
@@ -117,5 +117,7 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
         </>
     );
 });
+
+ClassificationsStep.displayName = 'ClassificationsStep';
 
 export default ClassificationsStep;

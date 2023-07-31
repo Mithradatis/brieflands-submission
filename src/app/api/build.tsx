@@ -1,4 +1,5 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit'
+import { loadStep } from '@/app/features/wizard/wizardSlice'
 
 const fetchDataFromApi = async (url: string) => {
   try {
@@ -24,8 +25,26 @@ export const getBuildStepGuide = createAsyncThunk(
 
 export const getBuildStepData = createAsyncThunk(
   'submission/getBuildStepData',
-  async (url: string) => {
-    return fetchDataFromApi(url);
+  async ( url: string, { getState, dispatch } ) => {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow',
+      });
+
+      if ( !response.ok ) {
+        const error = await response.text();
+        dispatch( loadStep( JSON.parse( error ).data.step ) );
+
+        return { hasError: true, error: error };
+      }
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
   }
 );
 
