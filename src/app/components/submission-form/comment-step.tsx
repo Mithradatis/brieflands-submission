@@ -14,10 +14,8 @@ const CommentStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${wizard.formStep}`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
-        if ( wizard.formStep === 'comments' ) {
-            dispatch( getCommentStepData( getStepDataFromApi ) );
-            dispatch( getCommentStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getCommentStepData( getStepDataFromApi ) );
+        dispatch( getCommentStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const CommentStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="comments" className={`tab${wizard.formStep === 'comments' ? ' active' : ''}`}>
+            <div id="comments" className="tab">
                 <h3 className="mb-4 text-shadow-white">Comment</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

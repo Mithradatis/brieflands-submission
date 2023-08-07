@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Button from '@mui/material/Button'
-import { Autocomplete, Input, FormControl, FormLabel, FormHelperText } from '@mui/joy'
+import { Autocomplete, Checkbox, Input, FormControl, FormLabel, FormHelperText } from '@mui/joy'
 import { modalState } from '@/app/features/modal/modalSlice'
-import { handleInput, handleInputAsArray, handleInputArray, addAuthorModalState } from '@/app/features/modal/addAuthorModalSlice'
+import { handleInput, handleInputAsArray, handleInputArray, addAuthorModalState, handleCheckbox } from '@/app/features/modal/addAuthorModalSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { searchPeople } from '@/app/api/author'
 
@@ -39,25 +39,29 @@ const AddAuthorModal = () => {
         'phone_type': false,
         'country_phone': false,
         'phone_number': false,
-        'affiliations': false
+        'affiliations': false,
+        'correspond_affiliation': false
     });
     useEffect( () => {
-        if ( modalData.modalForm === 'authors' ) {
-            setIsValid( prevIsValid => ({
-                ...prevIsValid,
-                'email': addAuthorModalData.value['email'] !== undefined && addAuthorModalData.value['email'] !== '',
-                'first-name': addAuthorModalData.value['first-name'] !== undefined && addAuthorModalData.value['first-name'] !== '',
-                'last-name': addAuthorModalData.value['last-name'] !== undefined && addAuthorModalData.value['last-name'] !== '',
-                'phone_type': addAuthorModalData.value['phone_type'] !== undefined && addAuthorModalData.value['phone_type'].length !== 0,
-                'country_phone': addAuthorModalData.value['country_phone'] !== undefined && addAuthorModalData.value['country_phone'].length !== 0,
-                'phone_number': addAuthorModalData.value['phone_number'] !== undefined && addAuthorModalData.value['phone_number'].length !== 0,
-                'affiliations': addAuthorModalData.value['affiliations'] !== undefined && addAuthorModalData.value['affiliations'].length !== 0
-            }));
-            const foundPhoneType = phoneTypes.find( ( item: any ) => item.label === addAuthorModalData.value['phone_type']?.[0] );
-            const foundCountry = countries.find( ( item: any ) => item.id === parseInt( addAuthorModalData.value['country_phone']?.[0] ) );
-            setAuthorPhoneTypeInputValue( foundPhoneType ? foundPhoneType : '' );
-            setAuthorPhoneCountryInputValue( foundCountry ? foundCountry : '' );
-        }
+        setIsValid( prevIsValid => ({
+            ...prevIsValid,
+            'email': addAuthorModalData.value['email'] !== undefined && addAuthorModalData.value['email'] !== '',
+            'first-name': addAuthorModalData.value['first-name'] !== undefined && addAuthorModalData.value['first-name'] !== '',
+            'last-name': addAuthorModalData.value['last-name'] !== undefined && addAuthorModalData.value['last-name'] !== '',
+            'phone_type': addAuthorModalData.value['phone_type'] !== undefined && addAuthorModalData.value['phone_type'].length !== 0,
+            'country_phone': addAuthorModalData.value['country_phone'] !== undefined && addAuthorModalData.value['country_phone'].length !== 0,
+            'phone_number': addAuthorModalData.value['phone_number'] !== undefined && addAuthorModalData.value['phone_number'].length !== 0,
+            'affiliations': addAuthorModalData.value['affiliations'] !== undefined && addAuthorModalData.value['affiliations'].length !== 0,
+            'correspond_affiliation': addAuthorModalData.value['is_corresponding'] === undefined 
+                || ( 
+                    addAuthorModalData.value['is_corresponding'] === 'on' 
+                    && ( addAuthorModalData.value['correspond_affiliation'] !== undefined && addAuthorModalData.value['correspond_affiliation'] !== '' ) 
+                )
+        }));
+        const foundPhoneType = phoneTypes.find( ( item: any ) => item.label === addAuthorModalData.value['phone_type']?.[0] );
+        const foundCountry = countries.find( ( item: any ) => item.id === parseInt( addAuthorModalData.value['country_phone']?.[0] ) );
+        setAuthorPhoneTypeInputValue( foundPhoneType ? foundPhoneType : '' );
+        setAuthorPhoneCountryInputValue( foundCountry ? foundCountry : '' );
     }, [addAuthorModalData.value]);
     const repeatField = () => {
         const newAffiliation = {
@@ -115,7 +119,7 @@ const AddAuthorModal = () => {
                     variant="soft"
                     name="authorFirstName"
                     id="authorFirstName"
-                    placeholder="Author's First Name"
+                    placeholder="First Name"
                     defaultValue={ addAuthorModalData.value['first-name'] }
                     onChange={ event => dispatch( handleInput( { name: 'first-name', value: event.target.value } ) ) }
                 />
@@ -134,7 +138,7 @@ const AddAuthorModal = () => {
                     variant="soft"
                     name="authorMiddleName"
                     id="authorMiddleName"
-                    placeholder="Author's Middle Name"
+                    placeholder="Middle Name"
                     defaultValue={ addAuthorModalData.value['middle-name'] }
                     onChange={ event => dispatch( handleInput( { name: 'middle-name', value: event.target.value } ) ) }
                 />
@@ -149,7 +153,7 @@ const AddAuthorModal = () => {
                     variant="soft"
                     name="authorLastName"
                     id="authorLastName"
-                    placeholder="Author's Last Name"
+                    placeholder="Last Name"
                     defaultValue={ addAuthorModalData.value['last-name'] }
                     onChange={ event => dispatch( handleInput( { name: 'last-name', value: event.target.value } ) ) }
                 />
@@ -167,9 +171,9 @@ const AddAuthorModal = () => {
                     disabled={ addAuthorModalData.disabledInputs }
                     name="authorOrcId"
                     id="authorOrcId"
-                    placeholder="Author's Orcid"
+                    placeholder="Orcid"
                     defaultValue={ addAuthorModalData.value['orcid-id'] }
-                    onChange={ event => dispatch( handleInput( { name: 'orcid-id', value: event.target.value } ) ) }
+                    onChange={ event => dispatch( handleInput( { name: 'orcid-id', value: event.target.value.toString() } ) ) }
                 />
             </FormControl>
             <fieldset className="fieldset mb-4">
@@ -219,14 +223,14 @@ const AddAuthorModal = () => {
                             variant="soft"
                             name="authorPhoneNumber"
                             id="authorPhoneNumber"
-                            placeholder="Author Orcid"
+                            placeholder="Phone Number"
                             defaultValue={ addAuthorModalData.value['phone_number'] }
                             onChange={ event => dispatch( handleInputAsArray( { name: 'phone_number', value: parseInt( event.target.value ) } ) ) }
                         />
                     </FormControl>
                 </div>
                 {
-                    ( !isValid['phone_type'] && !formIsValid )
+                    ( ( !isValid['phone_type'] || !isValid['country_phone'] || !isValid['phone_number'] ) && !formIsValid )
                         && <FormHelperText className="fs-7 text-danger mt-1">You should complete phone informations</FormHelperText>
                 }
             </fieldset>
@@ -257,6 +261,37 @@ const AddAuthorModal = () => {
                     Add Affiliation
                 </Button>
             </fieldset>
+            <FormControl className={`mb-3 ${ addAuthorModalData?.value['is_corresponding'] !== 'on' && 'd-none' }`}
+                error={ !isValid['correspond_affiliation'] && !formIsValid }>
+                <FormLabel className="fw-bold mb-1">
+                    Corresponding Affiliation
+                </FormLabel>
+                <Input
+                    required={ addAuthorModalData?.value['is_corresponding'] === 'on' }
+                    variant="soft"
+                    disabled={ addAuthorModalData.disabledInputs }
+                    name="authorCorrespondAffiliation"
+                    id="authorCorrespondAffiliation"
+                    placeholder="Corresponding Affiliation"
+                    defaultValue={ addAuthorModalData.value['correspond_affiliation'] }
+                    onChange={ event => dispatch( handleInput( { name: 'correspond_affiliation', value: event.target.value } ) ) }
+                />
+                {
+                    ( !isValid['correspond_affiliation'] && !formIsValid ) 
+                        && <FormHelperText className="fs-7 text-danger mt-1">You should enter correspond affiliation</FormHelperText>
+                }
+            </FormControl>
+            <FormControl className="mb-4">
+                <Checkbox
+                    required
+                    disabled={ addAuthorModalData.disabledInputs }
+                    label="This author is corresponding"
+                    name="isCorresponding"
+                    id="isCorrsponding"
+                    checked={ addAuthorModalData.value['is_corresponding'] === 'on' || false }
+                    onChange={ event => dispatch ( handleCheckbox( { name: 'is_corresponding', value: addAuthorModalData.value['is-corresponding'] } ) ) }
+                />
+            </FormControl>
         </>
     );
 }

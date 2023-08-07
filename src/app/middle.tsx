@@ -7,13 +7,29 @@ import '@/app/resources/css/customStyle.scss'
 import { Modal, ModalDialog } from '@mui/joy'
 import ModalContent from './components/modal/modal-content'
 import '@/app/resources/fontawesome-6/css/all.min.css'
+import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { modalState, handleClose } from '@/app/features/modal/modalSlice'
+import { getWorkflow, buildNewWorkflow, getSubmissionSteps } from '@/app/api/client'
 import Image from 'next/image'
 
 export default function App() {
+  const wizard = useSelector( wizardState );
   const modalData = useSelector( modalState );
-  const dispatch = useDispatch();
+  const dispatch: any = useDispatch();
+  useEffect( () => {
+    if ( wizard.workflowId === '' ) {
+        const buildNewWorkflowUrl = `${ wizard.baseUrl }/api/v1/submission/workflow`;
+        dispatch( buildNewWorkflow( buildNewWorkflowUrl ) );
+    } else {
+      const getWorkflowFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }`;
+      const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
+        dispatch( getWorkflow( getWorkflowFromApi ) ).then( () => {
+          dispatch( getSubmissionSteps( getStepsFromApi ) );
+        } );
+    }
+  },[]);
 
   return (
     <>
@@ -48,7 +64,11 @@ export default function App() {
             </div>
           </div>
           <main className={`${styles.main} pt-4`}>
-            <SubmissionForm />
+            {
+              ( !wizard.workflow?.locked && wizard.workflowId !== '' ) 
+              ? <SubmissionForm/>
+              : <h1>You have no permission</h1>
+            }
           </main>
         </div>
     </>

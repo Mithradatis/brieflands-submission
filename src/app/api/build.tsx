@@ -1,5 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { loadStep } from '@/app/features/wizard/wizardSlice'
+import { handleSnackbarOpen } from '@/app/features/snackbar/snackbarSlice'
 
 const fetchDataFromApi = async (url: string) => {
   try {
@@ -34,43 +35,14 @@ export const getBuildStepData = createAsyncThunk(
       });
 
       if ( !response.ok ) {
-        const error = await response.text();
-        dispatch( loadStep( JSON.parse( error ).data.step ) );
-
-        return { hasError: true, error: error };
+        const error = await response.json();
+        dispatch( loadStep( error.data.step ) );
+        dispatch( handleSnackbarOpen( { severity: 'error', message: error } ) );
       }
       const data = await response.json();
 
       return data;
     } catch (error) {
-      throw error;
-    }
-  }
-);
-
-export const updateBuildStepData = createAsyncThunk(
-  'submission/updateBuildStepData',
-  async ( url: string, { getState } ) => {
-    try {
-      const state: any = getState();
-      const data = state.buildSlice.value;
-      const response = await fetch(url, {
-        method: 'POST',
-        credentials: 'include',
-        redirect: 'follow',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to update build step');
-      }
-      const jsonData = await response.json();
-
-      return jsonData;
-    } catch (error) {
-      console.log(error);
       throw error;
     }
   }

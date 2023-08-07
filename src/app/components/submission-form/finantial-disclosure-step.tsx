@@ -14,10 +14,8 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
-        if ( wizard.formStep === 'financial_disclosure' ) {
-            dispatch( getFinancialDisclosureStepData( getStepDataFromApi ) );
-            dispatch( getFinancialDisclosureStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getFinancialDisclosureStepData( getStepDataFromApi ) );
+        dispatch( getFinancialDisclosureStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,9 +25,9 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="financial-disclosure" className={`tab${wizard.formStep === 'financial_disclosure' ? ' active' : ''}`}>
+            <div id="financial-disclosure" className="tab">
                 <h3 className="mb-4 text-shadow-white">
-                    { wizard.formStep.replace(/_/g, ' ') }
+                    Financial Disclosure
                 </h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

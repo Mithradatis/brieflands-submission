@@ -20,7 +20,7 @@ export const buildSlice = createSlice({
         ...state,
         value: {
         ...state.value,
-        [ action.payload.name ]: action.payload.value,
+        [ action.payload.name ]: !action.payload.value,
         },
       };
     }
@@ -44,7 +44,7 @@ export const buildSlice = createSlice({
           return {
             ...state,
             hasError: true,
-            errorMessage: JSON.parse( action.payload.error ).data.message
+            errorMessage: action.payload.error.data.message
           };
         } else {
           const { data } = action.payload;

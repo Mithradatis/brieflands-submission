@@ -16,11 +16,9 @@ const EditorStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/editor`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        if ( wizard.formStep === 'editors' ) {
-            dispatch( getEditors( getAllEditorsFromApi ) );
-            dispatch( getEditorStepData( getStepDataFromApi ) );
-            dispatch( getEditorStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getEditors( getAllEditorsFromApi ) );
+        dispatch( getEditorStepData( getStepDataFromApi ) );
+        dispatch( getEditorStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -30,7 +28,7 @@ const EditorStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="editors" className={`tab${wizard.formStep === 'editors' ? ' active' : ''}`}>
+            <div id="editors" className="tab">
                 <h3 className="mb-4 text-shadow-white">Editor</h3>
                 {   
                     formState.stepGuide !== undefined &&
@@ -57,13 +55,13 @@ const EditorStep = forwardRef( ( prop, ref ) => {
                                     item => {
                                         return item.name || '' 
                                     }
-                                   ) : []
+                                ) : []
                             }
                             value={
                                 formState.value.id !== ''
-                                  ? editorsList
-                                      .find( ( item: any ) => formState.value.id === item.id )?.name
-                                  : null
+                                ? editorsList
+                                    .find( ( item: any ) => formState.value.id === item.id )?.name
+                                : null
                             }
                             onChange={(event, value) => {
                                 dispatch( handleInput({ 

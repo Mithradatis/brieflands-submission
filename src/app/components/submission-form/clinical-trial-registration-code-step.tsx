@@ -14,10 +14,8 @@ const ClinicalTrialRegistrationCodeStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.clinical.trial.registration.code`;
     useEffect( () => {
-        if ( wizard.formStep === 'clinical_trial_registration_code' ) {
-            dispatch( getClinicalTrialRegistrationCodeStepData( getStepDataFromApi ) );
-            dispatch( getClinicalTrialRegistrationCodeStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getClinicalTrialRegistrationCodeStepData( getStepDataFromApi ) );
+        dispatch( getClinicalTrialRegistrationCodeStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const ClinicalTrialRegistrationCodeStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="clinical-trial-registration-code" className={`tab${wizard.formStep === 'clinical_trial_registration_code' ? ' active' : ''}`}>
+            <div id="clinical-trial-registration-code" className="tab">
                 <h3 className="mb-4 text-shadow-white">Clinical Trial Registration Code</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

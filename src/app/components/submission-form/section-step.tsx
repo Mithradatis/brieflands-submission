@@ -15,7 +15,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
     const [ isValid, setIsValid ] = useState({
         id: true,
     });
-    const getAllDocumentTypesFromApi = '${ wizard.baseUrl }/api/v1/journal/section';
+    const getAllDocumentTypesFromApi = `${ wizard.baseUrl }/api/v1/journal/section`;
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/section`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
@@ -32,13 +32,11 @@ const SectionStep = forwardRef( ( prop, ref ) => {
         }
     }, [formState.value, wizard.formStep, wizard.workflow]);
     useEffect(() => {
-        if ( wizard.formStep === 'section' ) {
-            if ( wizard.isVerified ) {
-                setIsValid( prevState => ({
-                    ...prevState,
-                    id: formState.value.id !== ''
-                }));
-            }
+        if ( wizard.isVerified ) {
+            setIsValid( prevState => ({
+                ...prevState,
+                id: formState.value.id !== '',
+            }));
         }
     }, [wizard.isVerified]);
     useImperativeHandle(ref, () => ({
@@ -49,7 +47,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="section" className={`tab${wizard.formStep === 'section' ? ' active' : ''}`}>
+            <div id="section" className="tab">
                 <h3 className="mb-4 text-shadow-white">Section</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
@@ -79,17 +77,16 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                                ) : []
                         }
                         value={
-                            formState.value.id !== ''
-                              ? documentSections
-                                  .find( ( item: any ) => formState.value.id === item.id )?.attributes?.title
-                              : null
+                            ( formState.value && formState.value.id )
+                              ? documentSections.find(
+                                ( item: any ) => formState.value.id === parseInt( item.id )
+                              )?.attributes?.title
+                            : null
                         }
                         onChange={(event, value) => {
                             dispatch( handleInput({ 
                                     name: 'id',
-                                    value: documentSections.find( 
-                                        ( item: any ) => item.attributes.title === value )?.id || '' } 
-                                        ) 
+                                    value: parseInt( documentSections.find( ( item: any ) => item.attributes.title === value )?.id ) || '' } ) 
                                     )
                         }}
                     />

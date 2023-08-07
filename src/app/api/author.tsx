@@ -1,5 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { handleOpen, setModalData, setModalActionButton, saveModal, setFormIsInvalid } from '@/app/features/modal/modalSlice'
+import { handleOpen, setModalActionButton, setFormIsValid, setFormIsInvalid, saveModal } from '@/app/features/modal/modalSlice'
+import { setModalData, handleDisabledInputs, saveAuthorModal } from '@/app/features/modal/addAuthorModalSlice'
+import { handleSnackbarOpen } from '@/app/features/snackbar/snackbarSlice'
 
 const fetchDataFromApi = async (url: string) => {
   try {
@@ -60,9 +62,16 @@ export const addAuthor = createAsyncThunk(
       body: JSON.stringify( modalFormData ),
     });
     if ( !response.ok ) {
+      if ( response.status === 422 ) {
+        const errorData = await response.json();
+        dispatch( handleSnackbarOpen( { severity: 'error', message: errorData } ) );
+      } else {
+        dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to update reviewers step' } ) );
+      }
       throw new Error('Failed to update author step');
     }
     const jsonData = await response.json();
+    dispatch( saveAuthorModal() );
     dispatch( saveModal() );
 
     return jsonData;
@@ -83,7 +92,15 @@ export const handleAuthorOperation = createAsyncThunk(
         && ( modalFormData['country_phone'] != '' && modalFormData['country_phone'] !== undefined )
         && ( modalFormData['phone_number'] !== '' && modalFormData['phone_number'] !== undefined )
         && ( modalFormData['affiliations'] !== '' && modalFormData['affiliations'] !== undefined )
+        && (
+          modalFormData['is_corresponding'] === undefined || 
+          (  
+            modalFormData['is_corresponding'] === 'on'
+            && modalFormData['correspond_affiliation'] !== undefined && modalFormData['correspond_affiliation'] !== ''
+          )
+        )
       ) {
+        dispatch( setFormIsValid() );
         try {
           dispatch( addAuthor( modalFormData ) );
         } catch (error) {
@@ -136,13 +153,18 @@ export const loadEditAuthorForm = createAsyncThunk(
   async (authorEmail: string, { getState, dispatch }) => {
     const state: any = getState();
     const authorSliceData = state.authorSlice.value;
-    let authorData;
+    const authorData: any = {};
     for (const [key, value] of Object.entries( authorSliceData )) {
       const authorItem: any = value;
       if ( authorItem.email === authorEmail ) {
-        authorData = value;
+        for ( const [key, value] of Object.entries( authorItem ) ) {
+          if ( value || value !== '' ) {
+            authorData[key] = value;
+          }
+        }
       }
     }
+    dispatch( handleDisabledInputs( false ) );
     dispatch( setModalData( authorData ) );
     dispatch( handleOpen( { title: 'Edit Author', parent: 'authors' } ) );
     dispatch( setModalActionButton( { action: 'edit', caption: 'edit' } ) );
@@ -176,6 +198,47 @@ export const deleteAuthor = createAsyncThunk(
       });
       if (!response.ok) {
         throw new Error('Failed to update author step');
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
+);
+
+export const updateAuthorsOrder = createAsyncThunk(
+  'submission/updateAuthorsOrder',
+  async ( payload: any, { getState } ) => {
+    try {
+      const state: any = getState();
+      const stepData = state.authorSlice.value;
+      const { url, authors } = payload;
+      const reorderedAuthors: any = [];
+      authors.forEach((author: any) => {
+        Object.entries(stepData).forEach(([key, value]) => {
+          const authorItem: any = value;
+          if ( authorItem.email === author.email ) {
+            reorderedAuthors.push( key );
+          }
+        });
+      });
+      const data = {
+        "ids": reorderedAuthors
+      };
+      const response = await fetch( url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update authors order');
       }
       const jsonData = await response.json();
 

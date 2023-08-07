@@ -20,27 +20,21 @@ const TypesStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/type`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        if ( wizard.formStep === 'types' ) {
-            dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
-            dispatch( getTypesStepData( getStepDataFromApi ) );
-            dispatch( getTypesStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
+        dispatch( getTypesStepData( getStepDataFromApi ) );
+        dispatch( getTypesStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useEffect(() => {
-        if ( wizard.formStep === 'types' ) {
-            const formIsValid = Object.values( formState.value ).every(value => value !== '');
-            dispatch( formValidator( formIsValid ) );
-        }
+        const formIsValid = Object.values( formState.value ).every(value => value !== '');
+        dispatch( formValidator( formIsValid ) );
     }, [formState.value, wizard.formStep, wizard.workflow]);
     useEffect(() => {
-        if ( wizard.formStep === 'types' ) {
-            if ( wizard.isVerified ) {
-                setIsValid( prevState => ({
-                    ...prevState,
-                    doc_type: formState.value.doc_type !== '',
-                    manuscript_title: formState.value.manuscript_title !== ''
-                }));
-            }
+        if ( wizard.isVerified ) {
+            setIsValid( prevState => ({
+                ...prevState,
+                doc_type: formState.value.doc_type !== '',
+                manuscript_title: formState.value.manuscript_title !== ''
+            }));
         }
     }, [wizard.isVerified]);
     useImperativeHandle(ref, () => ({
@@ -50,8 +44,8 @@ const TypesStep = forwardRef( ( prop, ref ) => {
     }));
 
     return (
-        <>
-            <div id="types" className={`tab${wizard.formStep === 'types' ? ' active' : ''}`}>
+        <> 
+            <div id="types" className="tab">
                 <h3 className="mb-4 text-shadow-white">Types</h3>
                 {   
                     formState.stepGuide !== undefined &&
@@ -59,7 +53,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
                 }
-                <FormControl className="mb-3" error={formState.value.doc_type === '' && !isValid.doc_type}>
+                <FormControl className="mb-3" error={ formState.value.doc_type === '' && !isValid.doc_type }>
                     <FormLabel className="fw-bold mb-1">
                         Manuscript Type
                     </FormLabel>

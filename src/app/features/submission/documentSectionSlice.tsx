@@ -1,15 +1,17 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { getSectionStepGuide, getDocumentSections, getSectionStepData } from '@/app/api/section'
 
+interface Value {
+  id: number
+}
+
 export const documentSectionSlice = createSlice({
   name: 'documentSection',
   initialState: {
     isLoading: false,
     stepGuide: {},
     documentSectionsList: [{}],
-    value: {
-      id: ''
-    }
+    value: {} as Value
   },
   reducers: {
     handleInput: ( state, action ) => {
@@ -24,10 +26,10 @@ export const documentSectionSlice = createSlice({
   },
   extraReducers( builder ) {
     builder
-    .addCase(getSectionStepGuide.pending, (state) => {
+    .addCase(getSectionStepGuide.pending, ( state ) => {
       state.isLoading = true;
     })
-    .addCase(getSectionStepGuide.fulfilled, (state, action) => {
+    .addCase(getSectionStepGuide.fulfilled, ( state, action ) => {
       state.isLoading = false;
       state.stepGuide = action.payload.data.value;
     })
@@ -38,12 +40,13 @@ export const documentSectionSlice = createSlice({
       state.isLoading = false;
       state.documentSectionsList = action.payload.data;
     })
-    .addCase(getSectionStepData.pending, (state) => {
+    .addCase(getSectionStepData.pending, ( state ) => {
       state.isLoading = true;
     })
-    .addCase(getSectionStepData.fulfilled, (state, action) => {
+    .addCase(getSectionStepData.fulfilled, ( state, action ) => {
       state.isLoading = false;
-      state.value = action.payload.data.step_data;
+      const stepData = action.payload.data.step_data;
+      state.value.id = parseInt( stepData );
     });
   },
 });

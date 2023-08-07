@@ -14,11 +14,9 @@ const InformedConsentStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
-        if ( wizard.formStep === 'informed_consent' ) {
-            dispatch( getInformedConsentStepData( getStepDataFromApi ) );
-            dispatch( getInformedConsentStepGuide( getDictionaryFromApi ) );
-        }
-    }, [wizard.formStep]);
+        dispatch( getInformedConsentStepData( getStepDataFromApi ) );
+        dispatch( getInformedConsentStepGuide( getDictionaryFromApi ) );
+}, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateInformedConsentStepData( getStepDataFromApi ) );
@@ -27,7 +25,7 @@ const InformedConsentStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="informed-consent" className={`tab${wizard.formStep === 'informed_consent' ? ' active' : ''}`}>
+            <div id="informed-consent" className="tab">
                 <h3 className="mb-4 text-shadow-white">Informed Consent</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

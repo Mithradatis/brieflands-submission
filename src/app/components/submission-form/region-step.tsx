@@ -13,43 +13,37 @@ const RegionStep = forwardRef( ( prop, ref ) => {
     const regionsList = formState.regionsList;
     const wizard = useSelector( wizardState );
     const [ isValid, setIsValid ] = useState({
-        ids: true
+        id: true
     });
     const getAllEditorsFromApi = `${ wizard.baseUrl }/api/v1/journal/${ wizard.formStep }`;
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        if ( wizard.formStep === 'region' ) {
-            dispatch( getRegions( getAllEditorsFromApi ) );
-            dispatch( getRegionStepData( getStepDataFromApi ) );
-            dispatch( getRegionStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getRegions( getAllEditorsFromApi ) );
+        dispatch( getRegionStepData( getStepDataFromApi ) );
+        dispatch( getRegionStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useEffect(() => {
-        if ( wizard.formStep === 'region' ) {
-            const formIsValid = Object.values( formState.value ).every(value => value !== '');
-            dispatch( formValidator( formIsValid ) );
-        }
+        const formIsValid = Object.values( formState.value ).every(value => value !== '');
+        dispatch( formValidator( formIsValid ) );
     }, [formState.value, wizard.formStep, wizard.workflow]);
     useEffect( () => {
-        if ( wizard.formStep === 'region' ) {
-            if ( wizard.isVerified ) {
-                setIsValid(prevState => ({
-                    ...prevState,
-                    ids: formState.value.terms
-                }));
-            }
+        if ( wizard.isVerified ) {
+            setIsValid(prevState => ({
+                ...prevState,
+                id: formState.value.terms
+            }));
         }
     }, [wizard.isVerified]);
     useImperativeHandle(ref, () => ({
-        submitForm () { 
+        submitForm () {   
           dispatch( updateRegionStepData( getStepDataFromApi ) );
         }
     }));
 
     return (
         <>
-            <div id="region" className={`tab${wizard.formStep === 'region' ? ' active' : ''}`}>
+            <div id="region" className="tab">
                 <h3 className="mb-4 text-shadow-white">Region</h3>
                 {   
                     formState.stepGuide !== undefined &&
@@ -57,7 +51,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
                 }
-                <FormControl className="mb-3" error= { formState.value.ids === '' && !isValid.ids }>
+                <FormControl className="mb-3" error= { formState.value.id === '' && !isValid.id }>
                     <FormLabel className="fw-bold mb-1">
                         Region
                     </FormLabel>
@@ -97,7 +91,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
                         <div>Loading regions...</div>
                     )}
                     {
-                        ( formState.value.ids === '' && !isValid.ids ) 
+                        ( formState.value.id === '' && !isValid.id ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">Please select a region</FormHelperText> 
                     }
                 </FormControl>

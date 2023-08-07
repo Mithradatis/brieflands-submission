@@ -38,33 +38,27 @@ const FilesStep = forwardRef( ( prop, ref ) => {
     const [filterText, setFilterText] = useState('');
     const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
     useEffect(() => {
-        if ( wizard.formStep === 'files' ) {
-            dispatch( getFileTypes( getFileTypesFromApi ) );
-            dispatch( getFilesStepData( getStepDataFromApi ) );
-            dispatch( getFilesStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getFileTypes( getFileTypesFromApi ) );
+        dispatch( getFilesStepData( getStepDataFromApi ) );
+        dispatch( getFilesStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useEffect(() => {
-        if ( wizard.formStep === 'files' ) {
-            const formIsValid = Object.values( formState.value ).every(value => value !== '');
-            dispatch( formValidator( formIsValid ) );
-        }
+        const formIsValid = Object.values( formState.value ).every(value => value !== '');
+        dispatch( formValidator( formIsValid ) );
     }, [formState?.value, wizard.formStep, wizard.workflow]);
     useEffect(() => {
-        if ( wizard.formStep === 'files' ) {
-          const filteredData = formState.newFilesList.filter( ( item: any ) => {
-            const rowValues = Object.values( item );
-            return rowValues.some((value) => {
-              if (typeof value === 'string') {
-                const formattedValue = value.replace(/\s/g, '').toLowerCase();
-                const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
-                return formattedValue.includes(formattedFilterText);
-              }
-              return false;
-            });
-          });
-          setFilteredItems( filteredData );
-        }
+        const filteredData = formState.newFilesList.filter( ( item: any ) => {
+        const rowValues = Object.values( item );
+        return rowValues.some((value) => {
+            if (typeof value === 'string') {
+            const formattedValue = value.replace(/\s/g, '').toLowerCase();
+            const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
+            return formattedValue.includes(formattedFilterText);
+            }
+            return false;
+        });
+        });
+        setFilteredItems( filteredData );
     }, [formState.newFilesList, filterText, wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {}
@@ -196,7 +190,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="files" className={`tab${wizard.formStep === 'files' ? ' active' : ''}`}>
+            <div id="files" className="tab">
                 <h3 className="mb-4 text-shadow-white">Files</h3>
                 {   
                     formState.stepGuide !== undefined &&  
@@ -227,9 +221,8 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                                    ) : []
                             }
                             value={
-                                formState.value.file_type_id !== ''
-                                  ? fileTypes
-                                      .find( ( item: any ) => formState.value.file_type_id === item.id )?.attributes?.title
+                                formState.value.file_type_id !== '' && Array.isArray( fileTypes )
+                                  ? fileTypes?.find( ( item: any ) => formState.value.file_type_id === item.id )?.attributes?.title
                                   : null
                             }
                             onChange={(event, value) => {

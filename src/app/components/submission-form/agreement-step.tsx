@@ -19,26 +19,20 @@ const AgreementStep = forwardRef(( props, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
-        if ( wizard.formStep === 'agreement' ) {
-            dispatch( getAgreementTerms( getAgreementTermsFromApi ) );
-            dispatch( getAgreementStepData( getStepDataFromApi ) );
-            dispatch( getAgreementStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getAgreementTerms( getAgreementTermsFromApi ) );
+        dispatch( getAgreementStepData( getStepDataFromApi ) );
+        dispatch( getAgreementStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useEffect(() => {
-        if ( wizard.formStep === 'agreement' ) {
-            const formIsValid = formState.value.terms;
-            dispatch( formValidator( formIsValid ) );
-        }
+        const formIsValid = formState.value.terms;
+        dispatch( formValidator( formIsValid ) );
     }, [formState.value, wizard.formStep, wizard.workflow]);
     useEffect( () => {
-        if ( wizard.formStep === 'agreement' ) {
-            if ( wizard.isVerified ) {
-                setIsValid(prevState => ({
-                    ...prevState,
-                    terms: formState.value.terms
-                }));
-            }
+        if ( wizard.isVerified ) {
+            setIsValid(prevState => ({
+                ...prevState,
+                terms: formState.value.terms
+            }));
         }
     }, [wizard.isVerified]);
     useImperativeHandle(ref, () => ({
@@ -49,7 +43,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
 
     return (
         <>
-            <div id="agreement" className={`tab${wizard.formStep === 'agreement' ? ' active' : ''}`}>
+            <div id="agreement" className="tab">
                 <h3 className="mb-4 text-shadow-white">Agreement</h3>
                 {   
                     formState.stepGuide !== undefined &&

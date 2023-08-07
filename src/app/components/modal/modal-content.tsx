@@ -3,6 +3,8 @@ import { Button } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { modalState, saveModal } from '@/app/features/modal/modalSlice'
+import { saveAuthorModal } from '@/app/features/modal/addAuthorModalSlice'
+import { saveReviewerModal } from '@/app/features/modal/addReviewerModalSlice'
 import { handleAuthorOperation } from '@/app/api/author'
 import { handleReviewerOperation } from '@/app/api/reviewers'
 import { Scrollbars } from 'react-custom-scrollbars'
@@ -34,7 +36,7 @@ const ModalContent = () => {
         switch ( modalData.modalForm ) {
             case 'authors':
                 setAction(
-                    <Button className="btn btn_primary" 
+                    <Button className="btn btn-primary" 
                         onClick={ () => dispatch( handleAuthorOperation() ) }>
                       {modalData.modalActionButton.caption}
                     </Button>
@@ -42,7 +44,7 @@ const ModalContent = () => {
               break;
             case 'reviewers':
               setAction( 
-                  <Button className="btn btn_primary"
+                  <Button className="btn btn-primary"
                       onClick={() => dispatch( handleReviewerOperation() )}>
                       { modalData.modalActionButton.caption }
                   </Button>
@@ -75,10 +77,21 @@ const ModalContent = () => {
                 </Scrollbars>
             </div>
             <div className="modal-footer">
-                { action }
-                <Button className="btn btn-default" onClick={ () => dispatch( saveModal() ) }>
+                <Button className="btn btn-light me-2" 
+                  onClick={ () => {
+                    switch( modalData.modalForm ) {
+                      case 'authors':
+                        dispatch( saveAuthorModal() )
+                      break;
+                      case 'reviewers':
+                        dispatch( saveReviewerModal() );
+                        break;
+                    }
+                    dispatch( saveModal() ) } 
+                  }>
                     close    
                 </Button>
+                { action }
             </div>
         </>
     );    

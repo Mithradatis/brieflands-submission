@@ -5,6 +5,7 @@ export const snackbarSlice = createSlice({
   initialState: {
     isOpen: false,
     transition: '',
+    severity: 'info',
     message: '',
   },
   reducers: {
@@ -12,8 +13,8 @@ export const snackbarSlice = createSlice({
       return {
         ...state,
         isOpen: true,
-        transition: action.payload.transition,
-        message: action.payload.message
+        severity: action.payload.severity,
+        message: action.payload.message.data.message
       }
     },
     handleSnackbarClose: ( state ) => {

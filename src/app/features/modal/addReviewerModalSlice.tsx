@@ -40,7 +40,15 @@ export const addReviewerModalSlice = createSlice({
         ...state,
         selectedClassifications: action.payload,
       };
-    }
+    },
+    saveReviewerModal : ( state ) => {
+      return {
+        ...state,
+        value: {
+          'suggest-or-oppose': 1
+        },
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -53,7 +61,8 @@ export const addReviewerModalSlice = createSlice({
 export const {
   handleSelection, 
   handleInput, 
-  handleClassifications 
+  handleClassifications,
+  saveReviewerModal 
 } = addReviewerModalSlice.actions;
 
 export const addReviewerModalState = ( state: any ) => state.addReviewerModalSlice;

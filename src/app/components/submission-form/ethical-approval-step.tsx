@@ -14,10 +14,8 @@ const EthicalApprovalStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
-        if ( wizard.formStep === 'ethical_approval' ) {
-            dispatch( getEthicalApprovalStepData( getStepDataFromApi ) );
-            dispatch( getEthicalApprovalStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getEthicalApprovalStepData( getStepDataFromApi ) );
+        dispatch( getEthicalApprovalStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const EthicalApprovalStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="ethical-approval" className={`tab${wizard.formStep === 'ethical_approval' ? ' active' : ''}`}>
+            <div id="ethical-approval" className="tab">
                 <h3 className="mb-4 text-shadow-white">Ethical Approval</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

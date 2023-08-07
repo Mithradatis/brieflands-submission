@@ -25,9 +25,10 @@ import conflictOfInterestsReducer from './features/submission/conflictOfInterest
 import informedConsentReducer from './features/submission/informedConsentSlice'
 import dataReproducibilityReducer from './features/submission/dataReproducibilitySlice'
 import reviewersReducer from './features/submission/reviewersSlice'
-import buildReducer from './features/submission/buildSlice'
-import dialogReducer from './features/dialog/dialogSlice'
-import snackbarReducer from './features/snackbar/snackbarSlice'
+import buildReducer from '@/app/features/submission/buildSlice'
+import zeroReducer from '@/app/features/submission/zeroSlice'
+import dialogReducer from '@/app/features/dialog/dialogSlice'
+import snackbarReducer from '@/app/features/snackbar/snackbarSlice'
 
 export const store = configureStore({
   reducer: {
@@ -58,6 +59,7 @@ export const store = configureStore({
     dataReproducibilitySlice: dataReproducibilityReducer,
     reviewersSlice: reviewersReducer,
     buildSlice: buildReducer,
+    zeroSlice: zeroReducer,
     dialogSlice: dialogReducer,
     snackbarSlice: snackbarReducer
   }

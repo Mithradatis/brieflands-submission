@@ -14,10 +14,8 @@ const ConflictOfInterestsStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
-        if ( wizard.formStep === 'conflict_of_interests' ) {
-            dispatch( getConflictOfInterestsStepData( getStepDataFromApi ) );
-            dispatch( getConflictOfInterestsStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getConflictOfInterestsStepData( getStepDataFromApi ) );
+        dispatch( getConflictOfInterestsStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const ConflictOfInterestsStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="conflict-of-interests" className={`tab${wizard.formStep === 'conflict_of_interests' ? ' active' : ''}`}>
+            <div id="conflict-of-interests" className="tab">
                 <h3 className="mb-4 text-shadow-white">Conflict of Interests</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

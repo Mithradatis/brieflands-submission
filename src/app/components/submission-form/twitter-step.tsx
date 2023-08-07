@@ -14,10 +14,8 @@ const TwitterStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
-        if ( wizard.formStep === 'twitter' ) {
-            dispatch( getTwitterStepData( getStepDataFromApi ) );
-            dispatch( getTwitterStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getTwitterStepData( getStepDataFromApi ) );
+        dispatch( getTwitterStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const TwitterStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="twitter" className={`tab${wizard.formStep === 'twitter' ? ' active' : ''}`}>
+            <div id="twitter" className="tab">
                 <h3 className="mb-4 text-shadow-white">Twitter</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

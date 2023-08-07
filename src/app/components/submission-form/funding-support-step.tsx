@@ -14,10 +14,8 @@ const FundingSupportStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
-        if ( wizard.formStep === 'funding_support' ) {
-            dispatch( getFundingSupportStepData( getStepDataFromApi ) );
-            dispatch( getFundingSupportStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getFundingSupportStepData( getStepDataFromApi ) );
+        dispatch( getFundingSupportStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const FundingSupportStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="funding-support" className={`tab${wizard.formStep === 'funding_support' ? ' active' : ''}`}>
+            <div id="funding-support" className="tab">
                 <h3 className="mb-4 text-shadow-white">Funding/Support</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

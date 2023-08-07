@@ -60,6 +60,12 @@ export const modalSlice = createSlice({
         modalFormData: action.payload
       };
     },
+    setFormIsValid: ( state ) => {
+      return {
+        ...state,
+        isFormValid: true
+      }
+    },
     setFormIsInvalid: ( state ) => {
       return {
         ...state,
@@ -83,6 +89,7 @@ export const {
   handleNestedClose,  
   saveModal,
   setModalData,
+  setFormIsValid,
   setFormIsInvalid,
   setModalActionButton
 } = modalSlice.actions;

@@ -17,6 +17,12 @@
         color: #999;
     }
 }
+.tab-container {
+    .tab {
+        position: relative;
+        z-index: 2;
+    }
+}
 .wizard-navigation-container {
     max-width: 725px;
     z-index: 2;
@@ -38,7 +44,7 @@
             li {
                 transition: all ease-in .5s;
                 a {
-                    font-size: .9rem;
+                    font-size: .8rem;
                     .index {
                         border-radius: 50%;
                     }   
@@ -46,7 +52,7 @@
                 &.active {
                     a {
                         font-weight: 700;
-                        font-size: 1.3rem;
+                        font-size: 1rem;
                         transform: scale(1.1, 1.1);
                         .index {
                             display: flex;
@@ -128,16 +134,6 @@
                 color: lighten($green, 25%);
                 text-shadow: none;
             }
-        }
-    }
-}
-
-.tab-container {
-    .tab {
-        position: relative;
-        display: none;
-        &.active {
-            display: block;
         }
     }
 }

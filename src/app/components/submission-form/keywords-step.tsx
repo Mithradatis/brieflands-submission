@@ -19,26 +19,20 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${wizard.formStep}`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
-        if ( wizard.formStep === 'keywords' ) {
-            dispatch( getKeywordsList( getAllKeywordsFromApi ) );
-            dispatch( getKeywordsStepData( getStepDataFromApi ) );
-            dispatch( getKeywordsStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getKeywordsList( getAllKeywordsFromApi ) );
+        dispatch( getKeywordsStepData( getStepDataFromApi ) );
+        dispatch( getKeywordsStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useEffect(() => {
-        if ( wizard.formStep === 'keywords' ) {
-            const formIsValid = Object.values( formState.value ).every(value => value !== '');
-            dispatch( formValidator( formIsValid ) );
-        }
+        const formIsValid = Object.values( formState.value ).every(value => value !== '');
+        dispatch( formValidator( formIsValid ) );
     }, [formState.value, wizard.formStep, wizard.workflow]);
     useEffect(() => {
-        if ( wizard.formStep === 'keywords' ) {
-            if (wizard.isVerified) {
-                setIsValid((prevState) => ({
-                    ...prevState,
-                    ids: formState.value.ids.length > 0,
-                }));
-            }
+        if (wizard.isVerified) {
+            setIsValid((prevState) => ({
+                ...prevState,
+                ids: formState.value.ids.length > 0,
+            }));
         }
     }, [wizard.isVerified]);
     useImperativeHandle(ref, () => ({
@@ -49,7 +43,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="keywords" className={`tab${wizard.formStep === 'keywords' ? ' active' : ''}`}>
+            <div id="keywords" className="tab">
                 <h3 className="mb-4 text-shadow-white">Keywords</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

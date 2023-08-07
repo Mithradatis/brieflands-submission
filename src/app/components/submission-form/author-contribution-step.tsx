@@ -14,10 +14,8 @@ const AuthorContributionStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
-        if ( wizard.formStep === "authors_contribution" ) {
-            dispatch( getAuthorContributionStepData( getStepDataFromApi ) );
-            dispatch( getAuthorContributionStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getAuthorContributionStepData( getStepDataFromApi ) );
+        dispatch( getAuthorContributionStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const AuthorContributionStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="author-contribution" className={`tab${wizard.formStep === "authors_contribution" ? ' active' : ''}`}>
+            <div id="author-contribution" className="tab">
                 <h3 className="mb-4 text-shadow-white">Author Contribution</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

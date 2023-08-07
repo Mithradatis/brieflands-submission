@@ -14,10 +14,8 @@ const AbstractStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
-        if ( wizard.formStep === 'abstract' ) {
-            dispatch( getAbstractStepData( getStepDataFromApi ) );
-            dispatch( getAbstractStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getAbstractStepData( getStepDataFromApi ) );
+        dispatch( getAbstractStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const AbstractStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="abstract" className={`tab${wizard.formStep === 'abstract' ? ' active' : ''}`}>
+            <div id="abstract" className="tab">
                 <h3 className="mb-4 text-shadow-white">Abstract</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">

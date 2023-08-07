@@ -11,11 +11,11 @@ const WizardOutline = () => {
                 <ol className="fs-7">
                     {
                         wizard.formSteps.map( ( item: any ) => {
-                            const formStepTitle = item.attributes.slug;
+                            const formStepTitle = item.attributes?.slug;
                             return (
                                 <li className={wizard.formStep === formStepTitle ? 'active' : ''} key={ formStepTitle }>
                                     <a href={`#${formStepTitle}`} onClick={() => dispatch( loadStep( formStepTitle ) ) }>
-                                        <span className="text-capitalize">{ formStepTitle.replace(/_/g, ' ') }</span>
+                                        <span className="text-capitalize">{ formStepTitle?.replace(/_/g, ' ') }</span>
                                     </a>
                                 </li>
                             )

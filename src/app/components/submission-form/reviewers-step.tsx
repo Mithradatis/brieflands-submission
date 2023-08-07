@@ -35,10 +35,8 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        if ( wizard.formStep === 'reviewers' ) {
-            dispatch( getReviewersStepData( getStepDataFromApi ) );
-            dispatch( getReviewersStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getReviewersStepData( getStepDataFromApi ) );
+        dispatch( getReviewersStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {}
@@ -124,25 +122,23 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
 		);
 	}, [filterText, resetPaginationToggle]);
     useEffect(() => {
-        if ( wizard.formStep === 'reviewers' ) {
-          const filteredData = formState.reviewersList.filter( ( item: any ) => {
-            const rowValues = Object.values( item );
-            return rowValues.some((value) => {
-              if (typeof value === 'string') {
-                const formattedValue = value.replace(/\s/g, '').toLowerCase();
-                const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
-                return formattedValue.includes(formattedFilterText);
-              }
-              return false;
-            });
-          });
-          setFilteredItems( filteredData );
-        }
+        const filteredData = formState.reviewersList.filter( ( item: any ) => {
+        const rowValues = Object.values( item );
+        return rowValues.some((value) => {
+            if (typeof value === 'string') {
+            const formattedValue = value.replace(/\s/g, '').toLowerCase();
+            const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
+            return formattedValue.includes(formattedFilterText);
+            }
+            return false;
+        });
+        });
+        setFilteredItems( filteredData );
       }, [formState.reviewersList, filterText, wizard.formStep]);
 
     return (
         <>
-            <div id="reviewers" className={`tab${wizard.formStep === 'reviewers' ? ' active' : ''}`}>
+            <div id="reviewers" className="tab">
                 <h3 className="mb-4 text-shadow-white">Reviewers</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Scrollbars
@@ -162,7 +158,7 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
                 <Button className="btn btn-primary btn-lg mb-4" onClick={ () => dispatch( handleOpen( { title: 'Add an Reviewer', parent: wizard.formStep } ) ) }>
                     Add Reviewer
                 </Button>
-                { 
+                {
                     formState.reviewersList.length > 0 &&
                         <DataTable className="datatable-container"
                             title={<h4 className="fs-6 mb-0">Reviewers List</h4>}

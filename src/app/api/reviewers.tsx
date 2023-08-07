@@ -1,5 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { handleOpen, setModalData, setModalActionButton, saveModal, setFormIsInvalid } from '@/app/features/modal/modalSlice'
+import { handleOpen, setModalData, setModalActionButton, saveModal, setFormIsValid, setFormIsInvalid } from '@/app/features/modal/modalSlice'
+import { saveReviewerModal } from '../features/modal/addReviewerModalSlice'
+import { handleSnackbarOpen } from '@/app/features/snackbar/snackbarSlice'
 
 const fetchDataFromApi = async (url: string) => {
   try {
@@ -60,9 +62,16 @@ export const addReviewer = createAsyncThunk(
       body: JSON.stringify( modalFormData ),
     });
     if ( !response.ok ) {
+      if ( response.status === 422 ) {
+        const errorData = await response.json();
+        dispatch( handleSnackbarOpen( { severity: 'error', message: errorData.message } ) );
+      } else {
+        dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to update reviewers step' } ) );
+      }
       throw new Error('Failed to update reviewers step');
     }
     const jsonData = await response.json();
+    dispatch( saveReviewerModal() );
     dispatch( saveModal() );
 
     return jsonData;
@@ -80,10 +89,11 @@ export const handleReviewerOperation = createAsyncThunk(
         && ( modalFormData['first-name'] !== '' && modalFormData['first-name'] !== undefined )
         && ( modalFormData['last-name'] !== '' && modalFormData['last-name'] !== undefined )
       ) {
+        dispatch( setFormIsValid() );
         try {
           dispatch( addReviewer( modalFormData ) );
-        } catch (error) {
-          console.log('Error in addAuthor:', error);
+        } catch ( error ) {
+          console.log( 'Error in addAuthor:', error );
           throw error;
         }
       } else {

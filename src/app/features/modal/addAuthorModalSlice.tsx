@@ -15,6 +15,9 @@ interface AuthorModalState {
     'phone_type'?: string[];
     'country_phone'?: string[];
     'phone_number'?: string[];
+    'affiliations'?: string;
+    'is_corresponding'?: boolean;
+    'correspond_affiliation'?: string; 
   };
 }
 
@@ -28,6 +31,15 @@ export const addAuthorModalSlice = createSlice({
     value: {}
   } as AuthorModalState,
   reducers: {
+    handleCheckbox: ( state, action ) => {
+      return {
+        ...state,
+        value: {
+          ...state.value,
+          [action.payload.name]: action.payload.value === 'on' ? 'off' : 'on',
+        },
+      };
+    },
     handleInput: ( state, action ) => {
       return {
         ...state,
@@ -58,6 +70,24 @@ export const addAuthorModalSlice = createSlice({
         },
       };
     },
+    handleDisabledInputs: ( state, action ) => {
+      return {
+        ...state,
+        disabledInputs: action.payload
+      }
+    },
+    saveAuthorModal : ( state ) => {
+      return {
+        ...state,
+        value: {}
+      };
+    },
+    setModalData: ( state, action ) => {
+      return {
+        ...state,
+        value: action.payload
+      };
+    },
   },
   extraReducers: ( builder ) => {
     builder
@@ -66,28 +96,38 @@ export const addAuthorModalSlice = createSlice({
       }).addCase(searchPeople.fulfilled, ( state, action ) => {
         state.isLoading = false;
         const author = action.payload.data.data;
-        const phoneType = [];
-        const phoneCountry = [];
-        const phoneNumber = [];
-        phoneType.push( author['phones']['type'] );
-        phoneCountry.push( author['phones']['country_phone'] );
-        phoneNumber.push( author['phones']['number'] );
-        state.value['email'] = action.payload.email;
-        author['first_name'] !== null && ( state.value['first-name'] = author['first_name'] );
-        author['last_name'] !== null && ( state.value['last-name'] = author['last_name'] );
-        author['orcid_id'] !== null && ( state.value['orcid-id'] = author['orcid_id'].toString() );
-        phoneType.length > 0 && ( state.value['phone_type'] = phoneType );
-        phoneCountry.length > 0 && ( state.value['country_phone'] = phoneCountry );
-        phoneNumber.length > 0 && ( state.value['phone_number'] = phoneNumber );
+        if ( Object.keys( author ).length > 0 ) {
+          const phoneType = [];
+          const phoneCountry = [];
+          const phoneNumber = [];
+          phoneType.push( author['phones']['type'] );
+          phoneCountry.push( author['phones']['country_phone'] );
+          phoneNumber.push( author['phones']['number'] );
+          state.value['email'] = action.payload.email;
+          author['first_name'] !== '' && ( state.value['first-name'] = author['first_name'] );
+          author['middle_name'] !== '' && ( state.value['middle-name'] = author['middle_name'] );
+          author['last_name'] !== '' && ( state.value['last-name'] = author['last_name'] );
+          ( author['orcid_id'] !== '' && author['orcid_id'] !== null ) && ( state.value['orcid-id'] = author['orcid_id'].toString() );
+          phoneType.length > 0 && ( state.value['phone_type'] = phoneType );
+          phoneCountry.length > 0 && ( state.value['country_phone'] = phoneCountry );
+          phoneNumber.length > 0 && ( state.value['phone_number'] = phoneNumber );
+          author['affiliations'] !== '' && ( state.value['affiliations'] = author['affiliations'] );
+          author['is_corresponding'] !== '' && ( state.value['is_corresponding'] = author['is_corresponding'] );
+          author['correspond_affiliation'] !== '' && ( state.value['correspond_affiliation'] = author['correspond_affiliation'] );
+        }
         state.disabledInputs = false;
       });
   },
 });
 
 export const { 
+  handleCheckbox,
   handleInput,
   handleInputAsArray, 
-  handleInputArray 
+  handleInputArray,
+  handleDisabledInputs,
+  saveAuthorModal,
+  setModalData 
 } = addAuthorModalSlice.actions;
 
 export const addAuthorModalState = ( state: any ) => state.addAuthorModalSlice;

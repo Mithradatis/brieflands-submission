@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { getSubmissionSteps, getWorkflow, buildNewWorkflow } from '@/app/api/client'
+import { useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
 import { dialogState } from '@/app/features/dialog/dialogSlice'
@@ -30,37 +29,15 @@ import FundingSupportStep from '@/app/components/submission-form/funding-support
 import DataReproducibilityStep from '@/app/components/submission-form/data-reproducibility-step'
 import BuildStep from '@/app/components/submission-form/build-step'
 import DialogComponent from '@/app/components/dialog/dialog'
+import FlashMessage from '@/app/components/snackbar/snackbar'
+import ZeroStep from '@/app/components/submission-form/zero-step'
 
 interface ChildComponentProps {
     submitForm: () => void;
 }
 
 const SubmissionForm = () => {
-    const dialog = useSelector( dialogState );
-    const stepComponents = [
-        AgreementStep,
-        TypesStep,
-        SectionStep,
-        AuthorsStep,
-        KeywordsStep,
-        ClassificationsStep,
-        AbstractStep,
-        EditorStep,
-        ReviewersStep,
-        FilesStep,
-        CommentStep,
-        RegionStep,
-        AuthorContributionStep,
-        FinancialDisclosureStep,
-        ClinicalTrialRegistrationCodeStep,
-        EthicalApprovalStep,
-        Twitter,
-        ConflictOfInterestStep,
-        InformedConsentStep,
-        FundingSupportStep,
-        DataReproducibilityStep,
-        BuildStep,
-    ];
+    const zeroChildRef = useRef<ChildComponentProps>( null );
     const agreementChildRef = useRef<ChildComponentProps>( null );
     const typesChildRef = useRef<ChildComponentProps>( null );
     const sectionChildRef = useRef<ChildComponentProps>( null );
@@ -82,21 +59,12 @@ const SubmissionForm = () => {
     const informedConsentChildRef = useRef<ChildComponentProps>( null );
     const fundingSupportChildRef = useRef<ChildComponentProps>( null );
     const dataReproducibilityChildRef = useRef<ChildComponentProps>( null );
-    const buildChildRef = useRef<ChildComponentProps>( null );
     const dispatch:any = useDispatch();
     const wizard = useSelector( wizardState );
-    const getWorkflowFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }`;
-    const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
-    useEffect( () => {
-        // if ( workflowId === '' ) {
-        //     dispatch( buildNewWorkflow( buildNewWorkflowUrl ) );
-        // } else {
-            dispatch( getWorkflow( getWorkflowFromApi ) );
-            dispatch( getSubmissionSteps( getStepsFromApi ) );
-        // }
-    },[]);
     const handleNextStep = () => {
-        const activeStepRef = wizard.formStep === 'agreement'
+        const activeStepRef = wizard.baseDocId !== ''
+            ? zeroChildRef
+            : wizard.formStep === 'agreement'
             ? agreementChildRef
             : wizard.formStep === 'types'
             ? typesChildRef
@@ -117,7 +85,7 @@ const SubmissionForm = () => {
             : wizard.formStep === 'files'
             ? filesChildRef
             : wizard.formStep === 'comments'
-            ? filesChildRef
+            ? commentChildRef
             : wizard.formStep === 'region'
             ? regionChildRef
             : wizard.formStep === 'authors_contribution'
@@ -138,8 +106,6 @@ const SubmissionForm = () => {
             ? fundingSupportChildRef
             : wizard.formStep === 'data_reproducibility'
             ? dataReproducibilityChildRef
-            : wizard.formStep === 'build'
-            ? buildChildRef
             : null;
         if ( wizard.isFormValid ) {
             activeStepRef?.current?.submitForm();
@@ -150,7 +116,10 @@ const SubmissionForm = () => {
     return (
         <div className="wizard mb-4">
             <DialogComponent/>
-            <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item.attributes.title?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
+            <FlashMessage/>
+            { wizard.formSteps.length > 0 && 
+                <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item.attributes?.slug?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
+            }
             <WizardNavigation />
             <div className="d-flex align-items-start">
                 <WizardOutline />
@@ -160,42 +129,94 @@ const SubmissionForm = () => {
                             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
                         </svg>
                     </div>
-                    <AgreementStep ref={agreementChildRef} />
-                    <TypesStep ref={typesChildRef} />
-                    <SectionStep ref={sectionChildRef} />
-                    <AuthorsStep ref={authorChildRef} />
-                    <KeywordsStep ref={keywordsChildRef} />
-                    <ClassificationsStep ref={classificationsChildRef} />
-                    <AbstractStep ref={abstractChildRef} />
-                    <EditorStep ref={editorChildRef} />
-                    <ReviewersStep ref={reviewersChildRef} />
-                    <FilesStep ref={filesChildRef} />
-                    <CommentStep ref={commentChildRef} />
-                    <RegionStep ref={regionChildRef} />
-                    <AuthorContributionStep ref={authorContributionChildRef} />
-                    <FinancialDisclosureStep ref={financialDisclosureChildRef} />
-                    <ClinicalTrialRegistrationCodeStep ref={clinicalTrialRegistrationCodeChildRef} />
-                    <EthicalApprovalStep ref={ethicalApprovalChildRef} />
-                    <Twitter ref={twitterChildRef} />
-                    <ConflictOfInterestStep ref={conflictOfInterestChildRef} />
-                    <InformedConsentStep ref={informedConsentChildRef} />
-                    <FundingSupportStep ref={fundingSupportChildRef} />
-                    <DataReproducibilityStep ref={dataReproducibilityChildRef} />
-                    <BuildStep ref={buildChildRef} />
-                    <div className="d-flex align-items-center justify-content-end mt-4">
-                        <button
-                            type="button" 
-                            id="previous-step" 
-                            className={`button btn_secondary me-2 ${ wizard.formStep === wizard.formSteps[0]?.title ? 'd-none' : '' }`} 
-                            onClick={ () =>dispatch( prevStep() )}>Back</button>
-                        <button
-                            type="button"
-                            id="next-step"
-                            className={`button btn_primary`} 
-                            onClick={ () => handleNextStep() }>
-                            { wizard.formStep === wizard.formSteps[wizard.formSteps.length - 1]?.title ? "submit" : "next" }
-                        </button>
-                    </div>
+                    {
+                        wizard.formStep === 'revision_message' && <ZeroStep ref={zeroChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'agreement' && <AgreementStep ref={agreementChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'types' && <TypesStep ref={typesChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'section' && <SectionStep ref={sectionChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'authors' && <AuthorsStep ref={authorChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'keywords' && <KeywordsStep ref={keywordsChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'classifications' && <ClassificationsStep ref={classificationsChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'abstract' && <AbstractStep ref={abstractChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'editors' && <EditorStep ref={editorChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'reviewers' && <ReviewersStep ref={reviewersChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'files' && <FilesStep ref={filesChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'comments' && <CommentStep ref={commentChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'region' && <RegionStep ref={regionChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'authors_contribution' && <AuthorContributionStep ref={authorContributionChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'financial_disclosure' && <FinancialDisclosureStep ref={financialDisclosureChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'clinical_trial_registration_code' && <ClinicalTrialRegistrationCodeStep ref={clinicalTrialRegistrationCodeChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'ethical_approval' && <EthicalApprovalStep ref={ethicalApprovalChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'twitter' && <Twitter ref={twitterChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'conflict_of_interests' && <ConflictOfInterestStep ref={conflictOfInterestChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'informed_consent' && <InformedConsentStep ref={informedConsentChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'funding_support' && <FundingSupportStep ref={fundingSupportChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'data_reproducibility' && <DataReproducibilityStep ref={dataReproducibilityChildRef} />
+                    }
+                    {
+                        wizard.formStep === 'build' && <BuildStep/>
+                    }
+                    { 
+                        wizard.formStep !== 'build' &&
+                            <div className="d-flex align-items-center justify-content-end mt-4">
+                                <button
+                                    type="button" 
+                                    id="previous-step" 
+                                    className={`button btn_secondary me-2 ${ wizard.formStep === wizard.formSteps[0]?.title ? 'd-none' : '' }`} 
+                                    onClick={ () =>dispatch( prevStep() )}>
+                                    Back
+                                </button>
+                                <button
+                                    type="button"
+                                    id="next-step"
+                                    className={`button btn_primary`} 
+                                    onClick={ () => handleNextStep() }>
+                                    Next
+                                </button>
+                            </div>
+                    }
                 </div>
             </div>
         </div>

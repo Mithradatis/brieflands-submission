@@ -3,6 +3,7 @@ import { handleDialogClose } from '@/app/features/dialog/dialogSlice'
 import { deleteAuthor } from '@/app/api/author'
 import { deleteReviewer } from '@/app/api/reviewers'
 import { deleteFile } from '@/app/api/files'
+import { finishSubmission } from './client'
 
 export const handleOperation = createAsyncThunk(
     'dialog/handleOperation', 
@@ -20,6 +21,9 @@ export const handleOperation = createAsyncThunk(
             break;
             case 'delete-file': 
                 dispatch( deleteFile( { url: dialog.action, uuid: dialog.data } ) );
+                dispatch( handleDialogClose() );
+            case 'finish-submission': 
+                dispatch( finishSubmission( dialog.action ) );
                 dispatch( handleDialogClose() );
             break;
         }

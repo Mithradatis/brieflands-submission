@@ -14,10 +14,8 @@ const DataReproducibilityStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect( () => {
-        if ( wizard.formStep === 'data_reproducibility' ) {
-            dispatch( getDataReproducibilityStepData( getStepDataFromApi ) );
-            dispatch( getDataReproducibilityStepGuide( getDictionaryFromApi ) );
-        }
+        dispatch( getDataReproducibilityStepData( getStepDataFromApi ) );
+        dispatch( getDataReproducibilityStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -27,7 +25,7 @@ const DataReproducibilityStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="data-reproducibility" className={`tab${wizard.formStep === 'data_reproducibility' ? ' active' : ''}`}>
+            <div id="data-reproducibility" className="tab">
                 <h3 className="mb-4 text-shadow-white">Data Reroducibility</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
