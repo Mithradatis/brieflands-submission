@@ -5,7 +5,7 @@ import { Autocomplete, Checkbox, Input, FormControl, FormLabel, FormHelperText }
 import { modalState } from '@/app/features/modal/modalSlice'
 import { handleInput, handleInputAsArray, handleInputArray, addAuthorModalState, handleCheckbox } from '@/app/features/modal/addAuthorModalSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
-import { searchPeople } from '@/app/api/author'
+import { searchPeople, getAllCountries } from '@/app/api/author'
 
 const AddAuthorModal = () => {
     const wizard = useSelector( wizardState );
@@ -18,11 +18,6 @@ const AddAuthorModal = () => {
         { id: 2, label: 'home' },
         { id: 3, label: 'work' },
         { id: 4, label: 'fax' }
-    ];
-    const countries = [
-        { id: 108, label: 'Iran' },
-        { id: 109, label: 'Afghanistan' },
-        { id: 110, label: 'Tajikistan'  },
     ];
     const [ authorEmailInputValue, setAuthorEmailInputValue ] = useState('');
     const [ authorPhoneTypeInputValue, setAuthorPhoneTypeInputValue ]: any = useState({});
@@ -42,6 +37,10 @@ const AddAuthorModal = () => {
         'affiliations': false,
         'correspond_affiliation': false
     });
+    const getAllCountriesUrl = `${ wizard.baseUrl }/api/v1/journal/country`;
+    useEffect( () => {
+        dispatch( getAllCountries( getAllCountriesUrl ) );
+    }, []);
     useEffect( () => {
         setIsValid( prevIsValid => ({
             ...prevIsValid,
@@ -59,7 +58,7 @@ const AddAuthorModal = () => {
                 )
         }));
         const foundPhoneType = phoneTypes.find( ( item: any ) => item.label === addAuthorModalData.value['phone_type']?.[0] );
-        const foundCountry = countries.find( ( item: any ) => item.id === parseInt( addAuthorModalData.value['country_phone']?.[0] ) );
+        const foundCountry = addAuthorModalData.countriesList.find( ( item: any ) => item.id === parseInt( addAuthorModalData.value['country_phone']?.[0] ) );
         setAuthorPhoneTypeInputValue( foundPhoneType ? foundPhoneType : '' );
         setAuthorPhoneCountryInputValue( foundCountry ? foundCountry : '' );
     }, [addAuthorModalData.value]);
@@ -206,7 +205,7 @@ const AddAuthorModal = () => {
                             variant="soft"     
                             id="authorPhoneCountry"
                             name="authorPhoneCountry"
-                            options={ countries }
+                            options={ addAuthorModalData.countriesList }
                             value={ authorPhoneCountryInputValue }
                             onChange={ ( event, value ) => {
                                 dispatch( handleInputAsArray( { name: 'country_phone', value: value?.id.toString() || '' } ) ) }

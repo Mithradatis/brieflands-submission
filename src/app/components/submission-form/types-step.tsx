@@ -4,23 +4,22 @@ import { Alert } from '@mui/material'
 import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/documentTypesSlice'
-import { getDocumentTypes, getTypesStepData, getTypesStepGuide, updateTypesStepData } from '@/app/api/types'
+import { getTypesStepData, getTypesStepGuide, updateTypesStepData } from '@/app/api/types'
 import ReactHtmlParser from 'react-html-parser'
+import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
 
 const TypesStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
-    const documentTypes = formState.documentTypesList;
     const wizard = useSelector( wizardState );
+    const documentTypes = wizard.documentTypesList;
     const [ isValid, setIsValid ] = useState({
         doc_type: true,
         manuscript_title: true
     });
-    const getAllDocumentTypesFromApi = `${ wizard.baseUrl }/api/v1/journal/type`;
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/type`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
         dispatch( getTypesStepData( getStepDataFromApi ) );
         dispatch( getTypesStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
@@ -37,9 +36,15 @@ const TypesStep = forwardRef( ( prop, ref ) => {
             }));
         }
     }, [wizard.isVerified]);
+    const getWorkflowFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }`;
+    const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
     useImperativeHandle(ref, () => ({
         submitForm () {
-          dispatch( updateTypesStepData( getStepDataFromApi ) );
+          dispatch( updateTypesStepData( getStepDataFromApi ) ).then( () => {
+            dispatch( getWorkflow( getWorkflowFromApi ) );
+            dispatch( getSubmissionSteps( getStepsFromApi ) );
+          }); 
+          
         }
     }));
 
@@ -95,7 +100,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                     )}
                     {
                         ( formState.value.doc_type === '' && !isValid.doc_type ) 
-                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                        && <FormHelperText className="fs-7 text-danger mt-1">You should select a document type</FormHelperText> 
                     }
                 </FormControl>
                 <FormControl className="mb-3" error={formState.value.manuscript_title === '' && !isValid.manuscript_title}>
@@ -113,7 +118,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                     />
                     {
                         ( formState.value.manuscript_title === '' && !isValid.manuscript_title ) 
-                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                        && <FormHelperText className="fs-7 text-danger mt-1">You should enter a title for your manuscript</FormHelperText> 
                     }
                 </FormControl>
             </div>

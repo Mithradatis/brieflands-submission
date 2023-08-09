@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
-import { handleOpen, setModalData, setModalActionButton, saveModal, setFormIsValid, setFormIsInvalid } from '@/app/features/modal/modalSlice'
-import { saveReviewerModal } from '../features/modal/addReviewerModalSlice'
+import { handleOpen, setModalActionButton, saveModal, setFormIsValid, setFormIsInvalid } from '@/app/features/modal/modalSlice'
+import { saveReviewerModal, setModalData } from '../features/modal/addReviewerModalSlice'
 import { handleSnackbarOpen } from '@/app/features/snackbar/snackbarSlice'
 
 const fetchDataFromApi = async (url: string) => {
@@ -114,11 +114,15 @@ export const loadEditReviewerForm = createAsyncThunk(
   async (reviewerEmail: string, { getState, dispatch }) => {
     const state: any = getState();
     const reviewersSliceData = state.reviewersSlice.value;
-    let reviewerData;
+    const reviewerData: any = {};
     for (const [key, value] of Object.entries( reviewersSliceData )) {
       const reviewerItem: any = value;
       if ( reviewerItem.email === reviewerEmail ) {
-        reviewerData = value;
+        for ( const [key, value] of Object.entries( reviewerItem ) ) {
+          if ( value || value !== '' ) {
+            reviewerData[key] = value;
+          }
+        }
       }
     }
     dispatch( setModalData( reviewerData ) );

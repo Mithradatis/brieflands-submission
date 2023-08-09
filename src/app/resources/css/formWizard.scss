@@ -35,8 +35,8 @@
             left: 0;
             width: 100%;
             height: 5px;
-            border-top: 1px solid rgba(lighten($green, 20%), .2);
-            background-image: linear-gradient(to left, transparent 0, darken($green, 5%) 30%, darken($green, 5%) 50%, darken($green, 5%) 70%, transparent 100%);
+            border-top: 1px solid rgba(lighten($mainColor, 20%), .2);
+            background-image: linear-gradient(to left, transparent 0, darken($mainColor, 5%) 30%, darken($mainColor, 5%) 50%, darken($mainColor, 5%) 70%, transparent 100%);
         }
         ol {
             transition: all ease-in .5s;
@@ -47,10 +47,15 @@
                     font-size: .8rem;
                     .index {
                         border-radius: 50%;
+                    }
+                    &.disabled {
+                        pointer-events: none;
+                        opacity: .5;
                     }   
                 }
                 &.active {
                     a {
+                        min-width: 10rem;
                         font-weight: 700;
                         font-size: 1rem;
                         transform: scale(1.1, 1.1);
@@ -59,14 +64,14 @@
                             align-items: center;
                             justify-content: center;
                             position: relative;
-                            margin-top: -2.5rem;
+                            top: -1.25rem;
                             margin-bottom: .5rem;
                             font-size: 1.2rem;
-                            color: darken($green, 25%);
-                            text-shadow: 1px 1px 0 lighten($green, 30%);
+                            color: darken($mainColor, 25%);
+                            text-shadow: 1px 1px 0 lighten($mainColor, 30%);
                             width: 2.5rem;
                             height: 2.5rem;
-                            background-image: linear-gradient(45deg, lighten($green, 5%), lighten($green, 20%));
+                            background-image: linear-gradient(45deg, lighten($mainColor, 5%), lighten($mainColor, 20%));
                             box-shadow: 0 0 10px rgba(black, .1);
                             &::before {
                                 content: '';
@@ -75,7 +80,7 @@
                                 position: absolute;
                                 top: -.5rem;
                                 left: -.5rem;
-                                background-color: darken($green, 5%);
+                                background-color: darken($mainColor, 5%);
                                 border-radius: 50%;
                                 z-index: -2;
                                 box-shadow: inset 0 0 6px rgba(black, .1);
@@ -87,10 +92,14 @@
                                 position: absolute;
                                 top: -.25rem;
                                 left: -.25rem;
-                                background-color: $green;
+                                background-color: $mainColor;
                                 border-radius: 50%;
                                 z-index: -2;
                             }                        
+                        }
+                        .index-title {
+                            position: relative;
+                            top: -1rem;
                         }
                     }
                 }
@@ -106,11 +115,11 @@
         }
         .start-gradient {
             left: 0;
-            background-image: linear-gradient(to right, rgba($green, 1) 0, rgba($green, 1) 20%, rgba($green, .4) 50%, transparent 100%);
+            background-image: linear-gradient(to right, rgba($mainColor, 1) 0, rgba($mainColor, 1) 20%, rgba($mainColor, .4) 50%, transparent 100%);
         }
         .end-gradient {
             right: 0;
-            background-image: linear-gradient(to left, rgba($green, 1) 0, rgba($green, 1) 20%, rgba($green, .4) 50%, transparent 100%);
+            background-image: linear-gradient(to left, rgba($mainColor, 1) 0, rgba($mainColor, 1) 20%, rgba($mainColor, .4) 50%, transparent 100%);
         }
     }
 }
@@ -118,8 +127,8 @@
 .wizard-steps {
     max-width: 725px;
     border: 1px solid white;
-    box-shadow:  20px 30px 100px #4a8538,
-        20px 20px 60px #79d95d,
+    box-shadow:  20px 30px 100px darken( $mainColor, 10% ),
+        20px 20px 60px $mainColor,
         inset 20px 20px 60px rgba(220, 220, 220, 1);
 }
 
@@ -127,11 +136,17 @@
     max-width: 15rem;
     li {
         transition: all ease-in-out .2s;
+        a {
+            &.disabled {
+                pointer-events: none;
+                opacity: .5;
+            }
+        }
         &.active {
             font-size: 1rem;
             font-weight: 700;
             a {
-                color: lighten($green, 25%);
+                color: lighten($mainColor, 25%);
                 text-shadow: none;
             }
         }
@@ -182,10 +197,6 @@
 
 /*  BUTTONS  */
 :root {
-    --primary-light: #8affa3;
-    --primary: #5dfc8d;
-    --primary-dark: #0eeb63;
-    
     --white: #FFFFFF;
     --greyLight-1: #E4EBF5;
     --greyLight-2: #c8d0e7;
@@ -207,16 +218,16 @@
     &.btn_primary {
         grid-column: 1 / 2;
         grid-row: 4 / 5;
-        background: var(--primary);
-        box-shadow:inset .2rem .2rem 1rem var(--primary-light), 
-                inset -.2rem -.2rem 1rem var(--primary-dark),
+        background: $mainColor;
+        box-shadow:inset .2rem .2rem .5rem lighten($mainColor, 5%), 
+                inset -.2rem -.2rem .5rem darken($mainColor, 5%),
                 $shadow;
-        color: var(--greyLight-1);
+        color: white;
 
-        &:hover { color: var(--white); }
+        &:hover { color: white; }
         &:active {
-        box-shadow:inset .2rem .2rem 1rem var(--primary-dark), 
-                inset -.2rem -.2rem 1rem var(--primary-light);
+        box-shadow:inset .2rem .2rem 1rem lighten($mainColor, 5%), 
+                inset -.2rem -.2rem 1rem darken($mainColor, 5%);
         }
     }
     &.btn_secondary {

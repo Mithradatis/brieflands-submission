@@ -1,20 +1,27 @@
+import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { wizardState, loadStep } from '@/app/features/wizard/wizardSlice'
 
 const WizardOutline = () => {
-    const wizard = useSelector( wizardState );
     const dispatch = useDispatch();
+    const [ formSteps, setFormSteps ] = useState([]);
+    const wizard = useSelector( wizardState );
+    useEffect( () => {
+        setFormSteps( wizard.formSteps );
+    }, [wizard.formSteps]);
 
     return (
         <>
             <div className="wizard-outline position-relative pe-4 py-4 text-shadow">
                 <ol className="fs-7">
                     {
-                        wizard.formSteps.map( ( item: any ) => {
+                        formSteps.map( ( item: any ) => {
                             const formStepTitle = item.attributes?.slug;
                             return (
-                                <li className={wizard.formStep === formStepTitle ? 'active' : ''} key={ formStepTitle }>
-                                    <a href={`#${formStepTitle}`} onClick={() => dispatch( loadStep( formStepTitle ) ) }>
+                                <li className={ wizard.formStep === formStepTitle ? 'active' : '' } key={ formStepTitle }>
+                                    <a href={`#${formStepTitle}`}
+                                       className={ ( wizard.workflow?.storage?.types?.doc_type === undefined && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }
+                                       onClick={() => dispatch( loadStep( formStepTitle ) ) }>
                                         <span className="text-capitalize">{ formStepTitle?.replace(/_/g, ' ') }</span>
                                     </a>
                                 </li>

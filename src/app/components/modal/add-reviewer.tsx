@@ -4,7 +4,7 @@ import { List, ListItem, ListItemText } from '@mui/material'
 import { Autocomplete, Input, FormControl, FormLabel, FormHelperText, Textarea, Button, Divider, createFilterOptions } from '@mui/joy'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { modalState, handleNestedOpen, handleNestedClose } from '@/app/features/modal/modalSlice'
-import { addReviewerModalState, handleSelection, handleInput, handleClassifications } from '@/app/features/modal/addReviewerModalSlice' 
+import { addReviewerModalState, handleInput, handleClassifications } from '@/app/features/modal/addReviewerModalSlice' 
 import { getClassificationsList } from '@/app/api/classifications'
 import { Modal, ModalDialog } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
@@ -18,6 +18,9 @@ const AddReviewerModal = () => {
     const [ selectedClassifications , setSelectedClassifications ] = useState<{ classification: string }[]>([]);
     const [ disabledClassifications, setDisabledClassifications ] = useState<{ [key: string]: boolean }>({});
     const formIsValid = modalData.isFormValid;
+    const [ reviewerSuggestedOrOpposed, setReviewerSuggestedOrOpposed ]: any = useState({});
+    const [ reviewerAcademicDegree, setReviewerAcademicDegree ]: any = useState({});
+    const [ reviewerClassifications, setReviewerClassifications ]: any = useState([]);
     const [ isValid, setIsValid ] = useState( {
         reviewerEmail: modalData.modalFormData.reviewerEmail && modalData.modalFormData.reviewerEmail !== '',
         reviewerFirstName: modalData.modalFormData.reviewerFirstName && modalData.modalFormData.reviewerFirstName !== '',
@@ -29,7 +32,7 @@ const AddReviewerModal = () => {
           ...prevDisabledClassifications,
           [classification]: true,
         }));
-      };
+    };
     const removeClassification = (index: any, classification: any) => {
         setSelectedClassifications((prevClassifications) => {
           const updatedClassifications = [...prevClassifications];
@@ -40,23 +43,30 @@ const AddReviewerModal = () => {
             ...prevDisabledClassifications,
             [classification]: false,
         }));
-    }
+    };
     useEffect( () => {
-        if ( modalData.modalForm === 'reviewers' ) {
-            const classificationsUrl = `${ wizard.baseUrl }/api/v1/journal/classification`;
-            dispatch( getClassificationsList( classificationsUrl ) );
-            const isValidKeys = Object.keys(isValid);
-            for ( const [key, value] of Object.entries( modalData.modalFormData ) ) {   
-                if ( isValidKeys.includes(key) ) {
-                    if ( value === '' ) {
-                        setIsValid({ ...isValid, [key]: false });
-                    } else {
-                        setIsValid({ ...isValid, [key]: true });
-                    }
+        const classificationsUrl = `${ wizard.baseUrl }/api/v1/journal/classification`;
+        dispatch( getClassificationsList( classificationsUrl ) );
+        const isValidKeys = Object.keys(isValid);
+        for ( const [key, value] of Object.entries( modalData.modalFormData ) ) {   
+            if ( isValidKeys.includes(key) ) {
+                if ( value === '' ) {
+                    setIsValid({ ...isValid, [key]: false });
+                } else {
+                    setIsValid({ ...isValid, [key]: true });
                 }
             }
         }
-    }, [modalData.modalFormData]);
+        const suggestedOrOpposed: any = addReviewerFormData.suggestOrOpposeList.find( ( item: any ) => item.id === parseInt( addReviewerFormData.value['suggest-or-oppose'] ) )?.title;
+        const academicDegree: any = addReviewerFormData.academicDegreeList.find( ( item: any ) => item.id === parseInt( addReviewerFormData.value['academic-degree'] ) )?.title;
+        const selectedClassificationIds = addReviewerFormData.value['classifications'];
+        const classifications: any[] = selectedClassificationIds?.map((classificationId: string) => {
+            return addReviewerFormData.classificationsList.find( ( item: any ) => item.id === classificationId ).id;
+        });
+        setReviewerSuggestedOrOpposed( suggestedOrOpposed ? suggestedOrOpposed : '' );
+        setReviewerAcademicDegree( academicDegree ? academicDegree : '' );
+        setReviewerClassifications( classifications ? classifications : [] );
+    }, [addReviewerFormData.value]);
 
     return (
         <>
@@ -91,9 +101,14 @@ const AddReviewerModal = () => {
                                                     { item.attributes.title }
                                                 </ListItemText>
                                                 <Button
-                                                size="sm"
-                                                onClick={() => selectClassification(item.attributes.title)}
-                                                disabled={disabledClassifications[item.attributes.title]}
+                                                    size="sm"
+                                                    onClick={ () => {
+                                                        const selectedIds: any = [];
+                                                        selectedIds.push( item.id );
+                                                        selectClassification( item.attributes.title );
+                                                        dispatch( handleInput( { name: 'classifications', value: selectedIds } ) );
+                                                    }}
+                                                    disabled={disabledClassifications[item.attributes.title]}
                                                 >
                                                 <i className="fa-duotone fa-angle-right"></i>
                                                 </Button>
@@ -151,12 +166,7 @@ const AddReviewerModal = () => {
                             }
                            ) : []
                     }
-                    value={
-                        addReviewerFormData.value['suggest-or-oppose'] !== ''
-                          ? addReviewerFormData.suggestOrOpposeList
-                              .find( ( item: any ) => addReviewerFormData.value['suggest-or-oppose'] === item.id )?.title
-                          : null
-                    }
+                    value={ reviewerSuggestedOrOpposed }
                     onChange={(event, value) => {
                         dispatch( handleInput({ 
                                 name: 'suggest-or-oppose',
@@ -177,11 +187,12 @@ const AddReviewerModal = () => {
                     name="reviewerEmail"
                     id="reviewerEmail"
                     placeholder="Reviewer's Email"
+                    defaultValue={ addReviewerFormData.value['email'] }
                     onChange={ event => dispatch( handleInput( { name: 'email', value: event.target.value } ) ) }
                 />
                 {
                     ( !isValid.reviewerEmail && !formIsValid ) 
-                    && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                    && <FormHelperText className="fs-7 text-danger mt-1">Please enter reviewer email</FormHelperText> 
                 }
             </FormControl>
             <FormControl className="mb-3" error={ !isValid.reviewerFirstName && !formIsValid }>
@@ -194,11 +205,12 @@ const AddReviewerModal = () => {
                     name="reviewerFirstName"
                     id="reviewerFirstName"
                     placeholder="Reviewer's First Name"
+                    defaultValue={ addReviewerFormData.value['first-name'] }
                     onChange={ event => dispatch( handleInput( { name: 'first-name', value: event.target.value } ) ) }
                 />
                 {
                     ( !isValid.reviewerFirstName && !formIsValid ) 
-                    && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                    && <FormHelperText className="fs-7 text-danger mt-1">Please enter reviewer first name</FormHelperText> 
                 }
             </FormControl>
             <FormControl className="mb-3">
@@ -210,6 +222,7 @@ const AddReviewerModal = () => {
                     name="reviewerMiddleName"
                     id="reviewerMiddleName"
                     placeholder="Reviewer's Middle Name"
+                    defaultValue={ addReviewerFormData.value['middle-name'] }
                     onChange={ event => dispatch( handleInput( { name: 'middle-name', value: event.target.value } ) ) }
                 />
             </FormControl>
@@ -223,11 +236,12 @@ const AddReviewerModal = () => {
                     name="reviewerLastName"
                     id="reviewerLastName"
                     placeholder="Reviewer's Last Name"
+                    defaultValue={ addReviewerFormData.value['last-name'] }
                     onChange={ event => dispatch( handleInput( { name: 'last-name', value: event.target.value } ) ) }
                 />
                 {
                     ( !isValid.reviewerLastName && !formIsValid ) 
-                    && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                    && <FormHelperText className="fs-7 text-danger mt-1">Please enter reviewer last name</FormHelperText> 
                 }
             </FormControl>
             <FormControl className="mb-3">
@@ -244,10 +258,27 @@ const AddReviewerModal = () => {
                     disableClearable={true}
                     name="academicDegree"
                     id="academicDegree"
-                    options={ addReviewerFormData.academicDegreeList }
-                    value={ addReviewerFormData.academicDegree }
+                    // options={ addReviewerFormData.academicDegreeList }
+                    // value={ reviewerAcademicDegree }
+                    // onChange={(event, value) => {
+                    //     dispatch( handleInput({ name: 'academic-degree' , value: value.toString() } ) );
+                    // }}
+                    options={
+                        Array.isArray( addReviewerFormData.academicDegreeList ) 
+                        ? addReviewerFormData.academicDegreeList.map( 
+                            ( item: any ) => {
+                                return item.title || '' 
+                            }
+                           ) : []
+                    }
+                    value={ reviewerAcademicDegree }
                     onChange={(event, value) => {
-                        dispatch( handleSelection({ name: 'academic-degree' , value: value } ) );
+                        dispatch( handleInput({ 
+                                name: 'academic-degree',
+                                value: addReviewerFormData.academicDegreeList.find( 
+                                    ( item: any ) => item.title === value )?.id || '' } 
+                                    ) 
+                                )
                     }}
                 />
             </FormControl>
@@ -260,6 +291,7 @@ const AddReviewerModal = () => {
                     name="reviewerDepartment"
                     id="reviewerDepartment"
                     placeholder="Reviewer's Department"
+                    defaultValue={ addReviewerFormData.value['department'] }
                     onChange={ event => dispatch( handleInput( { name: 'department', value: event.target.value } ) ) }
                 />
             </FormControl>
@@ -272,6 +304,7 @@ const AddReviewerModal = () => {
                     name="reviewerUniversity"
                     id="reviewerUniversity"
                     placeholder="Reviewer's University"
+                    defaultValue={ addReviewerFormData.value['university'] }
                     onChange={ event => dispatch( handleInput( { name: 'university', value: event.target.value } ) ) }
                 />
             </FormControl>
@@ -301,19 +334,20 @@ const AddReviewerModal = () => {
                                ) : []
                         }
                         value={
-                            Array.isArray( addReviewerFormData.classificationsList ) && addReviewerFormData.value?.ids?.length > 0
+                            Array.isArray( addReviewerFormData.classificationsList )
                               ? addReviewerFormData.classificationsList
-                                  .filter( ( item: any ) => addReviewerFormData.value.ids.includes( item.id ) )
+                                  .filter( ( item: any ) => reviewerClassifications.includes( item.id ) )
                                   .map( ( item: any ) => item.attributes.title )
                               : []
                         }
                         onChange={(event, value) => {
-                            const selectedIds = value.map((selectedItem) => {
+                            const selectedIds = value.map( ( selectedItem: any ) => {
                               const selectedOption = addReviewerFormData.classificationsList.find(
                                 ( item: any ) => item.attributes.title === selectedItem
                               );
                               return selectedOption ? selectedOption.id : '';
                             });
+                            setSelectedClassifications( value );
                             dispatch( handleInput( { name: 'classifications', value: selectedIds } ) );
                         }}
                         filterOptions={(options, params) => {

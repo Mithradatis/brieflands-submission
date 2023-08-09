@@ -1,10 +1,22 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { getClassificationsList } from '@/app/api/classifications'
-import { handleReviewerOperation } from '@/app/api/reviewers'
 
-const suggestOrOpposeList = [ { id: 1 , title: 'Suggest Reviewer' }, { id: 2, title: 'Oppose Reviewer' } ];
+const suggestOrOpposeList = [ 
+  { id: 1 , title: 'Suggest Reviewer' }, 
+  { id: 2, title: 'Oppose Reviewer' } 
+];
 
-const academicDegreeList = ['Not Spcified', 'B.Sc.', 'M.Sc.', 'MD', 'PhD', 'MD and PhD', 'PharmD', 'DDS', 'Other'];
+const academicDegreeList = [
+  { id: 0, title: 'Not Spcified' }, 
+  { id: 1, title: 'B.Sc.' }, 
+  { id: 2, title: 'M.Sc.' }, 
+  { id: 3, title: 'MD' },
+  { id: 4, title: 'PhD' },
+  { id: 5, title: 'MD and PhD' },
+  { id: 6, title: 'PharmD' }, 
+  { id: 7, title: 'DDS' }, 
+  { id: 8, title: 'Other' }
+];
 
 export const addReviewerModalSlice = createSlice({
   name: 'addReviewerModal',
@@ -49,6 +61,12 @@ export const addReviewerModalSlice = createSlice({
         },
       };
     },
+    setModalData: ( state, action ) => {
+      return {
+        ...state,
+        value: action.payload
+      };
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -62,7 +80,8 @@ export const {
   handleSelection, 
   handleInput, 
   handleClassifications,
-  saveReviewerModal 
+  saveReviewerModal,
+  setModalData 
 } = addReviewerModalSlice.actions;
 
 export const addReviewerModalState = ( state: any ) => state.addReviewerModalSlice;

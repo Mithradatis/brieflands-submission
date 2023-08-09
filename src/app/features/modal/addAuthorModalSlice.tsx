@@ -1,9 +1,10 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { searchPeople } from '@/app/api/author'
+import { searchPeople, getAllCountries } from '@/app/api/author'
 
 interface AuthorModalState {
   isVerified: boolean;
   isLoading: boolean;
+  countriesList: any[];
   datatableRows: any[];
   disabledInputs: boolean;
   value: {
@@ -26,6 +27,7 @@ export const addAuthorModalSlice = createSlice({
   initialState: {
     isVerified: false,
     isLoading: false,
+    countriesList: [],
     datatableRows: [],
     disabledInputs: true,
     value: {}
@@ -116,6 +118,16 @@ export const addAuthorModalSlice = createSlice({
           author['correspond_affiliation'] !== '' && ( state.value['correspond_affiliation'] = author['correspond_affiliation'] );
         }
         state.disabledInputs = false;
+      }).addCase(getAllCountries.pending, ( state ) => {
+        state.isLoading = true;
+      }).addCase(getAllCountries.fulfilled, ( state, action ) => {
+        state.isLoading = false;
+        console.log( action.payload.data );
+        const countriesList: any = [];
+        action.payload.data.forEach( ( country: any ) => {
+          countriesList.push({ id: parseInt( country.id ), label: country.attributes.title });
+        });
+        state.countriesList = countriesList;
       });
   },
 });

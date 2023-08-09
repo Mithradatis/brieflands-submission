@@ -1,9 +1,9 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
-import { dialogState } from '@/app/features/dialog/dialogSlice'
+import { getDocumentTypes } from '@/app/api/types'
 import WizardNavigation from '@/app/components/wizard-navigation'
 import WizardOutline from '@/app/components/wizard-outline'
 import AgreementStep from '@/app/components/submission-form/agreement-step'
@@ -112,6 +112,10 @@ const SubmissionForm = () => {
         }    
         dispatch( nextStep( wizard.isFormValid ) );
     }
+    const getAllDocumentTypesFromApi = `${ wizard.baseUrl }/api/v1/journal/type?filter[document_type_journals.journal_id]=${ wizard.workflow.attributes.journal_id }`;
+    useEffect( () => {
+        dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
+    }, []);
 
     return (
         <div className="wizard mb-4">
@@ -129,6 +133,31 @@ const SubmissionForm = () => {
                             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
                         </svg>
                     </div>
+                    <div className="z-index-2">
+                        {
+                            ( wizard.workflow?.storage?.types?.doc_type !== undefined && wizard.workflow?.storage?.types?.doc_type !== '' ) &&
+                                <p className="fs-7">
+                                    <label className="me-2 fw-bold">Document Type:</label>
+                                    <span className="text-muted">
+                                        { wizard.workflow?.storage?.types?.doc_type 
+                                            && wizard.documentTypesList.find( 
+                                                ( item: any ) => item.id === wizard.workflow.storage.types.doc_type 
+                                                )?.attributes?.title 
+                                        }
+                                    </span>
+                                </p>
+                        }
+                        {
+                            ( wizard.workflow?.storage?.types?.manuscript_title !== undefined && wizard.workflow?.storage?.types?.manuscript_title !== '' ) &&
+                                <p className="fs-7">
+                                    <label className="me-2 fw-bold">Manuscript Title:</label>
+                                    <span className="text-muted">
+                                        { wizard.workflow?.storage?.types?.manuscript_title }
+                                    </span>
+                                </p>
+                        }
+                    </div>
+                    <hr className="mt-2 mb-4"/>
                     {
                         wizard.formStep === 'revision_message' && <ZeroStep ref={zeroChildRef} />
                     }

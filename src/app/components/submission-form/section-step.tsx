@@ -54,7 +54,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                         { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
-                <FormControl className="mb-3" error={formState.value.id === '' && !isValid.id}>
+                <FormControl className="mb-3" error={ formState.value.id === '' && !isValid.id }>
                     <FormLabel className="fw-bold mb-1">
                         Please Choose
                     </FormLabel>

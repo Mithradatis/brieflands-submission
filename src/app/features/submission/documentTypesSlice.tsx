@@ -32,13 +32,6 @@ export const documentTypesSlice = createSlice({
       state.isLoading = false;
       state.stepGuide = action.payload.data.value;
     })
-    .addCase(getDocumentTypes.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getDocumentTypes.fulfilled, ( state, action: any ) => {
-      state.isLoading = false;
-      state.documentTypesList = action.payload.data;
-    })
     .addCase(getTypesStepData.pending, (state) => {
       state.isLoading = true;
     })

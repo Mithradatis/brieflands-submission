@@ -1,11 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { buildNewWorkflow, getSubmissionSteps, getWorkflow } from '@/app/api/client'
+import { getDocumentTypes } from '@/app/api/types'
 
 let baseUrl, currentUrl, workflowId = '';
 if (typeof window !== 'undefined') {
   currentUrl = new URL( window.location.href );
   workflowId = currentUrl.pathname.split('/').pop() || '';
-  baseUrl = `${ window.location.protocol }//${  window.location.hostname}`;
+  baseUrl = `${ window.location.protocol }//${  window.location.hostname }`;
 }
 
 interface FormSteps {
@@ -27,8 +28,10 @@ export const wizardSlice = createSlice({
     revision: '',
     formSteps: [] as FormSteps[],
     formStep: 'agreement',
-    workflowId: workflowId || 365,
-    workflow: {}
+    hasDocumentType: false,
+    workflowId: 365,
+    workflow: {},
+    documentTypesList: []
   },
   reducers: {
     loadStep: ( state, action ) => {
@@ -90,9 +93,8 @@ export const wizardSlice = createSlice({
         state.isLoading = true;
       })
       .addCase( getSubmissionSteps.fulfilled, ( state, action ) => {
-        const activeSteps = action.payload.data?.filter(
-          (item: any) => item.attributes.status === 'active'
-        );
+        state.formSteps = state.formSteps[0]?.attributes?.slug === 'revision_message' ? [{ id: 0, attributes: { title: 'Revision Message',  slug: 'revision_message' } }] : [];
+        const activeSteps = action.payload.data;
         if ( activeSteps !== undefined ) {
           state.formSteps = [
             ...state.formSteps,
@@ -109,7 +111,13 @@ export const wizardSlice = createSlice({
       .addCase( buildNewWorkflow.fulfilled, ( state, action ) => {
         state.isLoading = false;
         state.workflowId = action.payload?.id;
-        window.location.href = `${ state.baseUrl }/en/submssion/workflow/${ action.payload?.id }`;
+        window.location.href = `${ state.baseUrl }/en/submission/workflow/${ action.payload?.id }`;
+      }).addCase(getDocumentTypes.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase(getDocumentTypes.fulfilled, ( state, action: any ) => {
+        state.isLoading = false;
+        state.documentTypesList = action.payload.data;
       });
   },
 });

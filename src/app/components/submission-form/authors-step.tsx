@@ -130,7 +130,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                             if ( hoveredRow && draggingRow ) {
                               const itemsCopy = filteredItems.slice();
                               itemsCopy.splice(
-                                hoveredRow.index,
+                                hoveredRow.id,
                                 0,
                                 itemsCopy.splice(draggingRow.index, 1)[0]
                               );

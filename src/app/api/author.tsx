@@ -39,6 +39,13 @@ export const getAuthorStepData = createAsyncThunk(
   }
 );
 
+export const getAllCountries = createAsyncThunk(
+  'submission/getAllCountries',
+  async (url: string) => {
+    return fetchDataFromApi(url);
+  }
+);
+
 export const addAuthor = createAsyncThunk(
   'addAuthorModal/addAuthor',
   async ( modalFormData: any, { getState, dispatch }) => {
