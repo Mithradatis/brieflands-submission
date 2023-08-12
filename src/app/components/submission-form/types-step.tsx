@@ -41,8 +41,10 @@ const TypesStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateTypesStepData( getStepDataFromApi ) ).then( () => {
-            dispatch( getWorkflow( getWorkflowFromApi ) );
-            dispatch( getSubmissionSteps( getStepsFromApi ) );
+            if ( formState.value.doc_type === undefined ) {
+                dispatch( getWorkflow( getWorkflowFromApi ) );
+                dispatch( getSubmissionSteps( getStepsFromApi ) );
+            }
           }); 
           
         }
@@ -50,7 +52,6 @@ const TypesStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            { console.log( formState.value.doc_type ) } 
             <div id="types" className="tab">
                 <h3 className="mb-4 text-shadow-white">Types</h3>
                 {   
@@ -84,7 +85,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                             value={
                                 formState.value.doc_type !== ''
                                   ? documentTypes
-                                      .find( ( item: any ) => parseInt( item.id ) === formState.value.doc_type  )?.attributes?.title
+                                      .find( ( item: any ) => parseInt( item.id ) === parseInt( formState.value.doc_type )  )?.attributes?.title
                                   : null
                             }
                             onChange={(event, value) => {

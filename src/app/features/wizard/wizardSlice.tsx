@@ -3,10 +3,16 @@ import { buildNewWorkflow, getSubmissionSteps, getWorkflow } from '@/app/api/cli
 import { getDocumentTypes } from '@/app/api/types'
 
 let baseUrl, currentUrl, workflowId = '';
-if (typeof window !== 'undefined') {
+if ( typeof window !== 'undefined' ) {
   currentUrl = new URL( window.location.href );
-  workflowId = currentUrl.pathname.split('/').pop() || '';
-  baseUrl = `${ window.location.protocol }//${  window.location.hostname }`;
+  let pathname = currentUrl.pathname;
+  // Remove trailing slash if present
+  if ( pathname.endsWith('/') ) {
+    pathname = pathname.slice(0, -1);
+  }
+  const pathParts = pathname.split('/');
+  workflowId = pathParts.pop() || '';
+  baseUrl = `${window.location.protocol}//${window.location.hostname}`;
 }
 
 interface FormSteps {
@@ -21,7 +27,7 @@ export const wizardSlice = createSlice({
   name: 'submission',
   initialState: {
     baseUrl: baseUrl,
-    isLoading: false,
+    isLoading: true,
     isVerified: false,
     isFormValid: false,
     baseDocId: '',
@@ -29,7 +35,7 @@ export const wizardSlice = createSlice({
     formSteps: [] as FormSteps[],
     formStep: 'agreement',
     hasDocumentType: false,
-    workflowId: 302,
+    workflowId: workflowId || 365,
     workflow: {},
     documentTypesList: []
   },

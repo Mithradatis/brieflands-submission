@@ -123,15 +123,15 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
 	}, [filterText, resetPaginationToggle]);
     useEffect(() => {
         const filteredData = formState.reviewersList.filter( ( item: any ) => {
-        const rowValues = Object.values( item );
-        return rowValues.some((value) => {
-            if (typeof value === 'string') {
-            const formattedValue = value.replace(/\s/g, '').toLowerCase();
-            const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
-            return formattedValue.includes(formattedFilterText);
-            }
-            return false;
-        });
+            const rowValues = Object.values( item );
+            return rowValues.some((value) => {
+                if (typeof value === 'string') {
+                const formattedValue = value.replace(/\s/g, '').toLowerCase();
+                const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
+                return formattedValue.includes(formattedFilterText);
+                }
+                return false;
+            });
         });
         setFilteredItems( filteredData );
       }, [formState.reviewersList, filterText, wizard.formStep]);

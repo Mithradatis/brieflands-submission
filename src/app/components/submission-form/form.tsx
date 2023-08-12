@@ -145,7 +145,7 @@ const SubmissionForm = () => {
                                     <span className="text-muted">
                                         { wizard.workflow?.storage?.types?.doc_type
                                             && wizard.documentTypesList.find( 
-                                                ( item: any ) => parseInt( item.id ) === wizard.workflow.storage.types.doc_type 
+                                                ( item: any ) => parseInt( item.id ) === parseInt( wizard.workflow.storage.types.doc_type ) 
                                                 )?.attributes?.title 
                                         }
                                     </span>

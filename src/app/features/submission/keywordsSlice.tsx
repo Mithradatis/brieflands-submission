@@ -1,14 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getKeywordsStepGuide, getKeywordsList, getKeywordsStepData } from '@/app/api/keywords'
+import { getKeywordsStepGuide, getKeywords, findKeywords, getKeywordsStepData, addNewKeyword } from '@/app/api/keywords'
 
 export const keywordsSlice = createSlice({
   name: 'keywords',
   initialState: {
+    isInitialized: false,
     isLoading: false,
     stepGuide: {},
-    keywordsList: [{}],
+    keywordsBuffer: [] as any,
+    keywordsList: [] as any,
     value: {
-      ids: []
+      ids: [] as any
     }
   },
   reducers: {
@@ -31,13 +33,6 @@ export const keywordsSlice = createSlice({
       state.isLoading = false;
       state.stepGuide = action.payload.data.value;
     })
-    .addCase(getKeywordsList.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getKeywordsList.fulfilled, ( state, action: any ) => {
-      state.isLoading = false;
-      state.keywordsList = action.payload.data;
-    })
     .addCase(getKeywordsStepData.pending, (state) => {
       state.isLoading = true;
     })
@@ -47,6 +42,35 @@ export const keywordsSlice = createSlice({
       if ( Object.keys(stepData).length > 0 ) {
         state.value.ids = stepData;
       }
+      state.isInitialized = true;
+    })
+    .addCase(getKeywords.pending, ( state ) => {
+      state.isLoading = true;
+    })
+    .addCase(getKeywords.fulfilled, ( state, action: any ) => {
+      state.isLoading = false;
+      const keyword = action.payload.data;
+      state.keywordsList.push( keyword );
+    })
+    .addCase(findKeywords.pending, ( state ) => {
+      state.isLoading = true;
+    })
+    .addCase(findKeywords.fulfilled, ( state, action: any ) => {
+      state.isLoading = false;
+      const keywords = action.payload.data;
+      state.keywordsBuffer = [];
+      keywords.map( ( item: any ) => {
+        state.keywordsBuffer.push( item );
+      });
+    })
+    .addCase(addNewKeyword.pending, (state) => {
+      state.isLoading = true;
+    })
+    .addCase(addNewKeyword.fulfilled, ( state, action ) => {
+      state.isLoading = false;
+      const keyword = action.payload;
+      state.keywordsList.push( keyword );
+      state.value.ids.push( parseInt( keyword.id ) );
     });
   },
 });

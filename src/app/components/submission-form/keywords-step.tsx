@@ -4,7 +4,7 @@ import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/keywordsSlice'
-import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide, updateKeywordsStepData } from '@/app/api/keywords'
+import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide, updateKeywordsStepData, addNewKeyword, getKeywords, findKeywords } from '@/app/api/keywords'
 import ReactHtmlParser from 'react-html-parser'
 
 const KeywordsStep = forwardRef( ( prop, ref ) => {
@@ -35,6 +35,14 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
             }));
         }
     }, [wizard.isVerified]);
+    useEffect( () => {
+        if ( formState.value.ids.length > 0 ) {
+            formState.value.ids.map( ( item: any ) => {
+                const findKeywordInApi = `${ getAllKeywordsFromApi }/${ item }`;
+                dispatch( getKeywords( findKeywordInApi ) );
+            });
+        }
+    }, [formState.isInitialized]);
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateKeywordsStepData( getStepDataFromApi ) );
@@ -65,27 +73,33 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                         disabled={false}
                         name="documentKeywords"
                         id="documentKeywords"
-                        options={ 
-                            Array.isArray( formState.keywordsList ) 
-                            ? formState.keywordsList.map( 
-                                ( item: any ) => {
-                                    return item.attributes?.title || '' 
-                                }
-                               ) : []
+                        options={ formState.keywordsBuffer.length > 0 
+                            ? formState.keywordsBuffer.map( ( item: any ) => item.attributes?.title )
+                            : []
                         }
-                        value={
-                            Array.isArray( formState.keywordsList ) && formState.value.ids.length > 0
-                              ? formState.keywordsList
-                                  .filter( ( item: any ) => formState.value.ids.includes( parseInt( item.id ) ) )
-                                  .map( ( item: any ) => item.attributes.title )
-                              : []
+                        value={ formState.keywordsList.length > 0 
+                            ? formState.keywordsList.map( ( item: any ) => item.attributes?.title )
+                            : [] 
                         }
-                        onChange={(event, value) => {
-                            const selectedIds = value.map(
-                                ( title: string ) =>
-                                    parseInt( formState.keywordsList.find( ( item: any ) => item.attributes.title === title)?.id )
-                            );
-                            dispatch( handleInput( { name: 'ids', value: selectedIds } ) );
+                        onInputChange={ ( event, value ) =>  {
+                            if ( value.length > 0 ) {
+                                const findKeywordInApi = `${ getAllKeywordsFromApi }?filter[title]=${ value }`;
+                                dispatch( findKeywords( findKeywordInApi ) )
+                            }
+                        }}
+                        onChange={ ( event, value ) => {
+                            const findKeywordInApi = `${ getAllKeywordsFromApi }?filter[title]=${ value }`;
+                            dispatch( findKeywords( findKeywordInApi ) );
+                            if ( value.length > 0 && formState.keywordsBuffer.length === 0 ) {
+                                console.log( 'test new' );
+                                dispatch( addNewKeyword( { url: getAllKeywordsFromApi, keyword: value[value.length - 1] } ) );
+                            } else {
+                                const selectedIds = value.map(
+                                    ( title: string ) =>
+                                        parseInt( formState.keywordsBuffer.find( ( item: any ) => item.attributes.title === title)?.id )
+                                );
+                                dispatch( handleInput( { name: 'ids', value: selectedIds } ) );
+                            }
                         }}
                         filterOptions={ ( options, params ) => {
                             const filtered = filter(options, params);
@@ -94,7 +108,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                                 inputValue === option
                             );
                             if (inputValue !== '' && !isExisting) {
-                                filtered.push(inputValue);
+                                filtered.push( inputValue );
                             }
                         
                             return filtered;
@@ -102,7 +116,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                     />
                     {
                         ( formState.ids === '' && !isValid.ids ) 
-                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                        && <FormHelperText className="fs-7 text-danger mt-1">You should enter at least one keyword</FormHelperText> 
                     }
                 </FormControl>
             </div>

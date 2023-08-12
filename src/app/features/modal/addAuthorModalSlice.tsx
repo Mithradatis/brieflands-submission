@@ -122,7 +122,6 @@ export const addAuthorModalSlice = createSlice({
         state.isLoading = true;
       }).addCase(getAllCountries.fulfilled, ( state, action ) => {
         state.isLoading = false;
-        console.log( action.payload.data );
         const countriesList: any = [];
         action.payload.data.forEach( ( country: any ) => {
           countriesList.push({ id: parseInt( country.id ), label: country.attributes.title });

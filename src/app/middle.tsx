@@ -31,9 +31,9 @@ export default function App() {
     }
   },[]);
 
-
   return (
     <>
+        <div id="loading" className={ wizard.isLoading ? 'd-block' : 'd-none'}></div>
         <Modal
             id="modal"
             open={modalData.modalOpen}
