@@ -29,7 +29,7 @@ export const wizardSlice = createSlice({
     formSteps: [] as FormSteps[],
     formStep: 'agreement',
     hasDocumentType: false,
-    workflowId: 365,
+    workflowId: 302,
     workflow: {},
     documentTypesList: []
   },

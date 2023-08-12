@@ -32,6 +32,7 @@ export const buildNewWorkflow = createAsyncThunk(
         throw new Error('build a new workflow has failed!');
       }
       const data = await response.json();
+      console.log( data );
       return data;
     } catch( error ) {
       return error;

@@ -24,12 +24,13 @@ export default function App() {
         dispatch( buildNewWorkflow( buildNewWorkflowUrl ) );
     } else {
       const getWorkflowFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }`;
-      const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
         dispatch( getWorkflow( getWorkflowFromApi ) ).then( () => {
+          const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
           dispatch( getSubmissionSteps( getStepsFromApi ) );
         } );
     }
   },[]);
+
 
   return (
     <>

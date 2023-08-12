@@ -112,10 +112,14 @@ const SubmissionForm = () => {
         }    
         dispatch( nextStep( wizard.isFormValid ) );
     }
-    const getAllDocumentTypesFromApi = `${ wizard.baseUrl }/api/v1/journal/type?filter[document_type_journals.journal_id]=${ wizard.workflow.attributes.journal_id }`;
+
     useEffect( () => {
-        dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
-    }, []);
+        if ( wizard.workflow?.journal_id !== undefined ) {
+            const getAllDocumentTypesFromApi = `${ wizard.baseUrl }/api/v1/journal/type?
+            filter[document_type_journals.journal_id]=${ wizard.workflow?.journal_id }`;
+            dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
+          }
+    }, [wizard.workflow]);
 
     return (
         <div className="wizard mb-4">
@@ -139,9 +143,9 @@ const SubmissionForm = () => {
                                 <p className="fs-7">
                                     <label className="me-2 fw-bold">Document Type:</label>
                                     <span className="text-muted">
-                                        { wizard.workflow?.storage?.types?.doc_type 
+                                        { wizard.workflow?.storage?.types?.doc_type
                                             && wizard.documentTypesList.find( 
-                                                ( item: any ) => item.id === wizard.workflow.storage.types.doc_type 
+                                                ( item: any ) => parseInt( item.id ) === wizard.workflow.storage.types.doc_type 
                                                 )?.attributes?.title 
                                         }
                                     </span>

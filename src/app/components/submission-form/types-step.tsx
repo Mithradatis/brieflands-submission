@@ -10,8 +10,8 @@ import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
 
 const TypesStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
-    const formState = useSelector( stepState );
-    const wizard = useSelector( wizardState );
+    const formState: any = useSelector( stepState );
+    const wizard: any = useSelector( wizardState );
     const documentTypes = wizard.documentTypesList;
     const [ isValid, setIsValid ] = useState({
         doc_type: true,
@@ -49,7 +49,8 @@ const TypesStep = forwardRef( ( prop, ref ) => {
     }));
 
     return (
-        <> 
+        <>
+            { console.log( formState.value.doc_type ) } 
             <div id="types" className="tab">
                 <h3 className="mb-4 text-shadow-white">Types</h3>
                 {   
@@ -83,7 +84,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                             value={
                                 formState.value.doc_type !== ''
                                   ? documentTypes
-                                      .find( ( item: any ) => formState.value.doc_type === item.id )?.attributes?.title
+                                      .find( ( item: any ) => parseInt( item.id ) === formState.value.doc_type  )?.attributes?.title
                                   : null
                             }
                             onChange={(event, value) => {

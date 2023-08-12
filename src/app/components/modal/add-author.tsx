@@ -37,7 +37,7 @@ const AddAuthorModal = () => {
         'affiliations': false,
         'correspond_affiliation': false
     });
-    const getAllCountriesUrl = `${ wizard.baseUrl }/api/v1/journal/country`;
+    const getAllCountriesUrl = `${ wizard.baseUrl }/api/v1/journal/country?page[size]=1000`;
     useEffect( () => {
         dispatch( getAllCountries( getAllCountriesUrl ) );
     }, []);
