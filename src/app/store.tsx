@@ -29,6 +29,7 @@ import buildReducer from '@/app/features/submission/buildSlice'
 import zeroReducer from '@/app/features/submission/zeroSlice'
 import dialogReducer from '@/app/features/dialog/dialogSlice'
 import snackbarReducer from '@/app/features/snackbar/snackbarSlice'
+import modalSnackbarReducer from './features/snackbar/modalSnackbarSlice'
 
 export const store = configureStore({
   reducer: {
@@ -61,6 +62,7 @@ export const store = configureStore({
     buildSlice: buildReducer,
     zeroSlice: zeroReducer,
     dialogSlice: dialogReducer,
-    snackbarSlice: snackbarReducer
+    snackbarSlice: snackbarReducer,
+    modalSnackbarSlice: modalSnackbarReducer
   }
 });

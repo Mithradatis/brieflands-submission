@@ -1,7 +1,7 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { handleOpen, setModalActionButton, setFormIsValid, setFormIsInvalid, saveModal } from '@/app/features/modal/modalSlice'
 import { setModalData, handleDisabledInputs, saveAuthorModal } from '@/app/features/modal/addAuthorModalSlice'
-import { handleSnackbarOpen } from '@/app/features/snackbar/snackbarSlice'
+import { handleModalSnackbarOpen } from '@/app/features/snackbar/modalSnackbarSlice'
 
 const fetchDataFromApi = async (url: string) => {
   try {
@@ -71,9 +71,9 @@ export const addAuthor = createAsyncThunk(
     if ( !response.ok ) {
       if ( response.status === 422 ) {
         const errorData = await response.json();
-        dispatch( handleSnackbarOpen( { severity: 'error', message: errorData } ) );
+        dispatch( handleModalSnackbarOpen( { severity: 'error', message: errorData, vertical: 'top', horizontal: 'center' } ) );
       } else {
-        dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to update reviewers step' } ) );
+        dispatch( handleModalSnackbarOpen({  severity: 'error', message: 'Failed to update reviewers step', vertical: 'top', horizontal: 'center' } ) );
       }
       throw new Error('Failed to update author step');
     }

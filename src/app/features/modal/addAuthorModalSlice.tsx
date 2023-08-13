@@ -13,6 +13,7 @@ interface AuthorModalState {
     'middle-name'?: string;
     'last-name'?: string;
     'orcid-id'?: string;
+    'country'?: string;
     'phone_type'?: string[];
     'country_phone'?: string[];
     'phone_number'?: string[];
@@ -110,6 +111,7 @@ export const addAuthorModalSlice = createSlice({
           author['middle_name'] !== '' && ( state.value['middle-name'] = author['middle_name'] );
           author['last_name'] !== '' && ( state.value['last-name'] = author['last_name'] );
           ( author['orcid_id'] !== '' && author['orcid_id'] !== null ) && ( state.value['orcid-id'] = author['orcid_id'].toString() );
+          author['country'] !== '' && ( state.value['country'] = author['country'] );
           phoneType.length > 0 && ( state.value['phone_type'] = phoneType );
           phoneCountry.length > 0 && ( state.value['country_phone'] = phoneCountry );
           phoneNumber.length > 0 && ( state.value['phone_number'] = phoneNumber );

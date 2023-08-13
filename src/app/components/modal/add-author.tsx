@@ -175,6 +175,23 @@ const AddAuthorModal = () => {
                     onChange={ event => dispatch( handleInput( { name: 'orcid-id', value: event.target.value.toString() } ) ) }
                 />
             </FormControl>
+            <FormControl className="mb-3">
+                <FormLabel className="fw-bold mb-1">
+                    Country
+                </FormLabel>
+                <Autocomplete
+                    required
+                    disabled={ addAuthorModalData.disabledInputs }
+                    variant="soft"     
+                    id="authorCountry"
+                    name="authorCountry"
+                    options={ addAuthorModalData.countriesList }
+                    value={ authorPhoneCountryInputValue }
+                    onChange={ ( event, value ) => {
+                        dispatch( handleInput( { name: 'country', value: value?.id.toString() || '' } ) ) }
+                    }
+                />
+            </FormControl>
             <fieldset className="fieldset mb-4">
                 <legend>Phones</legend>
                 <div className="d-flex align-items-center">

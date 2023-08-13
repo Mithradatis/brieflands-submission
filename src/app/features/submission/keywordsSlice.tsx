@@ -22,6 +22,12 @@ export const keywordsSlice = createSlice({
           [ action.payload.name ]: action.payload.value,
         },
       };
+    },
+    handleKeywordsList: ( state, action ) => {
+        state.keywordsList.push( action.payload );
+    },
+    emptyKeywordsList: ( state ) => {
+      state.keywordsList = [];
     }
   },
   extraReducers( builder ) {
@@ -39,6 +45,7 @@ export const keywordsSlice = createSlice({
     .addCase(getKeywordsStepData.fulfilled, ( state, action ) => {
       state.isLoading = false;
       const stepData = action.payload.data.step_data;
+      state.keywordsList = [];
       if ( Object.keys(stepData).length > 0 ) {
         state.value.ids = stepData;
       }
@@ -70,12 +77,12 @@ export const keywordsSlice = createSlice({
       state.isLoading = false;
       const keyword = action.payload;
       state.keywordsList.push( keyword );
-      state.value.ids.push( parseInt( keyword.id ) );
+      state.value.ids.push( keyword.id );
     });
   },
 });
 
-export const { handleInput } = keywordsSlice.actions;
+export const { handleInput, handleKeywordsList, emptyKeywordsList } = keywordsSlice.actions;
 
 export const stepState = ( state: any ) => state.keywordsSlice;
 

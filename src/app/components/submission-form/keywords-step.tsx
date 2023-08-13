@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput } from '@/app/features/submission/keywordsSlice'
+import { stepState, handleInput, handleKeywordsList, emptyKeywordsList } from '@/app/features/submission/keywordsSlice'
 import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide, updateKeywordsStepData, addNewKeyword, getKeywords, findKeywords } from '@/app/api/keywords'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -78,7 +78,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                             : []
                         }
                         value={ formState.keywordsList.length > 0 
-                            ? formState.keywordsList.map( ( item: any ) => item.attributes?.title )
+                            ? formState.keywordsList.map( ( item: any ) => item?.attributes?.title )
                             : [] 
                         }
                         onInputChange={ ( event, value ) =>  {
@@ -87,19 +87,31 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                                 dispatch( findKeywords( findKeywordInApi ) )
                             }
                         }}
-                        onChange={ ( event, value ) => {
-                            const findKeywordInApi = `${ getAllKeywordsFromApi }?filter[title]=${ value }`;
-                            dispatch( findKeywords( findKeywordInApi ) );
-                            if ( value.length > 0 && formState.keywordsBuffer.length === 0 ) {
-                                console.log( 'test new' );
-                                dispatch( addNewKeyword( { url: getAllKeywordsFromApi, keyword: value[value.length - 1] } ) );
-                            } else {
-                                const selectedIds = value.map(
-                                    ( title: string ) =>
-                                        parseInt( formState.keywordsBuffer.find( ( item: any ) => item.attributes.title === title)?.id )
-                                );
-                                dispatch( handleInput( { name: 'ids', value: selectedIds } ) );
+                        onChange={ ( event, value, reason ) => {
+                            const selectedIds: any = [];
+                            if ( reason === 'selectOption' ) {
+                                const findKeywordInApi = `${ getAllKeywordsFromApi }?filter[title]=${ value }`;
+                                dispatch( findKeywords( findKeywordInApi ) );
+                                if ( value.length > 0 && formState.keywordsBuffer.length === 0 ) {
+                                    dispatch( addNewKeyword( { url: getAllKeywordsFromApi, keyword: value[value.length - 1] } ) );
+                                } else {
+                                    const selectedOption = formState.keywordsBuffer.find( ( item: any ) =>
+                                        item.attributes.title === value[value.length - 1]
+                                    );
+                                    selectedIds.push( selectedOption?.id );
+                                    dispatch( handleKeywordsList( selectedOption ) );
+                                    dispatch( handleInput( { name: 'ids', value: selectedIds } ) );
+                                }   
                             }
+                            if ( reason === 'removeOption' ) {
+                                dispatch( emptyKeywordsList() );
+                                value.map( ( title: any ) => {
+                                    const selectedOption = formState.keywordsList.find( ( item: any ) => item.attributes.title === title );
+                                    dispatch( handleKeywordsList( selectedOption ) );
+                                    selectedIds.push( selectedOption?.id );
+                                });
+                                dispatch( handleInput( { name: 'ids', value: selectedIds } ) );
+                            } 
                         }}
                         filterOptions={ ( options, params ) => {
                             const filtered = filter(options, params);

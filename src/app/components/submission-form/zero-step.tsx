@@ -23,7 +23,7 @@ const ZeroStep = forwardRef( ( prop, ref ) => {
     return (
         <>
             <div id="zero" className="tab">
-                <h3 className="mb-4 text-shadow-white">Zero</h3>
+                <h3 className="mb-4 text-shadow-white">Revission Message</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( formState.stepGuide ) }

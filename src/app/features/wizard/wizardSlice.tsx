@@ -6,12 +6,12 @@ let baseUrl, currentUrl, workflowId = '';
 if ( typeof window !== 'undefined' ) {
   currentUrl = new URL( window.location.href );
   let pathname = currentUrl.pathname;
-  // Remove trailing slash if present
   if ( pathname.endsWith('/') ) {
     pathname = pathname.slice(0, -1);
   }
   const pathParts = pathname.split('/');
-  workflowId = pathParts.pop() || '';
+  const poppedPart = pathParts.pop();
+  workflowId = poppedPart !== undefined && poppedPart !== 'workflow' ? poppedPart : '';
   baseUrl = `${window.location.protocol}//${window.location.hostname}`;
 }
 
@@ -35,7 +35,7 @@ export const wizardSlice = createSlice({
     formSteps: [] as FormSteps[],
     formStep: 'agreement',
     hasDocumentType: false,
-    workflowId: workflowId || 365,
+    workflowId: workflowId,
     workflow: {},
     documentTypesList: []
   },

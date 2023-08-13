@@ -62,7 +62,7 @@ const SubmissionForm = () => {
     const dispatch:any = useDispatch();
     const wizard = useSelector( wizardState );
     const handleNextStep = () => {
-        const activeStepRef = wizard.baseDocId !== ''
+        const activeStepRef = wizard.formStep === 'revision_message'
             ? zeroChildRef
             : wizard.formStep === 'agreement'
             ? agreementChildRef

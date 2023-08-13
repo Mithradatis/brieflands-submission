@@ -11,6 +11,7 @@ import { Scrollbars } from 'react-custom-scrollbars'
 import AddAuthorModal from '@/app/components/modal/add-author'
 import AddReviewerModal from '@/app/components/modal/add-reviewer'
 import Divider from '@mui/material/Divider'
+import ModalFlashMessage from '@/app/components/snackbar/modal-snackbar'
 import '@/app/resources/css/modal.scss'
 
 const ModalContent = () => {
@@ -58,6 +59,7 @@ const ModalContent = () => {
 
     return (
         <>
+            <ModalFlashMessage/>
             <div className="modal-header d-block">
                 <h2 id="parent-modal-title" 
                 className="fs-4 text-center text-green fw-bold container-fluid mb-4">
