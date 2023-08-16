@@ -20,6 +20,8 @@ const CommentStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateCommentStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

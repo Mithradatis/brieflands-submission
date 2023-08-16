@@ -20,6 +20,8 @@ const AbstractStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateAbstractStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

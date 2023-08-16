@@ -31,6 +31,7 @@ const AddAuthorModal = () => {
         'email': false,
         'first-name': false,
         'last-name': false,
+        'country': false,
         'phone_type': false,
         'country_phone': false,
         'phone_number': false,
@@ -80,13 +81,14 @@ const AddAuthorModal = () => {
 
     return (
         <>
-            <FormControl className="mb-3" error={ !isValid['email'] && !formIsValid }>
+            <FormControl className="mb-3 required" error={ !isValid['email'] && !formIsValid }>
                 <FormLabel className="fw-bold mb-1">
                     Email
                 </FormLabel>
                 <div className="d-flex align-items-center">
                     <Input
                         required
+                        readOnly={ !addAuthorModalData.inputStatus.email }
                         variant="soft"
                         className="flex-fill"
                         name="authorEmail"
@@ -108,13 +110,13 @@ const AddAuthorModal = () => {
                     && <FormHelperText className="fs-7 text-danger mt-1">You should enter the author email</FormHelperText> 
                 }
             </FormControl>
-            <FormControl className="mb-3" error={ !isValid['first-name'] && !formIsValid }>
+            <FormControl className="mb-3 required" error={ !isValid['first-name'] && !formIsValid }>
                 <FormLabel className="fw-bold mb-1">
                     First Name
                 </FormLabel>
                 <Input
                     required
-                    disabled={ addAuthorModalData.disabledInputs }
+                    readOnly={ !addAuthorModalData.inputStatus.firstName }
                     variant="soft"
                     name="authorFirstName"
                     id="authorFirstName"
@@ -133,7 +135,7 @@ const AddAuthorModal = () => {
                 </FormLabel>
                 <Input
                     required
-                    disabled={ addAuthorModalData.disabledInputs }
+                    readOnly={ !addAuthorModalData.inputStatus.middleName }
                     variant="soft"
                     name="authorMiddleName"
                     id="authorMiddleName"
@@ -142,13 +144,13 @@ const AddAuthorModal = () => {
                     onChange={ event => dispatch( handleInput( { name: 'middle-name', value: event.target.value } ) ) }
                 />
             </FormControl>
-            <FormControl className="mb-3" error={ !isValid['last-name'] && !formIsValid }>
+            <FormControl className="mb-3 required" error={ !isValid['last-name'] && !formIsValid }>
                 <FormLabel className="fw-bold mb-1">
                     Last Name
                 </FormLabel>
                 <Input
                     required
-                    disabled={ addAuthorModalData.disabledInputs }
+                    readOnly={ !addAuthorModalData.inputStatus.lastName }
                     variant="soft"
                     name="authorLastName"
                     id="authorLastName"
@@ -167,7 +169,7 @@ const AddAuthorModal = () => {
                 </FormLabel>
                 <Input
                     variant="soft"
-                    disabled={ addAuthorModalData.disabledInputs }
+                    readOnly={ !addAuthorModalData.inputStatus.orcid }
                     name="authorOrcId"
                     id="authorOrcId"
                     placeholder="Orcid"
@@ -175,33 +177,37 @@ const AddAuthorModal = () => {
                     onChange={ event => dispatch( handleInput( { name: 'orcid-id', value: event.target.value.toString() } ) ) }
                 />
             </FormControl>
-            <FormControl className="mb-3">
+            <FormControl className="mb-3 required" error={ !isValid['country'] && !formIsValid }>
                 <FormLabel className="fw-bold mb-1">
                     Country
                 </FormLabel>
                 <Autocomplete
                     required
-                    disabled={ addAuthorModalData.disabledInputs }
+                    readOnly={ !addAuthorModalData.inputStatus.country }
                     variant="soft"     
                     id="authorCountry"
                     name="authorCountry"
                     options={ addAuthorModalData.countriesList }
                     value={ authorPhoneCountryInputValue }
                     onChange={ ( event, value ) => {
-                        dispatch( handleInput( { name: 'country', value: value?.id.toString() || '' } ) ) }
+                        dispatch( handleInput( { name: 'country', value: value?.id || '' } ) ) }
                     }
                 />
+                {
+                    ( !isValid['country'] && !formIsValid ) 
+                    && <FormHelperText className="fs-7 text-danger mt-1">You should enter the author country</FormHelperText> 
+                }
             </FormControl>
             <fieldset className="fieldset mb-4">
                 <legend>Phones</legend>
                 <div className="d-flex align-items-center">
-                    <FormControl className="pe-2 col-md-4" error={ !isValid['phone_type'] && !formIsValid }>
+                    <FormControl className="pe-2 col-md-4 required" error={ !isValid['phone_type'] && !formIsValid }>
                         <FormLabel className="fw-bold mb-1">
                             Type
                         </FormLabel>
                         <Autocomplete
                             required
-                            disabled={ addAuthorModalData.disabledInputs }
+                            readOnly={ !addAuthorModalData.inputStatus.phoneType }
                             variant="soft" 
                             id="authorPhoneType"
                             name="authorPhoneType"
@@ -212,13 +218,13 @@ const AddAuthorModal = () => {
                             }
                         />
                     </FormControl>
-                    <FormControl className="pe-2 col-md-4" error={ !isValid['country_phone'] && !formIsValid }>
+                    <FormControl className="pe-2 col-md-4 required" error={ !isValid['country_phone'] && !formIsValid }>
                         <FormLabel className="fw-bold mb-1">
                             Country
                         </FormLabel>
                         <Autocomplete
                             required
-                            disabled={ addAuthorModalData.disabledInputs }
+                            readOnly={ !addAuthorModalData.inputStatus.countryPhone }
                             variant="soft"     
                             id="authorPhoneCountry"
                             name="authorPhoneCountry"
@@ -229,13 +235,13 @@ const AddAuthorModal = () => {
                             }
                         />
                     </FormControl>
-                    <FormControl className="col-md-4" error={ !isValid['phone_number'] && !formIsValid }>
+                    <FormControl className="col-md-4 required" error={ !isValid['phone_number'] && !formIsValid }>
                         <FormLabel className="fw-bold mb-1">
                             Number
                         </FormLabel>
                         <Input
                             required
-                            disabled={ addAuthorModalData.disabledInputs }
+                            readOnly={ !addAuthorModalData.inputStatus.phoneNumber }
                             variant="soft"
                             name="authorPhoneNumber"
                             id="authorPhoneNumber"
@@ -253,13 +259,12 @@ const AddAuthorModal = () => {
             <fieldset className="fieldset mb-4">
                 <legend>Affiliations</legend>
                 {affiliations.map((affiliation, index) => (
-                    <FormControl className="mb-3" key={affiliation.id} error={ index === 0 && !isValid['affiliations'] && !formIsValid }>
+                    <FormControl className="mb-3 required" key={affiliation.id} error={ index === 0 && !isValid['affiliations'] && !formIsValid }>
                         <FormLabel className="fw-bold mb-1">
                             Affiliation { index !== 0 && (index + 1)}
                         </FormLabel>
                         <Input
-                            required={affiliation.required}
-                            disabled={ addAuthorModalData.disabledInputs }
+                            required={ affiliation.required }
                             variant="soft"
                             name={`authorAffiliations_${index}`}
                             id={`authorAffiliations_${index}`}
@@ -273,11 +278,11 @@ const AddAuthorModal = () => {
                         }
                     </FormControl>
                 ))}
-                <Button disabled={ addAuthorModalData.disabledInputs } className="btn btn-primary btn-lg mb-4" onClick={() => repeatField()}>
+                <Button className="btn btn-primary btn-lg mb-4" onClick={() => repeatField()}>
                     Add Affiliation
                 </Button>
             </fieldset>
-            <FormControl className={`mb-3 ${ addAuthorModalData?.value['is_corresponding'] !== 'on' && 'd-none' }`}
+            <FormControl className={`required mb-3 ${ addAuthorModalData?.value['is_corresponding'] !== 'on' && 'd-none' }`}
                 error={ !isValid['correspond_affiliation'] && !formIsValid }>
                 <FormLabel className="fw-bold mb-1">
                     Corresponding Affiliation
@@ -285,7 +290,6 @@ const AddAuthorModal = () => {
                 <Input
                     required={ addAuthorModalData?.value['is_corresponding'] === 'on' }
                     variant="soft"
-                    disabled={ addAuthorModalData.disabledInputs }
                     name="authorCorrespondAffiliation"
                     id="authorCorrespondAffiliation"
                     placeholder="Corresponding Affiliation"
@@ -300,7 +304,7 @@ const AddAuthorModal = () => {
             <FormControl className="mb-4">
                 <Checkbox
                     required
-                    disabled={ addAuthorModalData.disabledInputs }
+                    readOnly={ !addAuthorModalData.inputStatus.isCorresponding }
                     label="This author is corresponding"
                     name="isCorresponding"
                     id="isCorrsponding"

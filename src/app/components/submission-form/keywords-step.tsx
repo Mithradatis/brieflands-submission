@@ -46,6 +46,8 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateKeywordsStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

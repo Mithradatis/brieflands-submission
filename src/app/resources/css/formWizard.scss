@@ -126,6 +126,7 @@
 
 .wizard-steps {
     max-width: 725px;
+    min-width: 675px;
     border: 1px solid white;
     box-shadow:  20px 30px 100px darken( $mainColor, 10% ),
         20px 20px 60px $mainColor,

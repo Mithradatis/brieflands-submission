@@ -71,7 +71,7 @@ export const addAuthor = createAsyncThunk(
     if ( !response.ok ) {
       if ( response.status === 422 ) {
         const errorData = await response.json();
-        dispatch( handleModalSnackbarOpen( { severity: 'error', message: errorData, vertical: 'top', horizontal: 'center' } ) );
+        dispatch( handleModalSnackbarOpen( { severity: 'error', message: errorData.data.message, vertical: 'top', horizontal: 'center' } ) );
       } else {
         dispatch( handleModalSnackbarOpen({  severity: 'error', message: 'Failed to update reviewers step', vertical: 'top', horizontal: 'center' } ) );
       }
@@ -95,6 +95,7 @@ export const handleAuthorOperation = createAsyncThunk(
         ( modalFormData?.['email'] !== '' || modalFormData['email'] !== undefined )
         && ( modalFormData['first-name'] !== '' && modalFormData['first-name'] !== undefined )
         && ( modalFormData['last-name'] !== '' && modalFormData['last-name'] !== undefined )
+        && ( modalFormData['country'] !== '' && modalFormData['country'] !== undefined )
         && ( modalFormData['phone_type'] !== '' && modalFormData['phone_type'] !== undefined )
         && ( modalFormData['country_phone'] != '' && modalFormData['country_phone'] !== undefined )
         && ( modalFormData['phone_number'] !== '' && modalFormData['phone_number'] !== undefined )

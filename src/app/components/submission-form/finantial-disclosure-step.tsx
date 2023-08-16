@@ -20,6 +20,8 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateFinancialDisclosureStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

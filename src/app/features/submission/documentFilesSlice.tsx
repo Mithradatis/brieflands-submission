@@ -1,10 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getFilesStepGuide, getFilesStepData, deleteFile, addFile, getFileTypes } from '@/app/api/files'
+import { getFilesStepGuide, getFilesStepData, deleteFile, addFile, getFileTypes, reuseFile } from '@/app/api/files'
 
 interface Value {
   old_files: string,
   new_files: string
-  file_type_id: string
+  file_type_id: string,
+  caption: string
 }
 
 interface File {
@@ -15,16 +16,18 @@ interface File {
   fileSize: string,
   wordCount: string,
   uploadDate: string,
-  uuid: string
+  uuid: string,
+  reuse: boolean
 }
 
 export const documentFilesSlice = createSlice({
   name: 'files',
   initialState: {
     isLoading: false,
+    captionRequired: false,
     formStatus: {
       isDisabled: true,
-      fileTypeId: true
+      fileTypeId: true,
     },
     stepGuide: {},
     fileTypesList: [],
@@ -42,9 +45,10 @@ export const documentFilesSlice = createSlice({
         }
       }
     },
-    handleInput: ( state, action ) => {
+    handleFileType: ( state, action ) => {
       return {
         ...state,
+        captionRequired: action.payload.captionRequired,
         value: {
           ...state.value,
           [ action.payload.name ]: action.payload.value,
@@ -53,6 +57,15 @@ export const documentFilesSlice = createSlice({
           isDisabled: false,
           fileTypeId: true
         }
+      };
+    },
+    handleInput: ( state, action ) => {
+      return {
+        ...state,
+        value: {
+          ...state.value,
+          [ action.payload.name ]: action.payload.value,
+        },
       };
     }
   },
@@ -85,7 +98,7 @@ export const documentFilesSlice = createSlice({
         for (let index = 0; index < oldKeys.length; index++) {
           const key: any = oldKeys[index];
           const value: any = oldFiles[key];
-          state.newFilesList.push(
+          state.oldFilesList.push(
             {
               id: ( index + 1 ),
               fileName: value.name || '', 
@@ -95,6 +108,7 @@ export const documentFilesSlice = createSlice({
               wordCount: value.word_count || value.word_count || '',
               uploadDate: value.createdAt || value.createdAt || '',
               uuid: value.uuid || value.uuid || '',
+              reuse: value.reuse || value.reuse || ''
             }
           );
         }
@@ -115,6 +129,7 @@ export const documentFilesSlice = createSlice({
               wordCount: value.word_count || value.word_count || '',
               uploadDate: value.createdAt || value.createdAt || '',
               uuid: value.uuid || value.uuid || '',
+              reuse: false
             }
           );
         }
@@ -126,61 +141,159 @@ export const documentFilesSlice = createSlice({
     })
     .addCase(deleteFile.fulfilled, ( state, action ) => {
       state.isLoading = false;
+      state.oldFilesList = [];
       state.newFilesList = [];
-      const newFiles = action.payload?.data.attributes.storage.files;
+      const oldFiles = action.payload.data.step_data.old_files;
+      const oldKeys = Object.keys( oldFiles );
+      if ( oldKeys.length > 0 ) {
+        for (let index = 0; index < oldKeys.length; index++) {
+          const key: any = oldKeys[index];
+          const value: any = oldFiles[key];
+          state.oldFilesList.push(
+            {
+              id: ( index + 1 ),
+              fileName: value.name || '', 
+              fileType: value.type || value.type || '',
+              caption: value.caption || value.caption || '',
+              fileSize: value.size || value.size || '',
+              wordCount: value.word_count || value.word_count || '',
+              uploadDate: value.createdAt || value.createdAt || '',
+              uuid: value.uuid || value.uuid || '',
+              reuse: value.reuse || value.reuse || ''
+            }
+          );
+        }
+      }
+      const newFiles = action.payload.data.step_data.new_files;
       const newKeys = Object.keys( newFiles );
-      if ( newKeys.length ) {
+      if ( newKeys.length > 0 ) {
         for (let index = 0; index < newKeys.length; index++) {
           const key: any = newKeys[index];
           const value: any = newFiles[key];
           state.newFilesList.push(
             {
               id: ( index + 1 ),
-              fileName: value.filename || '', 
-              fileType: value.file_type || value.file_type || '',
+              fileName: value.name || '', 
+              fileType: value.type || value.type || '',
               caption: value.caption || value.caption || '',
-              fileSize: value.file_size || value.file_size || '',
-              wordCount: value.file_word_count || value.file_word_count || '',
-              uploadDate: value.created_at || value.created_at || '',
-              uuid: value.file_uuid || value.file_uuid || '',
+              fileSize: value.size || value.size || '',
+              wordCount: value.word_count || value.word_count || '',
+              uploadDate: value.createdAt || value.createdAt || '',
+              uuid: value.uuid || value.uuid || '',
+              reuse: false
             }
           );
         }
       }
+      state.value.old_files = oldFiles;
       state.value.new_files = newFiles;
     }).addCase(addFile.pending, ( state ) => {
       state.isLoading = true;
     })
     .addCase(addFile.fulfilled, ( state, action: any ) => {
       state.isLoading = false;
+      state.oldFilesList = [];
       state.newFilesList = [];
-      const newFiles = action.payload?.data.attributes.storage.files;
+      const oldFiles = action.payload.data.step_data.old_files;
+      const oldKeys = Object.keys( oldFiles );
+      if ( oldKeys.length > 0 ) {
+        for (let index = 0; index < oldKeys.length; index++) {
+          const key: any = oldKeys[index];
+          const value: any = oldFiles[key];
+          state.oldFilesList.push(
+            {
+              id: ( index + 1 ),
+              fileName: value.name || '', 
+              fileType: value.type || value.type || '',
+              caption: value.caption || value.caption || '',
+              fileSize: value.size || value.size || '',
+              wordCount: value.word_count || value.word_count || '',
+              uploadDate: value.createdAt || value.createdAt || '',
+              uuid: value.uuid || value.uuid || '',
+              reuse: value.reuse || value.reuse || ''
+            }
+          );
+        }
+      }
+      const newFiles = action.payload.data.step_data.new_files;
       const newKeys = Object.keys( newFiles );
-      if ( newKeys.length ) {
+      if ( newKeys.length > 0 ) {
         for (let index = 0; index < newKeys.length; index++) {
           const key: any = newKeys[index];
           const value: any = newFiles[key];
           state.newFilesList.push(
             {
               id: ( index + 1 ),
-              fileName: value.filename || '', 
-              fileType: value.file_type || value.file_type || '',
+              fileName: value.name || '', 
+              fileType: value.type || value.type || '',
               caption: value.caption || value.caption || '',
-              fileSize: value.file_size || value.file_size || '',
-              wordCount: value.file_word_count || value.file_word_count || '',
-              uploadDate: value.created_at || value.created_at || '',
-              uuid: value.file_uuid || value.file_uuid || '',
+              fileSize: value.size || value.size || '',
+              wordCount: value.word_count || value.word_count || '',
+              uploadDate: value.createdAt || value.createdAt || '',
+              uuid: value.uuid || value.uuid || '',
+              reuse: false
             }
           );
         }
       }
+      state.value.old_files = oldFiles;
       state.value.new_files = newFiles;
-      state.formStatus.isDisabled = true;
+    }).addCase(reuseFile.pending, ( state ) => {
+      state.isLoading = true;
+    })
+    .addCase(reuseFile.fulfilled, ( state, action: any ) => {
+      state.isLoading = false;
+      state.oldFilesList = [];
+      state.newFilesList = [];
+      const oldFiles = action.payload.data.step_data.old_files;
+      const oldKeys = Object.keys( oldFiles );
+      if ( oldKeys.length > 0 ) {
+        for (let index = 0; index < oldKeys.length; index++) {
+          const key: any = oldKeys[index];
+          const value: any = oldFiles[key];
+          state.oldFilesList.push(
+            {
+              id: ( index + 1 ),
+              fileName: value.name || '', 
+              fileType: value.type || value.type || '',
+              caption: value.caption || value.caption || '',
+              fileSize: value.size || value.size || '',
+              wordCount: value.word_count || value.word_count || '',
+              uploadDate: value.createdAt || value.createdAt || '',
+              uuid: value.uuid || value.uuid || '',
+              reuse: value.reuse || value.reuse || ''
+            }
+          );
+        }
+      }
+      const newFiles = action.payload.data.step_data.new_files;
+      const newKeys = Object.keys( newFiles );
+      if ( newKeys.length > 0 ) {
+        for (let index = 0; index < newKeys.length; index++) {
+          const key: any = newKeys[index];
+          const value: any = newFiles[key];
+          state.newFilesList.push(
+            {
+              id: ( index + 1 ),
+              fileName: value.name || '', 
+              fileType: value.type || value.type || '',
+              caption: value.caption || value.caption || '',
+              fileSize: value.size || value.size || '',
+              wordCount: value.word_count || value.word_count || '',
+              uploadDate: value.createdAt || value.createdAt || '',
+              uuid: value.uuid || value.uuid || '',
+              reuse: false
+            }
+          );
+        }
+      }
+      state.value.old_files = oldFiles;
+      state.value.new_files = newFiles;
     });
   },
 });
 
-export const { handleInput, handleDropzoneStatus } = documentFilesSlice.actions;
+export const { handleFileType, handleInput, handleDropzoneStatus } = documentFilesSlice.actions;
 
 export const stepState = ( state: any ) => state.documentFilesSlice;
 

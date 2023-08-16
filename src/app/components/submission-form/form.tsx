@@ -108,9 +108,11 @@ const SubmissionForm = () => {
             ? dataReproducibilityChildRef
             : null;
         if ( wizard.isFormValid ) {
-            activeStepRef?.current?.submitForm();
-        }    
-        dispatch( nextStep( wizard.isFormValid ) );
+            const submitForm = activeStepRef?.current?.submitForm();
+            if ( submitForm ) {
+                dispatch( nextStep( wizard.isFormValid ) );
+            }
+        }
     }
 
     useEffect( () => {

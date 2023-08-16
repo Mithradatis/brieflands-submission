@@ -6,11 +6,13 @@ import { loadStep, wizardState } from '@/app/features/wizard/wizardSlice'
 const WizardNavigation = () => {
     const dispatch = useDispatch();
     const [ formSteps, setFormSteps ] = useState([]);
+    const [ isActiveStepSet, setIsActiveStepSet ] = useState( false );
     const wizard = useSelector( wizardState );
     useEffect(() => {
         const stepsList = document.querySelector('.wizard-navigation > ol');
         if ( stepsList instanceof HTMLElement ) {
             const activeStep = stepsList.querySelector('li.active');
+            console.log( activeStep );
             if ( stepsList.parentNode instanceof HTMLElement) {
                 const parentWidth = stepsList.parentNode.clientWidth;
                 if ( activeStep !== null ) {
@@ -21,7 +23,7 @@ const WizardNavigation = () => {
                 }
             }
         }
-    }, [wizard.formStep]);
+    }, [isActiveStepSet]);
     useEffect( () => {
         setFormSteps( wizard.formSteps );
     }, [wizard.formSteps]);
@@ -36,8 +38,12 @@ const WizardNavigation = () => {
                         {
                             formSteps.map( ( item: any, index: number ) => {
                                 const formStepTitle = item.attributes?.slug;
+                                if ( wizard.formStep === formStepTitle ) {
+                                    // setIsActiveStepSet( true );
+                                }
                                 return (
-                                    <li className={`pe-5 ${wizard.formStep === formStepTitle ? 'active' : ''}`} key={ formStepTitle }>
+                                    <li 
+                                        className={`pe-5 ${wizard.formStep === formStepTitle ? 'active' : ''}`} key={ formStepTitle }>
                                         <a href={`#${formStepTitle}`}
                                            className={`d-flex flex-column align-items-center text-center ${ ( wizard.workflow?.storage?.types?.doc_type === undefined && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }`} 
                                            onClick={() => dispatch( loadStep( formStepTitle ) )}>

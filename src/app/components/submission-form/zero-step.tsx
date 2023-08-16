@@ -17,7 +17,9 @@ const ZeroStep = forwardRef( ( prop, ref ) => {
         dispatch( getZeroStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {}
+        submitForm () {
+            return true;
+        }
     }));
 
     return (

@@ -4,7 +4,7 @@ const path = require('path');
 const nextConfig = {
     // distDir: 'build',
     // output: 'export',
-    // assetPrefix: 'http://services.brieflands.com.test/assets/',
+    // assetPrefix: '__service_url__',
     sassOptions: {
         includePaths: [path.join(__dirname, 'styles')],
     },

@@ -6,7 +6,18 @@ interface AuthorModalState {
   isLoading: boolean;
   countriesList: any[];
   datatableRows: any[];
-  disabledInputs: boolean;
+  inputStatus: {
+    email: boolean;
+    firstName: boolean;
+    middleName: boolean;
+    lastName: boolean;
+    orcid: boolean;
+    country: boolean;
+    phoneType: boolean;
+    countryPhone: boolean;
+    phoneNumber: boolean;
+    isCorresponding: boolean;
+  };
   value: {
     email?: string;
     'first-name'?: string;
@@ -30,7 +41,18 @@ export const addAuthorModalSlice = createSlice({
     isLoading: false,
     countriesList: [],
     datatableRows: [],
-    disabledInputs: true,
+    inputStatus: {
+      email: true,
+      firstName: false,
+      middleName: false,
+      lastName: false,
+      orcid: false,
+      country: false,
+      phoneType: false,
+      countryPhone: false,
+      phoneNumber: false,
+      isCorresponding: false
+    },
     value: {}
   } as AuthorModalState,
   reducers: {
@@ -107,19 +129,62 @@ export const addAuthorModalSlice = createSlice({
           phoneCountry.push( author['phones']['country_phone'] );
           phoneNumber.push( author['phones']['number'] );
           state.value['email'] = action.payload.email;
-          author['first_name'] !== '' && ( state.value['first-name'] = author['first_name'] );
-          author['middle_name'] !== '' && ( state.value['middle-name'] = author['middle_name'] );
-          author['last_name'] !== '' && ( state.value['last-name'] = author['last_name'] );
-          ( author['orcid_id'] !== '' && author['orcid_id'] !== null ) && ( state.value['orcid-id'] = author['orcid_id'].toString() );
-          author['country'] !== '' && ( state.value['country'] = author['country'] );
-          phoneType.length > 0 && ( state.value['phone_type'] = phoneType );
-          phoneCountry.length > 0 && ( state.value['country_phone'] = phoneCountry );
-          phoneNumber.length > 0 && ( state.value['phone_number'] = phoneNumber );
-          author['affiliations'] !== '' && ( state.value['affiliations'] = author['affiliations'] );
-          author['is_corresponding'] !== '' && ( state.value['is_corresponding'] = author['is_corresponding'] );
-          author['correspond_affiliation'] !== '' && ( state.value['correspond_affiliation'] = author['correspond_affiliation'] );
+          if ( action.payload.email ) {
+            state.inputStatus.email = false;
+          }
+          if ( author['first_name'] !== '' ) {
+            state.value['first-name'] = author['first_name'];
+          } else {
+            state.inputStatus.firstName = true;
+          }
+          if ( author['middle_name'] !== '' ) {
+            state.value['middle-name'] = author['middle_name'];
+          } else {
+            state.inputStatus.middleName = true;
+          }
+          if ( author['last_name'] !== '' ) {
+            state.value['last-name'] = author['last_name'];
+          } else {
+            state.inputStatus.lastName = true;
+          }
+          if ( author['orcid_id'] !== '' && author['orcid_id'] !== null ) {
+            state.value['orcid-id'] = author['orcid_id'].toString();
+          } else {
+            state.inputStatus.orcid = true;
+          }
+          if ( author['country'] !== '' ) {
+            state.value['country'] = author['country'];
+            state.inputStatus.country = false;
+          } else {
+            state.inputStatus.country = true;
+          }
+          if ( phoneType.length > 0 ) {
+            state.value['phone_type'] = phoneType;
+          } else {
+            state.inputStatus.phoneType = true;
+          }
+          if ( phoneCountry.length > 0 ) {
+            state.value['country_phone'] = phoneCountry;
+          } else {
+            state.inputStatus.countryPhone = true;
+          }
+          if ( phoneNumber.length > 0 ) {
+            state.value['phone_number'] = phoneNumber;
+          } else {
+            state.inputStatus.phoneNumber = true;
+          }
+          if ( author['affiliations'] !== '' ) {
+            state.value['affiliations'] = author['affiliations'];
+          }
+          if ( author['is_corresponding'] !== '' ) {
+            state.value['is_corresponding'] = author['is_corresponding'];
+          } else {
+            state.inputStatus.isCorresponding = true;
+          }
+          if ( author['correspond_affiliation'] !== '' ) {
+            state.value['correspond_affiliation'] = author['correspond_affiliation'];
+          }
         }
-        state.disabledInputs = false;
       }).addCase(getAllCountries.pending, ( state ) => {
         state.isLoading = true;
       }).addCase(getAllCountries.fulfilled, ( state, action ) => {

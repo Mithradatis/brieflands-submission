@@ -42,6 +42,8 @@ const SectionStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateSectionStepData( getStepDataFromApi ) );
+          
+          return true;
         }
     }));
 

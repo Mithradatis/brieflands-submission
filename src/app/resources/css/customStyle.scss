@@ -167,12 +167,44 @@ body {
     .MuiPaper-root {
         box-shadow: none;
     }
+    .MuiFormControl-root {
+        &.required {
+            label {
+                position: relative;
+                &::after {
+                    content: '*';
+                    position: absolute;
+                    color: #f00;
+                    right: -.5rem;
+                    top: 0; 
+                }
+            }
+        }
+    }
     .z-index-2 {
         position: relative;
         z-index: 2;
     }
     .z-index-1050 {
         z-index: 11000;
+    }
+}
+
+#loading {
+    .logo {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background-color: #1a2b20;
+    }
+    .loading {
+        position: fixed;
+        border-radius: 50%;
+        width: 4.25rem;
+        height: 4.25rem;
+        border: .25rem solid rgba($white, .2);
+        border-top-color: $white;
+        animation: spin 1s infinite linear;
     }
 }
 

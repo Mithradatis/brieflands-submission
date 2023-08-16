@@ -38,6 +38,8 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateClassificationsStepData( getStepDataFromApi ) );
+          
+          return true;
         }
     }));
 

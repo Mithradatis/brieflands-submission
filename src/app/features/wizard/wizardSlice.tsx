@@ -1,10 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { buildNewWorkflow, getSubmissionSteps, getWorkflow } from '@/app/api/client'
+import { buildNewWorkflow, getJournal, getSubmissionSteps, getWorkflow } from '@/app/api/client'
 import { getDocumentTypes } from '@/app/api/types'
 
-let baseUrl, currentUrl, workflowId = '';
+let baseUrl, currentUrl, workflowId, activeTab = '';
 if ( typeof window !== 'undefined' ) {
   currentUrl = new URL( window.location.href );
+  activeTab = currentUrl.hash ? currentUrl.hash.substring(1) : '';
   let pathname = currentUrl.pathname;
   if ( pathname.endsWith('/') ) {
     pathname = pathname.slice(0, -1);
@@ -30,13 +31,15 @@ export const wizardSlice = createSlice({
     isLoading: true,
     isVerified: false,
     isFormValid: false,
-    baseDocId: '',
+    documentId: '',
     revision: '',
     formSteps: [] as FormSteps[],
     formStep: 'agreement',
+    currentStep: activeTab,
     hasDocumentType: false,
-    workflowId: workflowId,
+    workflowId: workflowId || 365,
     workflow: {},
+    journal: {},
     documentTypesList: []
   },
   reducers: {
@@ -88,12 +91,18 @@ export const wizardSlice = createSlice({
         state.isLoading = false;
         const workflow = action.payload.data?.attributes;
         state.workflow = workflow;
-        if ( workflow?.storage?.hasOwnProperty('base_doc_id') ) {
-          state.baseDocId = workflow.storage.base_doc_id;
-          state.revision = workflow.storage.revision;
+        if ( workflow?.hasOwnProperty('document_id') && workflow.document_id !== null && workflow.document_id !== 0 ) {
+          state.documentId = workflow.document_id;
           state.formSteps.push( { id: 0, attributes: { title: 'Revision Message', slug: 'revision_message'} } );
           state.formStep = 'revision_message';
         }
+      })
+      .addCase(getJournal.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase(getJournal.fulfilled, ( state, action: any ) => {
+        state.isLoading = false;
+        state.journal = action.payload.data;
       })
       .addCase( getSubmissionSteps.pending, ( state ) => {
         state.isLoading = true;
@@ -104,9 +113,8 @@ export const wizardSlice = createSlice({
         if ( activeSteps !== undefined ) {
           state.formSteps = [
             ...state.formSteps,
-            ...activeSteps.map((step: any) => ({ attributes: { slug: step.attributes.slug } })),
+            ...activeSteps.map((step: any) => ({ attributes: { slug: step.attributes.slug, required: step.attributes.requirement } })),
           ];
-          state.formStep = state.formSteps[0]?.attributes.slug || '';
         }
       })
       .addCase( getSubmissionSteps.rejected, ( state ) => {

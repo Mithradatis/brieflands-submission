@@ -20,6 +20,8 @@ const FundingSupportStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateFundingSupportStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

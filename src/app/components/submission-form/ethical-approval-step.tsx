@@ -20,6 +20,8 @@ const EthicalApprovalStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateEthicalApprovalStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

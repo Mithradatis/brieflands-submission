@@ -23,6 +23,8 @@ const EditorStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateEditorStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

@@ -7,7 +7,7 @@ export const dialogSlice = createSlice({
     action: '',
     data: '',
     dialogTitle: '',
-    dialogContent: '',
+    dialogContent: {},
     dialogAction: '',
   },
   reducers: {

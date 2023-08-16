@@ -38,6 +38,8 @@ const RegionStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {   
           dispatch( updateRegionStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

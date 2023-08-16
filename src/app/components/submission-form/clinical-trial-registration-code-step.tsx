@@ -20,6 +20,8 @@ const ClinicalTrialRegistrationCodeStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateClinicalTrialRegistrationCodeStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

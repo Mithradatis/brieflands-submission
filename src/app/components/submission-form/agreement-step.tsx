@@ -38,6 +38,8 @@ const AgreementStep = forwardRef(( props, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateAgreementStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

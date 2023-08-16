@@ -20,6 +20,8 @@ const AuthorContributionStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateAuthorContributionStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

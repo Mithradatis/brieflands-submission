@@ -20,6 +20,8 @@ const TwitterStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateTwitterStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

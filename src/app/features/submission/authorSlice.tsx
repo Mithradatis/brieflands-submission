@@ -5,7 +5,9 @@ interface Author {
   id: number,
   email: string,
   firstname: string,
-  lastname: string
+  lastname: string,
+  orcid: string,
+  iscorresponding: string
 }
 
 export const authorSlice = createSlice({
@@ -50,7 +52,9 @@ export const authorSlice = createSlice({
               id: ( index + 1 ),
               email: value['email'],
               firstname: value['first-name'] || value['first_name'] || '',
-              lastname: value['last-name'] || value['last_name'] || ''
+              lastname: value['last-name'] || value['last_name'] || '',
+              orcid: value['orcid'] || '',
+              iscorresponding: value['is_corresponding'] ? 'Yes' : 'No'
             }
           );
           const authorItem: any = {};
@@ -59,6 +63,7 @@ export const authorSlice = createSlice({
           ( value['middle_name'] !== null && ( authorItem['middle-name'] = value['middle-name'] ) );
           ( value['last_name'] !== null && ( authorItem['last-name'] = value['last-name'] ) );
           ( value['orcid-id'] !== null && ( authorItem['orcid-id'] = value['orcid-id'] ) );
+          ( value['country'] !== null && ( authorItem['country'] = value['country'] ) );
           ( value['phone_type'] && ( authorItem['phone_type'] = value['phone_type'] ) );
           ( value['country_phone'] && ( authorItem['country_phone'] = value['country_phone'] ) );
           ( value['phone_number'] && ( authorItem['phone_number'] = value['phone_number'] ) );
@@ -85,7 +90,9 @@ export const authorSlice = createSlice({
               id: ( index + 1 ),
               email: value['email'],
               firstname: value['first-name'] || value['first_name'] || '',
-              lastname: value['last-name'] || value['last_name'] || ''
+              lastname: value['last-name'] || value['last_name'] || '',
+              orcid: value['orcid'] || '',
+              iscorresponding: value['is_corresponding'] ? 'Yes' : 'No'
             }
           );
           const authorItem: any = {};
@@ -94,6 +101,7 @@ export const authorSlice = createSlice({
           ( value['middle_name'] !== null && ( authorItem['middle-name'] = value['middle-name'] ) );
           ( value['last_name'] !== null && ( authorItem['last-name'] = value['last-name'] ) );
           ( value['orcid-id'] !== null && ( authorItem['orcid-id'] = value['orcid-id'] ) );
+          ( value['country'] !== null && ( authorItem['country'] = value['country'] ) );
           ( value['phone_type'] && ( authorItem['phone_type'] = value['phone_type'] ) );
           ( value['country_phone'] && ( authorItem['country_phone'] = value['country_phone'] ) );
           ( value['phone_number'] && ( authorItem['phone_number'] = value['phone_number'] ) );
@@ -119,9 +127,11 @@ export const authorSlice = createSlice({
           state.authorsList.push(
             {
               id: ( index + 1 ),
-              email: value['email'], 
+              email: value['email'],
               firstname: value['first-name'] || value['first_name'] || '',
-              lastname: value['last-name'] || value['last_name'] || '' 
+              lastname: value['last-name'] || value['last_name'] || '',
+              orcid: value['orcid'] || '',
+              iscorresponding: value['is_corresponding'] ? 'Yes' : 'No'
             }
           );
           const authorItem: any = {};
@@ -130,6 +140,7 @@ export const authorSlice = createSlice({
           ( value['middle_name'] !== null && ( authorItem['middle-name'] = value['middle-name'] ) );
           ( value['last_name'] !== null && ( authorItem['last-name'] = value['last-name'] ) );
           ( value['orcid-id'] !== null && ( authorItem['orcid-id'] = value['orcid-id'] ) );
+          ( value['country'] !== null && ( authorItem['country'] = value['country'] ) );
           ( value['phone_type'] && ( authorItem['phone_type'] = value['phone_type'] ) );
           ( value['country_phone'] && ( authorItem['country_phone'] = value['country_phone'] ) );
           ( value['phone_number'] && ( authorItem['phone_number'] = value['phone_number'] ) );
@@ -154,9 +165,11 @@ export const authorSlice = createSlice({
           state.authorsList.push(
             {
               id: ( index + 1 ),
-              email: value['email'], 
+              email: value['email'],
               firstname: value['first-name'] || value['first_name'] || '',
-              lastname: value['last-name'] || value['last_name'] || '' 
+              lastname: value['last-name'] || value['last_name'] || '',
+              orcid: value['orcid'] || '',
+              iscorresponding: value['is_corresponding'] ? 'Yes' : 'No'
             }
           );
           const authorItem: any = {};
@@ -165,6 +178,7 @@ export const authorSlice = createSlice({
           ( value['middle_name'] !== null && ( authorItem['middle-name'] = value['middle-name'] ) );
           ( value['last_name'] !== null && ( authorItem['last-name'] = value['last-name'] ) );
           ( value['orcid-id'] !== null && ( authorItem['orcid-id'] = value['orcid-id'] ) );
+          ( value['country'] !== null && ( authorItem['country'] = value['country'] ) );
           ( value['phone_type'] && ( authorItem['phone_type'] = value['phone_type'] ) );
           ( value['country_phone'] && ( authorItem['country_phone'] = value['country_phone'] ) );
           ( value['phone_number'] && ( authorItem['phone_number'] = value['phone_number'] ) );

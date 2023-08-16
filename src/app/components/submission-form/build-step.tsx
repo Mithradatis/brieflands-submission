@@ -84,6 +84,32 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                         </div>
                     }
                 </div>
+                <Alert severity="info" className="mb-4">
+                    { 
+                        formState.value.standard_word_count && 
+                        <div>
+                            Standard cord count is: { formState.value.standard_word_count }
+                        </div> 
+                    }
+                    { 
+                        formState.value.word_count && 
+                        <div>
+                            Word count(Total) of manuscript is about: { formState.value.word_count }
+                        </div> 
+                    }
+                    { 
+                        ( wizard.journal?.shopping_status === 'active' && formState.value.word_count_include_in_fee ) && 
+                        <div>
+                            Word count(include in fee) of manuscript is about: { formState.value.word_count_include_in_fee }
+                        </div> 
+                    }
+                    { 
+                        ( wizard.journal?.shopping_status === 'active' && formState.value.prices ) && 
+                        <div>
+                            Invoice amount(VAT included) will be:
+                        </div> 
+                    }
+                </Alert>
                 <form name="build-form" id="build-form">
                     <FormControl className="mb-4">
                         <Checkbox
@@ -118,7 +144,7 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                                     action: finishWorkflowUrl,
                                     data: '',
                                     dialogTitle: 'Finish Submission', 
-                                    dialogContent: formState.value.final_message, 
+                                    dialogContent: { content: formState.value.final_message }, 
                                     dialogAction: 'finish-submission' } 
                                     ) );
                             } else {

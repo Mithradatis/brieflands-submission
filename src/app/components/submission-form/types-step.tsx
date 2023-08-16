@@ -45,8 +45,9 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                 dispatch( getWorkflow( getWorkflowFromApi ) );
                 dispatch( getSubmissionSteps( getStepsFromApi ) );
             }
-          }); 
-          
+          });
+           
+          return true;
         }
     }));
 
@@ -60,7 +61,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
                 }
-                <FormControl className="mb-3" error={ formState.value.doc_type === '' && !isValid.doc_type }>
+                <FormControl className="mb-3 required" error={ formState.value.doc_type === '' && !isValid.doc_type }>
                     <FormLabel className="fw-bold mb-1">
                         Manuscript Type
                     </FormLabel>
@@ -105,7 +106,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                         && <FormHelperText className="fs-7 text-danger mt-1">You should select a document type</FormHelperText> 
                     }
                 </FormControl>
-                <FormControl className="mb-3" error={formState.value.manuscript_title === '' && !isValid.manuscript_title}>
+                <FormControl className="mb-3 required" error={formState.value.manuscript_title === '' && !isValid.manuscript_title}>
                     <FormLabel className="fw-bold mb-1">
                         Title
                     </FormLabel>

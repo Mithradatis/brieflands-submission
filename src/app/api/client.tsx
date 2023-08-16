@@ -2,7 +2,7 @@ import { createAsyncThunk } from '@reduxjs/toolkit'
 import { handleSnackbarOpen, handleSnackbarClose } from '@/app/features/snackbar/snackbarSlice'
 
 export const getSubmissionSteps = createAsyncThunk(
-  'submission/fetchInitialState',
+  'submission/getSubmissionSteps',
   async ( url: string ) => {
     try {
       const response = await fetch(url, {
@@ -12,6 +12,25 @@ export const getSubmissionSteps = createAsyncThunk(
       });
 
       const data = await response.json();
+      return data;
+    } catch (error) {
+      return error;
+    }
+  }
+);
+
+export const getJournal = createAsyncThunk(
+  'submission/getJournal',
+  async ( url: string ) => {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow'
+      });
+
+      const data = await response.json();
+      
       return data;
     } catch (error) {
       return error;

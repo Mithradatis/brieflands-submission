@@ -22,7 +22,13 @@ const WizardOutline = () => {
                                     <a href={`#${formStepTitle}`}
                                        className={ ( wizard.workflow?.storage?.types?.doc_type === undefined && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }
                                        onClick={() => dispatch( loadStep( formStepTitle ) ) }>
-                                        <span className="text-capitalize">{ formStepTitle?.replace(/_/g, ' ') }</span>
+                                        <span className="text-capitalize">
+                                            { formStepTitle?.replace(/_/g, ' ') }
+                                        </span>
+                                        {
+                                            item.attributes?.required &&
+                                                <span className="ms-1">*</span>
+                                        }
                                     </a>
                                 </li>
                             )

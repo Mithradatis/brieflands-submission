@@ -3,6 +3,7 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import { useTheme } from '@mui/material/styles'
 import { dialogState, handleDialogClose } from '@/app/features/dialog/dialogSlice'
 import { handleOperation } from '@/app/api/dialog'
+import ReactHtmlParser from 'react-html-parser'
 
 const DialogComponent = () => {
     const dispatch: any = useDispatch();
@@ -23,7 +24,7 @@ const DialogComponent = () => {
             </DialogTitle>
             <DialogContent>
                 <DialogContentText>
-                    { dialog.dialogContent }
+                    { ReactHtmlParser( dialog.dialogContent.content ) }
                 </DialogContentText>
             </DialogContent>
             <DialogActions>

@@ -23,7 +23,9 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
         dispatch( getAuthorStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {}
+        submitForm () {
+          return true;
+        }
     }));
     const deleteAuthorUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/remove`;
     const updateAuthorsOrderUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/change_order`;
@@ -31,6 +33,8 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
       email: string;
       firstname: string;
       lastname: string;
+      orcid: string;
+      iscorresponding: string;
     };
     const columns = useMemo<MRT_ColumnDef<Author>[]>(
       () => [  
@@ -45,6 +49,14 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
         {
           accessorKey: 'lastname',
           header: 'Last Name',   
+        },
+        {
+          accessorKey: 'orcid',
+          header: 'Orcid',   
+        },
+        {
+          accessorKey: 'iscorresponding',
+          header: 'is corresponding',   
         },
         {
           id: 'actions',
@@ -75,7 +87,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                     action: deleteAuthorUrl, 
                     data: row.original.email,
                     dialogTitle: 'Delete Author', 
-                    dialogContent: 'Are you sure?', 
+                    dialogContent: { content: 'Are you sure?' }, 
                     dialogAction: 'delete-author' } 
                     ) ) 
                 }>
@@ -92,7 +104,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
               <h3 className="mb-4 text-shadow-white">Authors</h3>
               <Scrollbars
                   className="mb-4"
-                  style={{ width: 500, height: 200 }}
+                  style={{ width: 600, height: 200 }}
                   universal={true}
                   autoHide
                   autoHideTimeout={500}
@@ -105,7 +117,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                   }
               </Scrollbars>
               {
-                wizard.baseDocId === '' &&
+                wizard.documentId === '' &&
                   <Button className="btn btn-primary btn-lg mb-4" onClick={() => dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep } ) )}>
                     Add Author
                   </Button>

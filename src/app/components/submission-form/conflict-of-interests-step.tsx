@@ -20,6 +20,8 @@ const ConflictOfInterestsStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateConflictOfInterestsStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

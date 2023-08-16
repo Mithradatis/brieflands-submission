@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import {  Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { useDropzone } from 'react-dropzone'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput, handleDropzoneStatus } from '@/app/features/submission/documentFilesSlice'
+import { stepState, handleFileType, handleInput, handleDropzoneStatus } from '@/app/features/submission/documentFilesSlice'
 import { getFileTypes, getFilesStepData, getFilesStepGuide, updateFilesStepData, addFile } from '@/app/api/files'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
 import DataTable, { TableColumn } from 'react-data-table-component'
@@ -29,13 +29,17 @@ const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string
 const FilesStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState: any = useSelector( stepState );
-    const fileTypes = formState.fileTypesList;
-    const wizard = useSelector( wizardState );
-    const [filteredItems, setFilteredItems] = useState([]);
+    const fileTypes: any = formState.fileTypesList;
+    const wizard: any = useSelector( wizardState );
+    const [newFilteredItems, setNewFilteredItems] = useState([]);
+    const [oldFilteredItems, setOldFilteredItems] = useState([]);
     const getFileTypesFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/files/get_file_types`;
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/files`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     const [filterText, setFilterText] = useState('');
+    const [ isValid, setIsValid ] = useState({
+        caption: true
+    });
     const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
     useEffect(() => {
         dispatch( getFileTypes( getFileTypesFromApi ) );
@@ -47,24 +51,38 @@ const FilesStep = forwardRef( ( prop, ref ) => {
         dispatch( formValidator( formIsValid ) );
     }, [formState?.value, wizard.formStep, wizard.workflow]);
     useEffect(() => {
-        const filteredData = formState.newFilesList.filter( ( item: any ) => {
-        const rowValues = Object.values( item );
-        return rowValues.some((value) => {
-            if (typeof value === 'string') {
-            const formattedValue = value.replace(/\s/g, '').toLowerCase();
-            const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
-            return formattedValue.includes(formattedFilterText);
-            }
-            return false;
+        const newfilteredData = formState.newFilesList.filter( ( item: any ) => {
+            const rowValues = Object.values( item );
+            return rowValues.some((value) => {
+                if (typeof value === 'string') {
+                const formattedValue = value.replace(/\s/g, '').toLowerCase();
+                const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
+                return formattedValue.includes(formattedFilterText);
+                }
+                return false;
+            });
         });
-        });
-        setFilteredItems( filteredData );
+        setNewFilteredItems( newfilteredData );
     }, [formState.newFilesList, filterText, wizard.formStep]);
+    useEffect(() => {
+        const oldfilteredData = formState.oldFilesList.filter( ( item: any ) => {
+            const rowValues = Object.values( item );
+            return rowValues.some((value) => {
+                if (typeof value === 'string') {
+                    const formattedValue = value.replace(/\s/g, '').toLowerCase();
+                    const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
+                    return formattedValue.includes(formattedFilterText);
+                }
+                return false;
+            });
+        });
+        setOldFilteredItems( oldfilteredData );
+    }, [formState.oldFilesList, filterText, wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {}
     }));
     const deleteFileUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/remove`;
-    const columns: TableColumn<{ 
+    const newColumns: TableColumn<{ 
         fileName: string, 
         fileType: string, 
         caption: string,
@@ -134,13 +152,110 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                                 action: deleteFileUrl, 
                                 data: row.uuid, 
                                 dialogTitle: 'Delete File', 
-                                dialogContent: 'Are you sure?', 
+                                dialogContent: { content: 'Are you sure?' }, 
                                 dialogAction: 'delete-file' } 
                                 ) ) 
                             }
                         >
                         <i className="fa-duotone fa-trash"></i>
                     </Button>
+                    <a href={ `/cdn/dl/${ row.uuid }` }>
+                        <Button
+                            className="py-2"
+                            variant="contained"
+                            color="primary"
+                            size="small"
+                            sx={{ minWidth: 0 }}
+                        >
+                            <i className="fa-duotone fa-download"></i>
+                        </Button>
+                    </a>
+                </div>
+            ),
+        },
+    ];
+    const reuseFileUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/reuse`;
+    const oldColumns: TableColumn<{ 
+        fileName: string, 
+        fileType: string, 
+        caption: string,
+        fileSize: string,
+        wordCount: string,
+        uploadDate: string,
+        uuid: string,
+        reuse: boolean,
+        downloadLink: string 
+        actions: any }>[] = [  
+        {
+            name: 'File Name',
+            selector: row => row.fileName,
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'File Type',
+            selector: row => row.fileType,
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'Caption',
+            selector: row => row.caption,
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'File Size',
+            selector: row => {
+                const fileSizeInKB:any = ( parseInt( row.fileSize ) / 1024 ).toFixed( 2 );
+                const fileSizeInMB: any = ( parseInt( fileSizeInKB ) / 1024 ).toFixed( 2 );
+        
+                if ( fileSizeInMB >= 1 ) {
+                  return `${ fileSizeInMB } MB`;
+                } else {
+                  return `${ fileSizeInKB } KB`;
+                }
+            },
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'Word Count',
+            selector: row => row.wordCount,
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'Upload Date',
+            selector: row => row.uploadDate,
+            sortable: true,
+            reorder: true
+        },
+        {
+            name: 'Actions',
+            cell: ( row ) => (
+                <div className="d-flex align-items-center justify-content-center flex-wrap">
+                    {   !row.reuse &&
+                        <Button
+                            title="Reuse"
+                            className="py-2 me-2"
+                            variant="contained"
+                            color="secondary"
+                            size="small"
+                            sx={{ minWidth: 0 }}
+                            onClick={ () => dispatch( handleDialogOpen( 
+                                { 
+                                    action: reuseFileUrl, 
+                                    data: row.uuid, 
+                                    dialogTitle: 'Reuse File', 
+                                    dialogContent: { content: 'Are you sure?' }, 
+                                    dialogAction: 'reuse-file' } 
+                                    ) ) 
+                                }
+                            >
+                            <i className="fa-duotone fa-repeat"></i>
+                        </Button>
+                    }
                     <a href={ `/cdn/dl/${ row.uuid }` }>
                         <Button
                             className="py-2"
@@ -198,7 +313,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
                 }
-                <FormControl className="mb-3" error={ !formState.formStatus.fileTypeId && formState.formStatus.isDisabled }>
+                <FormControl className="mb-3 required" error={ !formState.formStatus.fileTypeId && formState.formStatus.isDisabled }>
                     <FormLabel className="fw-bold mb-1">
                         File Type
                     </FormLabel>
@@ -216,21 +331,18 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                                 Array.isArray( fileTypes ) 
                                 ? fileTypes.map( 
                                     item => {
-                                        return item.attributes?.title || '' 
+                                        return item.attributes?.title + ( item.attributes.minimum_requirement !== 0 ? ' *' : '' )  || '' 
                                     }
                                    ) : []
-                            }
-                            value={
-                                formState.value.file_type_id !== '' && Array.isArray( fileTypes )
-                                  ? fileTypes?.find( ( item: any ) => formState.value.file_type_id === item.id )?.attributes?.title
-                                  : null
                             }
                             onChange={(event, value) => {
                                 if ( value === '' ) {
                                     dispatch( handleDropzoneStatus( false ) );
                                 }
-                                dispatch( handleInput({
+                                dispatch( handleFileType({
                                     name: 'file_type_id',
+                                    captionRequired: fileTypes.find( 
+                                        ( item: any ) => item.attributes.title === value )?.attributes.require_caption || '',
                                     value: fileTypes.find( 
                                         ( item: any ) => item.attributes.title === value )?.id || '' } 
                                         ) 
@@ -238,11 +350,28 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                             }}
                         />
                         ) : (
-                        <div>Loading document types...</div>
+                        <div>Loading file types...</div>
                     )}
                     {
                         ( !formState.formStatus.fileTypeId && formState.formStatus.isDisabled )
                         && <FormHelperText className="fs-7 text-danger mt-1">Please select the file type first</FormHelperText> 
+                    }
+                </FormControl>
+                <FormControl className={`required mb-3 ${ formState.captionRequired ? ' d-block' : ' d-none' }`} error={ formState.captionRequired && !isValid['caption'] }>
+                    <FormLabel className="fw-bold mb-1">
+                        Caption
+                    </FormLabel>
+                    <Input
+                        required={ formState.captionRequired }
+                        variant="soft"
+                        name="fileCaption"
+                        id="fileCaption"
+                        placeholder="Write a caption"
+                        onChange={ event => dispatch( handleInput( { name: 'caption', value: event.target.value } ) ) }
+                    />
+                    {
+                        ( formState.captionRequired && !isValid['caption'] ) 
+                        && <FormHelperText className="fs-7 text-danger mt-1">Caption is required</FormHelperText> 
                     }
                 </FormControl>
                 <div className={`dropzone d-flex align-items-center justify-content-center p-4 mb-4 ${ isDragActive ? 'drag-active' : ''}`}
@@ -259,34 +388,31 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                         </Button>
                     </div>
                 </div>
+                <div className="datatable-container">
+                    <DataTable
+                        className="datatable"
+                        title={ <h4 className="fs-6 mb-0 px-0">Files</h4> }
+                        subHeader
+                        subHeaderComponent={ subHeaderComponentMemo }
+                        persistTableHead
+                        pagination
+                        columns={ newColumns }
+                        data={ newFilteredItems }
+                    />
+                </div>
+                <hr/> 
                 {
                     formState.oldFilesList.length > 0 &&
                     <div className="datatable-container">
                         <DataTable
                         className="datatable"
-                            title={ <h4 className="fs-6 mb-0 px-0">Files List</h4> }
+                            title={ <h4 className="fs-6 mb-0 px-0">Old Files</h4> }
                             subHeader
                             subHeaderComponent={ subHeaderComponentMemo }
                             persistTableHead
                             pagination
-                            columns={ columns }
-                            data={ filteredItems }
-                        />
-                    </div> 
-                }
-                <hr/>
-                {
-                    formState.newFilesList.length > 0 &&
-                    <div className="datatable-container">
-                        <DataTable
-                            className="datatable"
-                            title={ <h4 className="fs-6 mb-0 px-0">Files List</h4> }
-                            subHeader
-                            subHeaderComponent={ subHeaderComponentMemo }
-                            persistTableHead
-                            pagination
-                            columns={ columns }
-                            data={ filteredItems }
+                            columns={ oldColumns }
+                            data={ oldFilteredItems }
                         />
                     </div> 
                 }

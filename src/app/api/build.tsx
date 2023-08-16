@@ -36,8 +36,9 @@ export const getBuildStepData = createAsyncThunk(
 
       if ( !response.ok ) {
         const error = await response.json();
+        console.log( error );
         dispatch( loadStep( error.data.step ) );
-        dispatch( handleSnackbarOpen( { severity: 'error', message: error } ) );
+        dispatch( handleSnackbarOpen( { severity: 'error', message: error.data.message } ) );
       }
       const data = await response.json();
 

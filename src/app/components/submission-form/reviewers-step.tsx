@@ -39,7 +39,9 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
         dispatch( getReviewersStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {}
+        submitForm () {
+            return true;
+        }
     }));
     const deleteReviewerUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/remove`;
     const columns: TableColumn<{ email: string, firstname: string, lastname: string, suggested_opposed: string, actions: any }>[] = [
@@ -92,7 +94,7 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
                         action: deleteReviewerUrl, 
                         data: row.email, 
                         dialogTitle: 'Delete Reviewer', 
-                        dialogContent: 'Are you sure?', 
+                        dialogContent: { content: 'Are you sure?' }, 
                         dialogAction: 'delete-reviewer' } 
                         ) ) 
                     }

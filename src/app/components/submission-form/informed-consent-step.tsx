@@ -20,6 +20,8 @@ const InformedConsentStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateInformedConsentStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 

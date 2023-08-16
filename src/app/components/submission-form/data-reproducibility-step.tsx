@@ -20,6 +20,8 @@ const DataReproducibilityStep = forwardRef( ( prop, ref ) => {
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateDataReproducibilityStepData( getStepDataFromApi ) );
+
+          return true;
         }
     }));
 
