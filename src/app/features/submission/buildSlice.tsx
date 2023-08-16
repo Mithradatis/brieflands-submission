@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getBuildStepGuide, getBuildStepData } from '@/app/api/build'
+import { getBuildStepGuide, getBuildStepData, getFinalAgreementGuide } from '@/app/api/build'
 
 export const buildSlice = createSlice({
   name: 'build',
@@ -10,6 +10,7 @@ export const buildSlice = createSlice({
     hasError: false,
     errorMessage: '',
     stepGuide: {},
+    finalAgreementGuide: {},
     value: {
       terms: false
     }
@@ -57,6 +58,12 @@ export const buildSlice = createSlice({
       })
       .addCase( getBuildStepData.rejected, ( state ) => {
         // state.error = action.error.message;
+      }).addCase(getFinalAgreementGuide.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase(getFinalAgreementGuide.fulfilled, ( state, action: any ) => {
+        state.isLoading = false;
+        state.finalAgreementGuide = action.payload.data.value;
       });
   },
 });

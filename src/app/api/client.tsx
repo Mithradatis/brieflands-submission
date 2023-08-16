@@ -38,6 +38,25 @@ export const getJournal = createAsyncThunk(
   }
 );
 
+export const getUser = createAsyncThunk(
+  'submission/getUser',
+  async ( url: string ) => {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow'
+      });
+
+      const data = await response.json();
+      
+      return data;
+    } catch (error) {
+      return error;
+    }
+  }
+);
+
 export const buildNewWorkflow = createAsyncThunk(
   'submission/buildNewWorkflow',
   async ( url: string ) => {
@@ -84,6 +103,7 @@ export const finishSubmission = createAsyncThunk(
   'submission/finishSubmission',
   async ( url: string, { getState, dispatch } ) => {
     try {
+      const state: any = getState(); 
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',
@@ -94,11 +114,8 @@ export const finishSubmission = createAsyncThunk(
       }
       const data = await response.json();
       dispatch( handleSnackbarOpen( { severity: 'success', message: data.data.message } ) );
-      const timer = setTimeout(() => {
-        window.location.href = data.data.link;
-      }, 5000);
 
-      return () => clearTimeout(timer);
+      return data;
     } catch (error) {
       return error;
     }

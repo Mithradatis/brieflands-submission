@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getTypesStepGuide, getDocumentTypes, getTypesStepData } from '@/app/api/types'
+import { getTypesStepGuide, getTypesStepData } from '@/app/api/types'
 
 export const documentTypesSlice = createSlice({
   name: 'documentTypes',

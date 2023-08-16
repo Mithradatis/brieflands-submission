@@ -24,6 +24,13 @@ export const getBuildStepGuide = createAsyncThunk(
   }
 );
 
+export const getFinalAgreementGuide = createAsyncThunk(
+  'submission/getFinalAgreementGuide',
+  async (url: string) => {
+    return fetchDataFromApi(url);
+  }
+);
+
 export const getBuildStepData = createAsyncThunk(
   'submission/getBuildStepData',
   async ( url: string, { getState, dispatch } ) => {

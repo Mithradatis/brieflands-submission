@@ -78,7 +78,7 @@ export const addFile = createAsyncThunk(
     const state: any = getState();
     const formData = new FormData();
     formData.append('file_type_id', state.documentFilesSlice.value.file_type_id);
-    formData.append('caption', state.documentFilesSlice.value.caption);
+    state.documentFilesSlice.value?.caption !== undefined && formData.append('caption', state.documentFilesSlice.value.caption);
     formData.append('file', file);
     const url = `${ state.wizardSlice.baseUrl }/api/v1/submission/workflow/${ state.wizardSlice.workflowId }/files/add`;
     const response = await fetch( url, {

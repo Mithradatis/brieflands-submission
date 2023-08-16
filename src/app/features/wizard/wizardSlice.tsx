@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { buildNewWorkflow, getJournal, getSubmissionSteps, getWorkflow } from '@/app/api/client'
+import { buildNewWorkflow, getJournal, getUser, getSubmissionSteps, getWorkflow, finishSubmission } from '@/app/api/client'
 import { getDocumentTypes } from '@/app/api/types'
 
 let baseUrl, currentUrl, workflowId, activeTab = '';
@@ -40,6 +40,7 @@ export const wizardSlice = createSlice({
     workflowId: workflowId || 365,
     workflow: {},
     journal: {},
+    user: {},
     documentTypesList: []
   },
   reducers: {
@@ -104,6 +105,13 @@ export const wizardSlice = createSlice({
         state.isLoading = false;
         state.journal = action.payload.data;
       })
+      .addCase(getUser.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase(getUser.fulfilled, ( state, action: any ) => {
+        state.isLoading = false;
+        state.user = action.payload.data;
+      })
       .addCase( getSubmissionSteps.pending, ( state ) => {
         state.isLoading = true;
       })
@@ -132,6 +140,13 @@ export const wizardSlice = createSlice({
       .addCase(getDocumentTypes.fulfilled, ( state, action: any ) => {
         state.isLoading = false;
         state.documentTypesList = action.payload.data;
+      }).addCase(finishSubmission.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase(finishSubmission.fulfilled, ( state, action: any ) => {
+        setTimeout(() => {
+          window.location.href = action.payload.data.link;
+        }, 5000);
       });
   },
 });

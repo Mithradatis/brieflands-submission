@@ -4,7 +4,7 @@ const path = require('path');
 const nextConfig = {
     // distDir: 'build',
     // output: 'export',
-    // assetPrefix: '__service_url__',
+    // assetPrefix: '/assets',
     sassOptions: {
         includePaths: [path.join(__dirname, 'styles')],
     },

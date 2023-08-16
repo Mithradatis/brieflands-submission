@@ -40,13 +40,11 @@ const TypesStep = forwardRef( ( prop, ref ) => {
     const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
     useImperativeHandle(ref, () => ({
         submitForm () {
-          dispatch( updateTypesStepData( getStepDataFromApi ) ).then( () => {
-            if ( formState.value.doc_type === undefined ) {
-                dispatch( getWorkflow( getWorkflowFromApi ) );
-                dispatch( getSubmissionSteps( getStepsFromApi ) );
-            }
+          dispatch( updateTypesStepData( getStepDataFromApi ) );
+          dispatch( getWorkflow( getWorkflowFromApi ) ).then( () => {
+            dispatch( getSubmissionSteps( getStepsFromApi ) )
           });
-           
+          
           return true;
         }
     }));

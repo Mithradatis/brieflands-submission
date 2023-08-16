@@ -30,6 +30,13 @@ body {
     .fs-7 {
         font-size: .8rem;
     }
+    .img-circle {
+        border-radius: 50%;
+        border: 3px solid rgba(#1f2220, .25);
+    }
+    .img-tiny {
+        width: 2rem;
+    }
     .main-container {
         transition: all ease-in .2s;
         position: fixed;

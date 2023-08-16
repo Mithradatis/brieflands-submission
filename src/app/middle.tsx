@@ -4,6 +4,7 @@ import SubmissionForm from './components/submission-form/form'
 import styles from '@/app/page.module.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@/app/resources/css/customStyle.scss'
+import { Breadcrumbs, Typography, Link } from '@mui/material'
 import { Modal, ModalDialog } from '@mui/joy'
 import ModalContent from './components/modal/modal-content'
 import '@/app/resources/fontawesome-6/css/all.min.css'
@@ -11,7 +12,7 @@ import { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { loadStep, wizardState } from '@/app/features/wizard/wizardSlice'
 import { modalState, handleClose } from '@/app/features/modal/modalSlice'
-import { getWorkflow, buildNewWorkflow, getSubmissionSteps, getJournal } from '@/app/api/client'
+import { getWorkflow, buildNewWorkflow, getSubmissionSteps, getJournal, getUser } from '@/app/api/client'
 import Image from 'next/image'
 
 export default function App() {
@@ -35,11 +36,14 @@ export default function App() {
     if ( wizard.workflow !== undefined && Object.keys( wizard.workflow ).length > 0 ) {
       const getJournalFromApi = `${ wizard.baseUrl }/api/v1/journal/journal/${ wizard.workflow.journal_id }`;
       dispatch( getJournal( getJournalFromApi ) );
+      const getUserFromApi = `${ wizard.baseUrl }/api/v1/journal/profile`;
+      dispatch( getUser( getUserFromApi ) );
     }
   }, [wizard.workflow]);
 
   return (
     <>
+        { console.log( wizard.user ) }
         <div id="loading" className={`d-flex flex-column align-items-center justify-content-center ${ wizard.isLoading ? ' d-block' : ' d-none'}`}>
           <div className="logo p-3 d-flex align-items-center justify-content-center">
             <Image
@@ -78,11 +82,19 @@ export default function App() {
                 <span className="ms-2">{ wizard.journal?.attributes?.title }</span>
               </div>
             </div> 
-            <div className="logo px-3">
-              <i className="fa-duotone fa-circle-user fa-2x"></i>
+            <div className="logo px-3 d-flex align-items-center">
+              <span className="me-2">{ wizard.user.attributes?.full_name }</span>
+              <img className="img-circle img-tiny" src={ wizard.user.attributes?.avatar } alt={ wizard.user.attributes?.full_name } title={ wizard.user.attributes?.full_name } />
             </div>
           </div>
           <main className={`${styles.main} pt-4`}>
+          <Breadcrumbs aria-label="breadcrumb">
+            <Link underline="hover" color="inherit" href="/">
+              <i className="fa-duotone fa-home fs-7 me-1"></i>
+              <span>Home</span>
+            </Link>
+            <Typography color="text.primary">Submission</Typography>
+          </Breadcrumbs>
             {
               ( !wizard.workflow?.locked && wizard.workflowId !== '' ) 
               ? <SubmissionForm/>

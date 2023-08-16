@@ -12,7 +12,6 @@ const WizardNavigation = () => {
         const stepsList = document.querySelector('.wizard-navigation > ol');
         if ( stepsList instanceof HTMLElement ) {
             const activeStep = stepsList.querySelector('li.active');
-            console.log( activeStep );
             if ( stepsList.parentNode instanceof HTMLElement) {
                 const parentWidth = stepsList.parentNode.clientWidth;
                 if ( activeStep !== null ) {

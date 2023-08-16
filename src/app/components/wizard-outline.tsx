@@ -5,9 +5,14 @@ import { wizardState, loadStep } from '@/app/features/wizard/wizardSlice'
 const WizardOutline = () => {
     const dispatch = useDispatch();
     const [ formSteps, setFormSteps ] = useState([]);
+    const [ isDocumentTypeSet, setIsDocumentTypeSet ] = useState( false );
     const wizard = useSelector( wizardState );
     useEffect( () => {
+        if ( wizard.workflow?.storage?.types?.doc_type !== undefined ) {
+            setIsDocumentTypeSet( true );
+        }
         setFormSteps( wizard.formSteps );
+        
     }, [wizard.formSteps]);
 
     return (
@@ -20,7 +25,7 @@ const WizardOutline = () => {
                             return (
                                 <li className={ wizard.formStep === formStepTitle ? 'active' : '' } key={ formStepTitle }>
                                     <a href={`#${formStepTitle}`}
-                                       className={ ( wizard.workflow?.storage?.types?.doc_type === undefined && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }
+                                    //    className={ ( !isDocumentTypeSet && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }
                                        onClick={() => dispatch( loadStep( formStepTitle ) ) }>
                                         <span className="text-capitalize">
                                             { formStepTitle?.replace(/_/g, ' ') }

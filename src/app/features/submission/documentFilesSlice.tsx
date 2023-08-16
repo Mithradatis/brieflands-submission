@@ -136,6 +136,8 @@ export const documentFilesSlice = createSlice({
       }
       state.value.old_files = oldFiles;
       state.value.new_files = newFiles;
+      state.value.caption = '';
+      state.value.file_type_id = '';
     }).addCase(deleteFile.pending, ( state ) => {
       state.isLoading = true;
     })
@@ -187,6 +189,8 @@ export const documentFilesSlice = createSlice({
       }
       state.value.old_files = oldFiles;
       state.value.new_files = newFiles;
+      state.value.caption = '';
+      state.value.file_type_id = '';
     }).addCase(addFile.pending, ( state ) => {
       state.isLoading = true;
     })
@@ -238,6 +242,8 @@ export const documentFilesSlice = createSlice({
       }
       state.value.old_files = oldFiles;
       state.value.new_files = newFiles;
+      state.value.caption = '';
+      state.value.file_type_id = '';
     }).addCase(reuseFile.pending, ( state ) => {
       state.isLoading = true;
     })
@@ -289,6 +295,8 @@ export const documentFilesSlice = createSlice({
       }
       state.value.old_files = oldFiles;
       state.value.new_files = newFiles;
+      state.value.caption = '';
+      state.value.file_type_id = '';
     });
   },
 });

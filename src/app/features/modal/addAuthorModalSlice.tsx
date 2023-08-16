@@ -184,6 +184,16 @@ export const addAuthorModalSlice = createSlice({
           if ( author['correspond_affiliation'] !== '' ) {
             state.value['correspond_affiliation'] = author['correspond_affiliation'];
           }
+        } else {
+          state.inputStatus.email = false;
+          state.inputStatus.firstName = true;
+          state.inputStatus.middleName = true;
+          state.inputStatus.lastName = true;
+          state.inputStatus.orcid = true;
+          state.inputStatus.country = true;
+          state.inputStatus.phoneType = true;
+          state.inputStatus.countryPhone = true;
+          state.inputStatus.phoneNumber = true;
         }
       }).addCase(getAllCountries.pending, ( state ) => {
         state.isLoading = true;

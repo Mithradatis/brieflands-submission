@@ -5,7 +5,7 @@ import { Alert } from '@mui/material'
 import { Checkbox, FormControl, Card, CardContent } from '@mui/joy'
 import { stepState, handleCheckbox } from '@/app/features/submission/buildSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
-import { getBuildStepGuide, getBuildStepData } from '@/app/api/build'
+import { getBuildStepGuide, getBuildStepData, getFinalAgreementGuide } from '@/app/api/build'
 import ReactHtmlParser from 'react-html-parser'
 
 const BuildStep = forwardRef( ( prop, ref ) => {
@@ -34,6 +34,16 @@ const BuildStep = forwardRef( ( prop, ref ) => {
             }));
         }
     }, [wizard.isVerified]);
+
+    useEffect( () => {
+        let getFinalAgreementDictionary = '';
+        if( wizard.journal?.attributes?.shopping_status ) {
+            getFinalAgreementDictionary = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.final.agreement.apc`;
+        } else {
+            getFinalAgreementDictionary = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.final.agreement`;
+        }
+        dispatch( getFinalAgreementGuide( getFinalAgreementDictionary ) );
+    }, [wizard.journal]);
 
     return (
         <>
@@ -85,6 +95,8 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                     }
                 </div>
                 <Alert severity="info" className="mb-4">
+                    { ReactHtmlParser( formState.finalAgreementGuide ) }
+                    <hr/>
                     { 
                         formState.value.standard_word_count && 
                         <div>
@@ -98,15 +110,22 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                         </div> 
                     }
                     { 
-                        ( wizard.journal?.shopping_status === 'active' && formState.value.word_count_include_in_fee ) && 
+                        ( wizard.journal?.attributes?.shopping_status === 'active' && formState.value.word_count_include_in_fee ) && 
                         <div>
                             Word count(include in fee) of manuscript is about: { formState.value.word_count_include_in_fee }
                         </div> 
                     }
                     { 
-                        ( wizard.journal?.shopping_status === 'active' && formState.value.prices ) && 
+                        (wizard.journal?.attributes?.shopping_status === 'active' && formState.value.prices) && 
                         <div>
-                            Invoice amount(VAT included) will be:
+                            Invoice amount(VAT included) will be: 
+                            {/* {
+                                Object.keys(formState.value.prices).map( ( product: any ) => (
+                                    Object.values(product).map( ( currency: any ) => (
+                                        <span key={currency}>{currency}: {formState.value.prices[currency]}</span>
+                                    ))
+                                ))
+                            } */}
                         </div> 
                     }
                 </Alert>

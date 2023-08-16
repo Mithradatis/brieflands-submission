@@ -126,7 +126,7 @@ const SubmissionForm = () => {
     return (
         <div className="wizard mb-4">
             <DialogComponent/>
-            <FlashMessage/>
+            <FlashMessage className="z-index-1050"/>
             { wizard.formSteps.length > 0 && 
                 <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item.attributes?.slug?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
             }

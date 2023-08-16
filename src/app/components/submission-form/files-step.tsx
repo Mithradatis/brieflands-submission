@@ -40,16 +40,18 @@ const FilesStep = forwardRef( ( prop, ref ) => {
     const [ isValid, setIsValid ] = useState({
         caption: true
     });
+    useEffect(() => {
+        setIsValid( prevState => ({
+            ...prevState,
+            caption: formState.value.caption !== undefined && formState.value.caption !== '',
+        }));
+    }, [formState.value.file_type_id]);
     const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
     useEffect(() => {
         dispatch( getFileTypes( getFileTypesFromApi ) );
         dispatch( getFilesStepData( getStepDataFromApi ) );
         dispatch( getFilesStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
-    useEffect(() => {
-        const formIsValid = Object.values( formState.value ).every(value => value !== '');
-        dispatch( formValidator( formIsValid ) );
-    }, [formState?.value, wizard.formStep, wizard.workflow]);
     useEffect(() => {
         const newfilteredData = formState.newFilesList.filter( ( item: any ) => {
             const rowValues = Object.values( item );
@@ -79,7 +81,9 @@ const FilesStep = forwardRef( ( prop, ref ) => {
         setOldFilteredItems( oldfilteredData );
     }, [formState.oldFilesList, filterText, wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {}
+        submitForm () {
+            return true;
+        }
     }));
     const deleteFileUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/remove`;
     const newColumns: TableColumn<{ 
@@ -327,11 +331,11 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                             disabled={false}
                             name="fileType"
                             id="fileType"
-                            options={ 
+                            options={
                                 Array.isArray( fileTypes ) 
                                 ? fileTypes.map( 
                                     item => {
-                                        return item.attributes?.title + ( item.attributes.minimum_requirement !== 0 ? ' *' : '' )  || '' 
+                                        return item.attributes?.title || '' 
                                     }
                                    ) : []
                             }

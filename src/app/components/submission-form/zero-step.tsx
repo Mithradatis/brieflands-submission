@@ -25,14 +25,38 @@ const ZeroStep = forwardRef( ( prop, ref ) => {
     return (
         <>
             <div id="zero" className="tab">
-                <h3 className="mb-4 text-shadow-white">Revission Message</h3>
+                <h3 className="mb-4 text-shadow-white">Revise/Revission Message</h3>
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
                 <Alert severity="info" className="mb-4 break-word">
-                    { ReactHtmlParser( formState.value.revise_message ) }
+                    { formState.value.revise_message !== undefined 
+                        && ReactHtmlParser( formState.value.revise_message )
+                    }
+                    { formState.value.screening !== undefined &&
+                        <table className="fs-7 table table-bordered table-stripped table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>Step Title</th>
+                                    <th>Status</th>
+                                    <th>Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {
+                                    formState.value.screening.map( ( row: any, index: number ) =>
+                                        <tr key={ `row-${ index }` }>
+                                            <td>{ row.step_title }</td>
+                                            <td>{ row.status }</td>
+                                            <td>{ ReactHtmlParser( row.detail ) }</td>
+                                        </tr>
+                                    )
+                                }
+                            </tbody>
+                        </table> 
+                    }
                 </Alert>
             </div>
         </>

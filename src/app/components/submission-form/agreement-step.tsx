@@ -7,6 +7,7 @@ import { stepState, handleCheckbox } from '@/app/features/submission/agreementSl
 import { getAgreementStepData, getAgreementStepGuide, getAgreementTerms, updateAgreementStepData } from '@/app/api/agreement'
 import Divider from '@mui/material/Divider'
 import ReactHtmlParser from 'react-html-parser'
+import { setFormIsValid } from '@/app/features/modal/modalSlice'
 
 const AgreementStep = forwardRef(( props, ref ) => {
     const dispatch: any = useDispatch();
@@ -24,7 +25,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
         dispatch( getAgreementStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useEffect(() => {
-        const formIsValid = formState.value.terms;
+        const formIsValid = formState.value?.terms;
         dispatch( formValidator( formIsValid ) );
     }, [formState.value, wizard.formStep, wizard.workflow]);
     useEffect( () => {
@@ -36,7 +37,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
         }
     }, [wizard.isVerified]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
+        submitForm () {  
           dispatch( updateAgreementStepData( getStepDataFromApi ) );
 
           return true;
@@ -74,7 +75,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
                                 required
                                 name="terms"
                                 id="terms"
-                                checked={ formState.value.terms || false }
+                                checked={ formState.value?.terms || false }
                                 onChange={ event => dispatch ( handleCheckbox( { name: event.target.name, value: formState.value.terms } ) ) }
                                 inputProps={{ 'aria-label': 'terms' }}
                             />
@@ -82,7 +83,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
                         label="I've read and agree to all terms that are mentioned above"
                     />
                     {
-                        ( !formState.value.terms && !isValid.terms ) 
+                        ( !formState.value?.terms && !isValid.terms ) 
                         && <div className="fs-7 text-danger">Please accept the terms and conditions</div> 
                     }
                 </FormControl>
