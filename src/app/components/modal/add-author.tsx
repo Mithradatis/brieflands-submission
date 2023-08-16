@@ -5,7 +5,7 @@ import { Autocomplete, Checkbox, Input, FormControl, FormLabel, FormHelperText }
 import { modalState } from '@/app/features/modal/modalSlice'
 import { handleInput, handleInputAsArray, handleInputArray, addAuthorModalState, handleCheckbox } from '@/app/features/modal/addAuthorModalSlice'
 import { wizardState } from '@/app/features/wizard/wizardSlice'
-import { searchPeople, getAllCountries } from '@/app/api/author'
+import { searchPeople } from '@/app/api/author'
 
 const AddAuthorModal = () => {
     const wizard = useSelector( wizardState );
@@ -38,10 +38,6 @@ const AddAuthorModal = () => {
         'affiliations': false,
         'correspond_affiliation': false
     });
-    const getAllCountriesUrl = `${ wizard.baseUrl }/api/v1/journal/country?page[size]=1000`;
-    useEffect( () => {
-        dispatch( getAllCountries( getAllCountriesUrl ) );
-    }, []);
     useEffect( () => {
         setIsValid( prevIsValid => ({
             ...prevIsValid,

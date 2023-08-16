@@ -43,7 +43,6 @@ export default function App() {
 
   return (
     <>
-        { console.log( wizard.user ) }
         <div id="loading" className={`d-flex flex-column align-items-center justify-content-center ${ wizard.isLoading ? ' d-block' : ' d-none'}`}>
           <div className="logo p-3 d-flex align-items-center justify-content-center">
             <Image

@@ -7,7 +7,7 @@ import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { stepState } from '@/app/features/submission/authorSlice'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
-import { getAuthorStepData, getAuthorStepGuide, loadEditAuthorForm, updateAuthorsOrder } from '@/app/api/author'
+import { getAuthorStepData, getAuthorStepGuide, loadEditAuthorForm, updateAuthorsOrder, getAllCountries } from '@/app/api/author'
 import ReactHtmlParser from 'react-html-parser'
 import { MaterialReactTable, type MRT_ColumnDef, type MRT_Row } from 'material-react-table'
 
@@ -18,9 +18,11 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
     const wizard = useSelector( wizardState );
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/authors`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const getAllCountriesUrl = `${ wizard.baseUrl }/api/v1/journal/country?page[size]=1000`;
     useEffect(() => {
         dispatch( getAuthorStepData( getStepDataFromApi ) );
         dispatch( getAuthorStepGuide( getDictionaryFromApi ) );
+        dispatch( getAllCountries( getAllCountriesUrl ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {
@@ -117,7 +119,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                   }
               </Scrollbars>
               {
-                wizard.documentId === '' &&
+                wizard.workflow?.storage?.revision === undefined && 
                   <Button className="btn btn-primary btn-lg mb-4" onClick={() => dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep } ) )}>
                     Add Author
                   </Button>
