@@ -2,7 +2,7 @@ import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl } from '@mui/joy'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/editorSlice'
 import { getEditors, getEditorStepData, getEditorStepGuide, updateEditorStepData } from '@/app/api/editor'
 import ReactHtmlParser from 'react-html-parser'
@@ -19,6 +19,7 @@ const EditorStep = forwardRef( ( prop, ref ) => {
         dispatch( getEditors( getAllEditorsFromApi ) );
         dispatch( getEditorStepData( getStepDataFromApi ) );
         dispatch( getEditorStepGuide( getDictionaryFromApi ) );
+        dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {

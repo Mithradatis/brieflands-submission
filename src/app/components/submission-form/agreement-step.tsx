@@ -2,12 +2,11 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { Checkbox, FormControl, FormControlLabel, Alert } from '@mui/material'
-import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleCheckbox } from '@/app/features/submission/agreementSlice' 
 import { getAgreementStepData, getAgreementStepGuide, getAgreementTerms, updateAgreementStepData } from '@/app/api/agreement'
 import Divider from '@mui/material/Divider'
 import ReactHtmlParser from 'react-html-parser'
-import { setFormIsValid } from '@/app/features/modal/modalSlice'
 
 const AgreementStep = forwardRef(( props, ref ) => {
     const dispatch: any = useDispatch();
@@ -27,7 +26,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
     useEffect(() => {
         const formIsValid = formState.value?.terms;
         dispatch( formValidator( formIsValid ) );
-    }, [formState.value, wizard.formStep, wizard.workflow]);
+    }, [wizard.formStep, formState.value]);
     useEffect( () => {
         if ( wizard.isVerified ) {
             setIsValid(prevState => ({
@@ -35,7 +34,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
                 terms: formState.value.terms
             }));
         }
-    }, [wizard.isVerified]);
+    }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
         submitForm () {  
           dispatch( updateAgreementStepData( getStepDataFromApi ) );
@@ -76,14 +75,18 @@ const AgreementStep = forwardRef(( props, ref ) => {
                                 name="terms"
                                 id="terms"
                                 checked={ formState.value?.terms || false }
-                                onChange={ event => dispatch ( handleCheckbox( { name: event.target.name, value: formState.value.terms } ) ) }
+                                onChange={ event => {
+                                        !wizard.isVerified && dispatch( handleIsVerified() ); 
+                                        dispatch ( handleCheckbox( { name: event.target.name, value: formState.value.terms } ) ); 
+                                    } 
+                                }
                                 inputProps={{ 'aria-label': 'terms' }}
                             />
                         }
                         label="I've read and agree to all terms that are mentioned above"
                     />
                     {
-                        ( !formState.value?.terms && !isValid.terms ) 
+                        ( wizard.isVerified && !isValid.terms ) 
                         && <div className="fs-7 text-danger">Please accept the terms and conditions</div> 
                     }
                 </FormControl>

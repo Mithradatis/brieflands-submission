@@ -1,6 +1,6 @@
 import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { stepState, handleInput } from '@/app/features/submission/fundingSupportSlice'
@@ -16,6 +16,7 @@ const FundingSupportStep = forwardRef( ( prop, ref ) => {
     useEffect( () => {
         dispatch( getFundingSupportStepData( getStepDataFromApi ) );
         dispatch( getFundingSupportStepGuide( getDictionaryFromApi ) );
+        dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {

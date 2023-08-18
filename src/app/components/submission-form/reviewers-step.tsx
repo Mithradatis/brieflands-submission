@@ -4,7 +4,7 @@ import { Button, Alert } from '@mui/material'
 import { Input } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { handleOpen } from '@/app/features/modal/modalSlice'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState } from '@/app/features/submission/reviewersSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
 import { getReviewersStepGuide, getReviewersStepData, loadEditReviewerForm } from '@/app/api/reviewers'
@@ -37,6 +37,7 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
     useEffect(() => {
         dispatch( getReviewersStepData( getStepDataFromApi ) );
         dispatch( getReviewersStepGuide( getDictionaryFromApi ) );
+        dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {

@@ -24,6 +24,12 @@ interface FormSteps {
   }
 }
 
+const updateHashInUrl = ( url: string, hash: string ): string => {
+  const urlObj = new URL( url );
+  urlObj.hash = hash;
+  return urlObj.toString();
+}
+
 export const wizardSlice = createSlice({
   name: 'submission',
   initialState: {
@@ -36,7 +42,7 @@ export const wizardSlice = createSlice({
     formStep: 'agreement',
     currentStep: activeTab,
     hasDocumentType: false,
-    workflowId: workflowId,
+    workflowId: workflowId || 365,
     workflow: {},
     journal: {},
     user: {},
@@ -46,16 +52,23 @@ export const wizardSlice = createSlice({
     loadStep: ( state, action ) => {
       return {
         ...state,
-        formStep: action.payload
+        formStep: action.payload,
+        isVerified: false,
+        isFormValid: false
       }
     },
     prevStep: ( state ) => {
       const currentStepIndex = state.formSteps.findIndex( ( item: any ) => item.attributes.slug.includes( state.formStep ));
       if ( currentStepIndex - 1 >= 0 ) {
-          return {
-            ...state,
-            formStep: state.formSteps[currentStepIndex - 1]['attributes']['slug']
-          }
+        const prevFormStep = state.formSteps[currentStepIndex - 1]['attributes']['slug'];
+        const newUrl = updateHashInUrl(window.location.href, prevFormStep);
+        window.history.pushState({}, '', newUrl);
+
+        return {
+          ...state,
+          formStep: prevFormStep,
+          isVerified: false
+        }
       }
     },
     nextStep: ( state, action ) => {
@@ -63,22 +76,34 @@ export const wizardSlice = createSlice({
         item.attributes.slug.includes(state.formStep)
       );
       const isLastStep = currentStepIndex === state.formSteps.length - 1;
-      if (!isLastStep && action.payload) {
+      if ( !isLastStep && action.payload ) {
+        const nextFormStep = state.formSteps[currentStepIndex + 1]['attributes']['slug'];
+        const newUrl = updateHashInUrl(window.location.href, nextFormStep);
+        window.history.pushState({}, '', newUrl);
+    
         return {
           ...state,
-          formStep: state.formSteps[currentStepIndex + 1]['attributes']['slug'],
+          formStep: nextFormStep,
           isVerified: false,
+          isFormValid: false
         };
       }
       return {
         ...state,
-        isVerified: true
+        isVerified: false,
+        isFormValid: false
       };
     },
     formValidator: ( state, action ) => {
       return {
         ...state,
         isFormValid: action.payload
+      }
+    },
+    handleIsVerified: ( state ) => {
+      return {
+        ...state,
+        isVerified: true
       }
     }
   },
@@ -123,9 +148,6 @@ export const wizardSlice = createSlice({
             ...activeSteps.map((step: any) => ({ attributes: { slug: step.attributes.slug, required: step.attributes.requirement } })),
           ];
         }
-      })
-      .addCase( getSubmissionSteps.rejected, ( state ) => {
-        // state.error = action.error.message;
       }).addCase( buildNewWorkflow.pending, ( state ) => {
         state.isLoading = true;
       })
@@ -150,7 +172,7 @@ export const wizardSlice = createSlice({
   },
 });
 
-export const { loadStep, prevStep, nextStep, formValidator } = wizardSlice.actions;
+export const { loadStep, prevStep, nextStep, formValidator, handleIsVerified } = wizardSlice.actions;
 
 export const wizardState = ( state: any ) => state.wizardSlice;
 

@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { searchPeople, getAllCountries } from '@/app/api/author'
+import { searchPeople, getAllCountries, loadEditAuthorForm } from '@/app/api/author'
 
 interface AuthorModalState {
   isVerified: boolean;
@@ -204,6 +204,12 @@ export const addAuthorModalSlice = createSlice({
           countriesList.push({ id: parseInt( country.id ), label: country.attributes.title });
         });
         state.countriesList = countriesList;
+      }).addCase(loadEditAuthorForm.pending, ( state ) => {
+        state.isLoading = true;
+      }).addCase(loadEditAuthorForm.fulfilled, ( state, action ) => {
+        state.isLoading = false;
+        state.value['middle-name'] === '' && ( state.inputStatus.firstName = true );
+        state.value['orcid-id'] === '' && ( state.inputStatus.orcid = true );
       });
   },
 });

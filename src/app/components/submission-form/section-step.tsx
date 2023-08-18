@@ -2,7 +2,7 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText } from '@mui/joy'
-import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { handleInput, stepState } from '@/app/features/submission/documentSectionSlice'
 import { getDocumentSections, getSectionStepData, getSectionStepGuide, updateSectionStepData } from '@/app/api/section'
 import ReactHtmlParser from 'react-html-parser'
@@ -26,11 +26,9 @@ const SectionStep = forwardRef( ( prop, ref ) => {
         }
     }, [wizard.formStep]);
     useEffect(() => {
-        if ( wizard.formStep === 'section' ) {
-            const formIsValid = Object.values( formState.value ).every(value => value !== '');
-            dispatch( formValidator( formIsValid ) );
-        }
-    }, [formState.value, wizard.formStep, wizard.workflow]);
+        const formIsValid = formState.value.id !== '';
+        dispatch( formValidator( formIsValid ) );
+    }, [wizard.formStep, formState.value]);
     useEffect(() => {
         if ( wizard.isVerified ) {
             setIsValid( prevState => ({
@@ -38,7 +36,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                 id: formState.value.id !== '',
             }));
         }
-    }, [wizard.isVerified]);
+    }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateSectionStepData( getStepDataFromApi ) );
@@ -56,13 +54,13 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                         { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
-                <FormControl className="mb-3" error={ formState.value.id === '' && !isValid.id }>
+                <FormControl className="mb-3" error={ wizard.isVerified && formState.value.id === '' && !isValid.id }>
                     <FormLabel className="fw-bold mb-1">
                         Please Choose
                     </FormLabel>
                     <Autocomplete
-                        key="documentSection"
                         required
+                        key="documentSection"
                         color="neutral"
                         size="md"
                         variant="soft"
@@ -86,6 +84,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                             : null
                         }
                         onChange={(event, value) => {
+                            !wizard.isVerified && dispatch( handleIsVerified() );
                             dispatch( handleInput({ 
                                     name: 'id',
                                     value: parseInt( documentSections.find( ( item: any ) => item.attributes.title === value )?.id ) || '' } ) 
@@ -94,7 +93,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                     />
                     {
                         ( formState.value.id === '' && !isValid.id )
-                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                        && <FormHelperText className="fs-7 text-danger mt-1">You should choose a section.</FormHelperText> 
                     }
                 </FormControl>
             </div>

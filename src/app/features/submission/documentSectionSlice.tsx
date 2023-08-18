@@ -46,7 +46,7 @@ export const documentSectionSlice = createSlice({
     .addCase(getSectionStepData.fulfilled, ( state, action ) => {
       state.isLoading = false;
       const stepData = action.payload.data.step_data;
-      state.value.id = parseInt( stepData );
+      state.value.id = stepData !== '' ? parseInt( stepData ) : 7;
     });
   },
 });

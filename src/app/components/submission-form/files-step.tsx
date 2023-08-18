@@ -51,6 +51,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
         dispatch( getFileTypes( getFileTypesFromApi ) );
         dispatch( getFilesStepData( getStepDataFromApi ) );
         dispatch( getFilesStepGuide( getDictionaryFromApi ) );
+        dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useEffect(() => {
         const newfilteredData = formState.newFilesList.filter( ( item: any ) => {

@@ -1,6 +1,6 @@
 import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { stepState } from '@/app/features/submission/zeroSlice'
 import { getZeroStepGuide, getZeroStepData } from '@/app/api/zero' 
@@ -15,6 +15,7 @@ const ZeroStep = forwardRef( ( prop, ref ) => {
     useEffect( () => {
         dispatch( getZeroStepData( getStepDataFromApi ) );
         dispatch( getZeroStepGuide( getDictionaryFromApi ) );
+        dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {

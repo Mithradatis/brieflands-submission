@@ -1,6 +1,6 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { wizardState, formValidator, prevStep } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator, prevStep, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { Checkbox, FormControl, Card, CardContent } from '@mui/joy'
 import { stepState, handleCheckbox } from '@/app/features/submission/buildSlice'
@@ -25,7 +25,7 @@ const BuildStep = forwardRef( ( prop, ref ) => {
     useEffect(() => {
         const formIsValid = formState.value?.terms;
         dispatch( formValidator( formIsValid ) );
-    }, [formState.value, wizard.formStep, wizard.workflow]);
+    }, [wizard.formStep, formState.value]);
     useEffect( () => {
         if ( wizard.isVerified ) {
             setIsValid(prevState => ({
@@ -33,7 +33,7 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                 terms: formState.value.terms
             }));
         }
-    }, [wizard.isVerified]);
+    }, [formState.value, wizard.isVerified]);
 
     useEffect( () => {
         let getFinalAgreementDictionary = '';
@@ -137,10 +137,14 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                             id="terms"
                             label={ <span className="fs-7 text-muted">{ formState.value.journal_agreement_message }</span> }
                             checked={ formState.value.terms || false }
-                            onChange={ event => dispatch ( handleCheckbox( { name: event.target.name, value: formState.value?.terms } ) ) }
+                            onChange={ event => {
+                                    !wizard.isVerified && dispatch( handleIsVerified() );
+                                    dispatch ( handleCheckbox( { name: event.target.name, value: formState.value?.terms } ) ) 
+                                } 
+                            }
                         />
                         {
-                            ( !formState.value?.terms && !isValid.terms )
+                            ( wizard.isVerified && !formState.value?.terms && !isValid.terms )
                             && <div className="fs-7 text-danger">Please check the agreement to continue</div> 
                         }
                     </FormControl>

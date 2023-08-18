@@ -2,7 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { wizardState, prevStep, nextStep } from '@/app/features/wizard/wizardSlice'
+import { wizardState, prevStep, nextStep, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { getDocumentTypes } from '@/app/api/types'
 import WizardNavigation from '@/app/components/wizard-navigation'
 import WizardOutline from '@/app/components/wizard-outline'
@@ -107,6 +107,7 @@ const SubmissionForm = () => {
             : wizard.formStep === 'data_reproducibility'
             ? dataReproducibilityChildRef
             : null;
+        !wizard.isVerified && dispatch( handleIsVerified() );
         if ( wizard.isFormValid ) {
             const submitForm = activeStepRef?.current?.submitForm();
             if ( submitForm ) {

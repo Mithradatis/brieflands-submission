@@ -2,7 +2,7 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
-import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput, handleKeywordsList, emptyKeywordsList } from '@/app/features/submission/keywordsSlice'
 import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide, updateKeywordsStepData, addNewKeyword, getKeywords, findKeywords } from '@/app/api/keywords'
 import ReactHtmlParser from 'react-html-parser'
@@ -23,10 +23,12 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
         dispatch( getKeywordsStepData( getStepDataFromApi ) );
         dispatch( getKeywordsStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
+
+
     useEffect(() => {
         const formIsValid = Object.values( formState.value ).every(value => value !== '');
         dispatch( formValidator( formIsValid ) );
-    }, [formState.value, wizard.formStep, wizard.workflow]);
+    }, [wizard.formStep, formState.value]);
     useEffect(() => {
         if (wizard.isVerified) {
             setIsValid((prevState) => ({
@@ -34,7 +36,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                 ids: formState.value.ids.length > 0,
             }));
         }
-    }, [wizard.isVerified]);
+    }, [formState.value, wizard.isVerified]);
     useEffect( () => {
         if ( formState.value.ids.length > 0 ) {
             formState.value.ids.map( ( item: any ) => {
@@ -60,7 +62,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                         { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
-                <FormControl className="mb-3" error={ formState.ids === '' && !isValid.ids }>
+                <FormControl className="mb-3" error={ wizard.isVerified && formState.ids === '' && !isValid.ids }>
                     <FormLabel className="fw-bold mb-2">
                         Please Choose
                     </FormLabel>
@@ -90,6 +92,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                             }
                         }}
                         onChange={ ( event, value, reason ) => {
+                            !wizard.isVerified && dispatch( handleIsVerified() );
                             const selectedIds: any = [];
                             if ( reason === 'selectOption' ) {
                                 const findKeywordInApi = `${ getAllKeywordsFromApi }?filter[title]=${ value }`;
@@ -129,7 +132,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                         }}
                     />
                     {
-                        ( formState.ids === '' && !isValid.ids ) 
+                        ( wizard.isVerified && formState.ids === '' && !isValid.ids ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">You should enter at least one keyword</FormHelperText> 
                     }
                 </FormControl>

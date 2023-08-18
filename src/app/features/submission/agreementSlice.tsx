@@ -3,7 +3,7 @@ import {
   getAgreementTerms, 
   getAgreementStepGuide, 
   getAgreementStepData, 
-  updateAgreementStepData } from '@/app/api/agreement'
+} from '@/app/api/agreement'
 
 export const agreementSlice = createSlice({
   name: 'agreement',

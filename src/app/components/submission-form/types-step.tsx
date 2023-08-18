@@ -2,7 +2,7 @@ import { useState, useEffect,forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
-import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/documentTypesSlice'
 import { getTypesStepData, getTypesStepGuide, updateTypesStepData } from '@/app/api/types'
 import ReactHtmlParser from 'react-html-parser'
@@ -26,7 +26,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
     useEffect(() => {
         const formIsValid = Object.values( formState.value ).every(value => value !== '');
         dispatch( formValidator( formIsValid ) );
-    }, [formState.value, wizard.formStep, wizard.workflow]);
+    }, [wizard.formStep, formState.value]);
     useEffect(() => {
         if ( wizard.isVerified ) {
             setIsValid( prevState => ({
@@ -35,7 +35,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                 manuscript_title: formState.value.manuscript_title !== ''
             }));
         }
-    }, [wizard.isVerified]);
+    }, [formState.value, wizard.isVerified]);
     const getWorkflowFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }`;
     const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
     useImperativeHandle(ref, () => ({
@@ -59,7 +59,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
                 }
-                <FormControl className="mb-3 required" error={ formState.value.doc_type === '' && !isValid.doc_type }>
+                <FormControl className="mb-3 required" error={ wizard.isVerified && formState.value.doc_type === '' && !isValid.doc_type }>
                     <FormLabel className="fw-bold mb-1">
                         Manuscript Type
                     </FormLabel>
@@ -88,6 +88,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                                   : null
                             }
                             onChange={(event, value) => {
+                                !wizard.isVerified && dispatch( handleIsVerified() );
                                 dispatch( handleInput({ 
                                         name: 'doc_type',
                                         value: documentTypes.find( 
@@ -100,11 +101,11 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                         <div>Loading document types...</div>
                     )}
                     {
-                        ( formState.value.doc_type === '' && !isValid.doc_type ) 
+                        ( wizard.isVerified && formState.value.doc_type === '' && !isValid.doc_type ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">You should select a document type</FormHelperText> 
                     }
                 </FormControl>
-                <FormControl className="mb-3 required" error={formState.value.manuscript_title === '' && !isValid.manuscript_title}>
+                <FormControl className="mb-3 required" error={ wizard.isVerified && formState.value.manuscript_title === '' && !isValid.manuscript_title}>
                     <FormLabel className="fw-bold mb-1">
                         Title
                     </FormLabel>
@@ -115,10 +116,14 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                         id="manuscript_title"
                         placeholder="Manuscript Title"
                         value={ formState.value.manuscript_title }
-                        onChange={ event => dispatch( handleInput( { name: event.target.name, value: event.target.value } ) ) }
+                        onChange={ event => {
+                                !wizard.isVerified && dispatch( handleIsVerified() );
+                                dispatch( handleInput( { name: event.target.name, value: event.target.value } ) ) 
+                            }
+                        }
                     />
                     {
-                        ( formState.value.manuscript_title === '' && !isValid.manuscript_title ) 
+                        ( wizard.isVerified && formState.value.manuscript_title === '' && !isValid.manuscript_title ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">You should enter a title for your manuscript</FormHelperText> 
                     }
                 </FormControl>

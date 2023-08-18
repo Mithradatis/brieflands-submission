@@ -2,7 +2,7 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
-import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/classificationsSlice'
 import { getClassificationsList, getClassificationsStepData, getClassificationsStepGuide, updateClassificationsStepData } from '@/app/api/classifications'
 import ReactHtmlParser from 'react-html-parser'
@@ -26,7 +26,7 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
     useEffect(() => {
         const formIsValid = Object.values( formState.value ).every(value => value !== '');
         dispatch( formValidator( formIsValid ) );
-    }, [formState.value, wizard.formStep, wizard.workflow]);
+    }, [wizard.formStep, formState.value]);
     useEffect(() => {
         if (wizard.isVerified) {
             setIsValid((prevState) => ({
@@ -34,7 +34,7 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
                 ids: formState.value.ids.length > 0,
             }));
         }
-    }, [wizard.isVerified]);
+    }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
         submitForm () {
           dispatch( updateClassificationsStepData( getStepDataFromApi ) );
@@ -52,7 +52,7 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
                         { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
-                <FormControl className="mb-3" error={formState.value.ids.length === 0 && !isValid.ids}>
+                <FormControl className="mb-3" error={ wizard.isVerified && formState.value.ids.length === 0 && !isValid.ids}>
                     <FormLabel className="fw-bold mb-2">
                         Please Choose
                     </FormLabel>
@@ -82,6 +82,7 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
                               : []
                         }
                         onChange={(event, value) => {
+                            !wizard.isVerified && dispatch( handleIsVerified() );
                             const selectedIds = value.map((selectedItem) => {
                               const selectedOption = formState.classificationsList.find(
                                 ( item: any ) => item.attributes.title === selectedItem
@@ -105,8 +106,8 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
                         }}
                     />
                     {
-                        ( formState.value.ids.length === 0 && !isValid.ids )
-                        && <FormHelperText className="fs-7 text-danger mt-1">Oops! something went wrong.</FormHelperText> 
+                        ( wizard.isVerified && formState.value.ids.length === 0 && !isValid.ids )
+                        && <FormHelperText className="fs-7 text-danger mt-1">You should choose at least one classification</FormHelperText> 
                     }
                 </FormControl>
             </div>

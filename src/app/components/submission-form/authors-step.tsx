@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect, forwardRef, useImperativeHandle } from 'react'
+import { useMemo, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Box, Button, Alert } from '@mui/material'
-import { Input } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
-import { wizardState } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState } from '@/app/features/submission/authorSlice'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
@@ -23,6 +22,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
         dispatch( getAuthorStepData( getStepDataFromApi ) );
         dispatch( getAuthorStepGuide( getDictionaryFromApi ) );
         dispatch( getAllCountries( getAllCountriesUrl ) );
+        dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         submitForm () {

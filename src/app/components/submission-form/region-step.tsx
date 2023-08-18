@@ -2,7 +2,7 @@ import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl, FormHelperText } from '@mui/joy'
-import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
+import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/regionSlice'
 import { getRegions, getRegionStepData, getRegionStepGuide, updateRegionStepData } from '@/app/api/region'
 import ReactHtmlParser from 'react-html-parser'
@@ -26,17 +26,17 @@ const RegionStep = forwardRef( ( prop, ref ) => {
     useEffect(() => {
         const formIsValid = Object.values( formState.value ).every(value => value !== '');
         dispatch( formValidator( formIsValid ) );
-    }, [formState.value, wizard.formStep, wizard.workflow]);
+    }, [wizard.formStep, formState.value]);
     useEffect( () => {
         if ( wizard.isVerified ) {
             setIsValid(prevState => ({
                 ...prevState,
-                id: formState.value.terms
+                id: formState.value.id
             }));
         }
-    }, [wizard.isVerified]);
+    }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
-        submitForm () {   
+        submitForm () {
           dispatch( updateRegionStepData( getStepDataFromApi ) );
 
           return true;
@@ -53,7 +53,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
                 }
-                <FormControl className="mb-3" error= { formState.value.id === '' && !isValid.id }>
+                <FormControl className="mb-3" error= { wizard.isVerified && formState.value.id === '' && !isValid.id }>
                     <FormLabel className="fw-bold mb-1">
                         Region
                     </FormLabel>
@@ -81,6 +81,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
                                   : null
                             }
                             onChange={(event, value) => {
+                                !wizard.isVerified && dispatch( handleIsVerified() );
                                 dispatch( handleInput({ 
                                         name: 'id',
                                         value: regionsList.find( 
@@ -93,7 +94,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
                         <div>Loading regions...</div>
                     )}
                     {
-                        ( formState.value.id === '' && !isValid.id ) 
+                        ( wizard.isVerified && formState.value.id === '' && !isValid.id ) 
                         && <FormHelperText className="fs-7 text-danger mt-1">Please select a region</FormHelperText> 
                     }
                 </FormControl>
