@@ -160,17 +160,17 @@ export const addAuthorModalSlice = createSlice({
           } else {
             state.inputStatus.country = true;
           }
-          if ( phoneType.length > 0 ) {
+          if ( phoneType.length > 0 || ( phoneType.length === 1 && phoneType[0] === '' ) ) {
             state.value['phone_type'] = phoneType;
           } else {
             state.inputStatus.phoneType = true;
           }
-          if ( phoneCountry.length > 0 ) {
+          if ( phoneCountry.length > 0 || ( phoneCountry.length === 1 && phoneCountry[0] === '' ) ) {
             state.value['country_phone'] = phoneCountry;
           } else {
             state.inputStatus.countryPhone = true;
           }
-          if ( phoneNumber.length > 0 ) {
+          if ( phoneNumber.length > 0 || ( phoneNumber.length === 1 && phoneNumber[0] === '' ) ) {
             state.value['phone_number'] = phoneNumber;
           } else {
             state.inputStatus.phoneNumber = true;

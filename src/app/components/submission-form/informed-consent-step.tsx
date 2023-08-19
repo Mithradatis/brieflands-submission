@@ -11,6 +11,8 @@ const InformedConsentStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState = useSelector( stepState );
     const wizard = useSelector( wizardState );
+    const details = wizard.screeningDetails?.find( ( item: any ) => 
+        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
     useEffect( () => {
@@ -30,6 +32,12 @@ const InformedConsentStep = forwardRef( ( prop, ref ) => {
         <>
             <div id="informed-consent" className="tab">
                 <h3 className="mb-4 text-shadow-white">Informed Consent</h3>
+                {
+                    ( details !== undefined && details !== '' ) &&
+                        <Alert severity="error" className="mb-4">
+                            { ReactHtmlParser( details ) }
+                        </Alert>
+                }
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( formState.stepGuide ) }

@@ -14,10 +14,10 @@ const AddAuthorModal = () => {
     const addAuthorModalData: any = useSelector( addAuthorModalState );
     const formIsValid = modalData.isFormValid;
     const phoneTypes = [
-        { id: 1, label: 'mobile' },
-        { id: 2, label: 'home' },
-        { id: 3, label: 'work' },
-        { id: 4, label: 'fax' }
+        { id: 1, label: 'Mobile', value: 'mobile' },
+        { id: 2, label: 'Home', value: 'home' },
+        { id: 3, label: 'Work', value: 'work' },
+        { id: 4, label: 'Fax', value: 'fax' }
     ];
     const [ authorEmailInputValue, setAuthorEmailInputValue ] = useState('');
     const [ authorCountryInputValue, setAuthorCountryInputValue ]: any = useState({});
@@ -57,7 +57,7 @@ const AddAuthorModal = () => {
                 )
         }));
         const foundCountry = addAuthorModalData.countriesList.find( ( item: any ) => item.id === parseInt( addAuthorModalData.value['country'] ) );
-        const foundPhoneType = phoneTypes.find( ( item: any ) => item.label === addAuthorModalData.value['phone_type']?.[0] );
+        const foundPhoneType = phoneTypes.find( ( item: any ) => item.value === addAuthorModalData.value['phone_type']?.[0] );
         const foundCountryPhone = addAuthorModalData.countriesPhoneList.find( ( item: any ) => item.id === parseInt( addAuthorModalData.value['country_phone']?.[0] ) );
         setAuthorCountryInputValue( foundCountry ? foundCountry : '' );
         setAuthorPhoneTypeInputValue( foundPhoneType ? foundPhoneType : '' );
@@ -214,7 +214,9 @@ const AddAuthorModal = () => {
                             options={ phoneTypes }
                             value={ authorPhoneTypeInputValue }
                             onChange={ ( event, value ) => 
-                                dispatch( handleInputAsArray( { name: 'phone_type', value: value?.label || '' } ) )
+                                {
+                                    dispatch( handleInputAsArray( { name: 'phone_type', value: value?.value || '' } ) )
+                                }
                             }
                         />
                     </FormControl>

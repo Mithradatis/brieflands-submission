@@ -35,7 +35,7 @@ export const authorSlice = createSlice({
               email: value['email'],
               firstname: value['first-name'] || value['first_name'] || '',
               lastname: value['last-name'] || value['last_name'] || '',
-              orcid: value['orcid'] || '',
+              orcid: value['orcid-id'] || '',
               iscorresponding: value['is_corresponding'] ? 'Yes' : 'No'
             }
           );

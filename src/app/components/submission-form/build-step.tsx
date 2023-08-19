@@ -15,6 +15,8 @@ const BuildStep = forwardRef( ( prop, ref ) => {
     const [ isValid, setIsValid ] = useState({
         terms: true
     });
+    const details = wizard.screeningDetails?.find( ( item: any ) => 
+        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     const finishWorkflowUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/finish`;
@@ -49,6 +51,12 @@ const BuildStep = forwardRef( ( prop, ref ) => {
         <>
             <div id="build" className="tab">
                 <h3 className="mb-4 text-shadow-white">Build</h3>
+                {
+                    ( details !== undefined && details !== '' ) &&
+                        <Alert severity="error" className="mb-4">
+                            { ReactHtmlParser( details ) }
+                        </Alert>
+                }
                 {   formState.stepGuide !== undefined &&     
                     <Alert severity="info" className="mb-4">
                         { ReactHtmlParser( formState.stepGuide ) }

@@ -40,6 +40,8 @@ const FilesStep = forwardRef( ( prop, ref ) => {
     const [ isValid, setIsValid ] = useState({
         caption: true
     });
+    const details = wizard.screeningDetails?.find( ( item: any ) => 
+        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     useEffect(() => {
         setIsValid( prevState => ({
             ...prevState,
@@ -319,6 +321,12 @@ const FilesStep = forwardRef( ( prop, ref ) => {
         <>
             <div id="files" className="tab">
                 <h3 className="mb-4 text-shadow-white">Files</h3>
+                {
+                    ( details !== undefined && details !== '' ) &&
+                        <Alert severity="error" className="mb-4">
+                            { ReactHtmlParser( details ) }
+                        </Alert>
+                }
                 {   
                     formState.stepGuide !== undefined &&  
                         <Alert severity="info" className="mb-4">
@@ -363,7 +371,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                             }}
                         />
                         ) : (
-                        <div>Loading file types...</div>
+                        <div className="text-danger">You have to choose a document type first!</div>
                     )}
                     {
                         ( !formState.formStatus.fileTypeId && formState.formStatus.isDisabled )

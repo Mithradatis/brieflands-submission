@@ -57,6 +57,25 @@ export const getUser = createAsyncThunk(
   }
 );
 
+export const getScreening = createAsyncThunk(
+  'submission/getScreening',
+  async ( url: string ) => {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow'
+      });
+
+      const data = await response.json();
+      
+      return data;
+    } catch (error) {
+      return error;
+    }
+  }
+);
+
 export const buildNewWorkflow = createAsyncThunk(
   'submission/buildNewWorkflow',
   async ( url: string ) => {

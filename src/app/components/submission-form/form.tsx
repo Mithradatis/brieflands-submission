@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { getScreening } from '@/app/api/client'
 import { wizardState, prevStep, nextStep, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { getDocumentTypes } from '@/app/api/types'
 import WizardNavigation from '@/app/components/wizard-navigation'
@@ -121,7 +122,11 @@ const SubmissionForm = () => {
             const getAllDocumentTypesFromApi = `${ wizard.baseUrl }/api/v1/journal/type?
             filter[document_type_journals.journal_id]=${ wizard.workflow?.journal_id }`;
             dispatch( getDocumentTypes( getAllDocumentTypesFromApi ) );
-          }
+        }
+        if ( wizard.workflow?.document_id !== undefined && wizard.workflow?.document_id !== '' && wizard.workflow?.document_id !== null ) {
+          const getScreeningFromApi = `${ wizard.baseUrl }/api/v1/screening/${ wizard.workflow?.document_id }?include=step`;
+          dispatch( getScreening( getScreeningFromApi ) );
+        }
     }, [wizard.workflow]);
 
     return (

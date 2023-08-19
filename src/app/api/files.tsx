@@ -39,8 +39,25 @@ export const getFilesStepData = createAsyncThunk(
 
 export const getFileTypes = createAsyncThunk(
   'submission/getFileTypes',
-  async (url: string) => {
-    return fetchDataFromApi( url );
+  async ( url: string, { getState, dispatch } ) => {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow',
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        dispatch( handleSnackbarOpen({  severity: 'error', message: errorData.data.message }) );
+
+        return {};
+      }
+      const data = await response.json();
+
+      return data;
+    } catch (error) {
+      throw error;
+    }
   }
 );
 

@@ -78,7 +78,17 @@ export const addAuthor = createAsyncThunk(
     if ( !response.ok ) {
       if ( response.status === 422 ) {
         const errorData = await response.json();
-        dispatch( handleModalSnackbarOpen( { severity: 'error', message: errorData.data.message, vertical: 'top', horizontal: 'center' } ) );
+        let message: any;
+        if ( errorData.data.hasOwnProperty('message') ) {
+          message = errorData.data.message;
+          dispatch( handleModalSnackbarOpen( { severity: 'error', message: message, vertical: 'top', horizontal: 'center' } ) );
+        }
+        if ( errorData.data.hasOwnProperty('errors') ) {
+          Object.entries( errorData.data.errors).map( ([key, value]) => {
+            const message: any = value;
+            dispatch( handleModalSnackbarOpen( { severity: 'error', message: message[0], vertical: 'top', horizontal: 'center' } ) );
+          });
+        }
       } else {
         dispatch( handleModalSnackbarOpen({  severity: 'error', message: 'Failed to update Authors step', vertical: 'top', horizontal: 'center' } ) );
       }

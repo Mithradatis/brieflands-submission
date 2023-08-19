@@ -15,6 +15,8 @@ const AgreementStep = forwardRef(( props, ref ) => {
     const [ isValid, setIsValid ] = useState({
         terms: true
     });
+    const details = wizard.screeningDetails?.find( ( item: any ) => 
+        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     const getAgreementTermsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/agreement/current`;
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${ wizard.formStep }`;
@@ -42,16 +44,30 @@ const AgreementStep = forwardRef(( props, ref ) => {
           return true;
         }
     }));
-
+  
     return (
         <>
             <div id="agreement" className="tab">
                 <h3 className="mb-4 text-shadow-white">Agreement</h3>
+                {
+                    ( details !== undefined && details !== '' ) &&
+                        <Alert severity="error" className="mb-4">
+                            { ReactHtmlParser( details ) }
+                        </Alert>
+                }
                 {   
                     formState.stepGuide !== undefined &&
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.stepGuide ) }
-                        </Alert>
+                        <Scrollbars
+                            className="mb-4"
+                            style={{ width: 600, height: 200 }}
+                            universal={true}
+                            autoHide
+                            autoHideTimeout={500}
+                            autoHideDuration={200}>
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( formState.stepGuide ) }
+                            </Alert>
+                        </Scrollbars>
                 }
                 <Scrollbars
                     className="mb-4"

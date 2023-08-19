@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { buildNewWorkflow, getJournal, getUser, getSubmissionSteps, getWorkflow, finishSubmission } from '@/app/api/client'
+import { buildNewWorkflow, getJournal, getUser, getSubmissionSteps, getWorkflow, finishSubmission, getScreening } from '@/app/api/client'
 import { getDocumentTypes } from '@/app/api/types'
 
 let baseUrl, currentUrl, workflowId, activeTab = '';
@@ -42,10 +42,11 @@ export const wizardSlice = createSlice({
     formStep: 'agreement',
     currentStep: activeTab,
     hasDocumentType: false,
-    workflowId: workflowId || 284,
+    workflowId: workflowId || 366,
     workflow: {},
     journal: {},
     user: {},
+    screeningDetails: [],
     documentTypesList: []
   },
   reducers: {
@@ -168,6 +169,17 @@ export const wizardSlice = createSlice({
         setTimeout(() => {
           window.location.href = action.payload.data.link;
         }, 5000);
+      }).addCase(getScreening.pending, ( state ) => {
+        state.isLoading = true;
+      })
+      .addCase(getScreening.fulfilled, ( state, action: any ) => {
+        state.isLoading = false;
+        const screeningData = action.payload.data;
+        const screeningRelationships = action.payload.included;
+        screeningData?.map( ( screenedStep: any, index: number ) => {
+          screeningData[index].attributes.step_slug = screeningRelationships.find( ( step: any ) => parseInt( step.id ) === parseInt( screenedStep.attributes.step_id ) ).attributes.slug;
+        });
+        state.screeningDetails = screeningData; 
       });
   },
 });

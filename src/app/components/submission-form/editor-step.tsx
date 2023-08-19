@@ -12,6 +12,8 @@ const EditorStep = forwardRef( ( prop, ref ) => {
     const formState = useSelector( stepState );
     const editorsList = formState.editorsList;
     const wizard = useSelector( wizardState );
+    const details = wizard.screeningDetails?.find( ( item: any ) => 
+        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     const getAllEditorsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/editor/get_all`;
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/editor`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
@@ -33,6 +35,12 @@ const EditorStep = forwardRef( ( prop, ref ) => {
         <>
             <div id="editors" className="tab">
                 <h3 className="mb-4 text-shadow-white">Editor</h3>
+                {
+                    ( details !== undefined && details !== '' ) &&
+                        <Alert severity="error" className="mb-4">
+                            { ReactHtmlParser( details ) }
+                        </Alert>
+                }
                 {   
                     formState.stepGuide !== undefined &&
                         <Alert severity="info" className="mb-4">

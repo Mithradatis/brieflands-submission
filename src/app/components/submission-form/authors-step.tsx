@@ -15,6 +15,8 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
     const formState = useSelector( stepState );
     const filteredItems = formState.authorsList;
     const wizard = useSelector( wizardState );
+    const details = wizard.screeningDetails?.find( ( item: any ) => 
+        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/authors`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     const getAllCountriesUrl = `${ wizard.baseUrl }/api/v1/journal/country?page[size]=1000`;
@@ -108,6 +110,12 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
         <>
           <div id="authors" className="tab">
               <h3 className="mb-4 text-shadow-white">Authors</h3>
+              {
+                  ( details !== undefined && details !== '' ) &&
+                      <Alert severity="error" className="mb-4">
+                          { ReactHtmlParser( details ) }
+                      </Alert>
+              }
               <Scrollbars
                   className="mb-4"
                   style={{ width: 600, height: 200 }}
