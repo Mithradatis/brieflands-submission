@@ -22,6 +22,13 @@ body {
             }
         }
     }
+    .read-only {
+        .MuiInput-root, .MuiAutocomplete-root {
+            opacity: .5;
+            cursor: pointer;
+            pointer-events: none;
+        }
+    }
     .break-word {
         a {
             word-break: break-word;

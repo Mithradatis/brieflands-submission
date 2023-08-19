@@ -45,7 +45,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
             ...prevState,
             caption: formState.value.caption !== undefined && formState.value.caption !== '',
         }));
-    }, [formState.value.file_type_id]);
+    }, [formState.value]);
     const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
     useEffect(() => {
         dispatch( getFileTypes( getFileTypesFromApi ) );
@@ -293,6 +293,13 @@ const FilesStep = forwardRef( ( prop, ref ) => {
       );
     }, [filterText, resetPaginationToggle]);
     const [isDragActive, setIsDragActive] = useState(false);
+    const [ selectedFileType, setSelectedFileType ] = useState('');
+    useEffect( () => {
+        const selectedType = formState.fileTypesList?.find( ( item: any ) =>  (
+            parseInt ( item.id ) ===  parseInt( formState.value.file_type_id )
+        ));
+        setSelectedFileType( selectedType?.attributes?.title );
+    }, [formState.value.file_type_id]);
     const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
         multiple: false,
         disabled: formState.formStatus.isDisabled,
@@ -336,10 +343,11 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                                 Array.isArray( fileTypes ) 
                                 ? fileTypes.map( 
                                     item => {
-                                        return item.attributes?.title || '' 
+                                        return `${ item.attributes?.title}${ item.attributes.minimum_requirement > 0 ? ' *' : ''}` || ''
                                     }
                                    ) : []
                             }
+                            value={ selectedFileType }
                             onChange={(event, value) => {
                                 if ( value === '' ) {
                                     dispatch( handleDropzoneStatus( false ) );
@@ -347,9 +355,9 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                                 dispatch( handleFileType({
                                     name: 'file_type_id',
                                     captionRequired: fileTypes.find( 
-                                        ( item: any ) => item.attributes.title === value )?.attributes.require_caption || '',
+                                        ( item: any ) => item.attributes.title === value || `${ item.attributes.title } *` === value )?.attributes.require_caption || '',
                                     value: fileTypes.find( 
-                                        ( item: any ) => item.attributes.title === value )?.id || '' } 
+                                        ( item: any ) => item.attributes.title === value || `${ item.attributes.title } *` === value )?.id || '' } 
                                         ) 
                                     )
                             }}
@@ -372,6 +380,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                         name="fileCaption"
                         id="fileCaption"
                         placeholder="Write a caption"
+                        value={ formState.value.caption }
                         onChange={ event => dispatch( handleInput( { name: 'caption', value: event.target.value } ) ) }
                     />
                     {

@@ -6,7 +6,7 @@ import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { stepState } from '@/app/features/submission/authorSlice'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
-import { getAuthorStepData, getAuthorStepGuide, loadEditAuthorForm, updateAuthorsOrder, getAllCountries } from '@/app/api/author'
+import { getAuthorStepData, getAuthorStepGuide, loadEditAuthorForm, updateAuthorsOrder, getAllCountries, getAuthorsAffiliations } from '@/app/api/author'
 import ReactHtmlParser from 'react-html-parser'
 import { MaterialReactTable, type MRT_ColumnDef, type MRT_Row } from 'material-react-table'
 
@@ -18,12 +18,16 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/authors`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
     const getAllCountriesUrl = `${ wizard.baseUrl }/api/v1/journal/country?page[size]=1000`;
+    const getAuthorsAffiliationsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/authors/affiliations`;
     useEffect(() => {
         dispatch( getAuthorStepData( getStepDataFromApi ) );
         dispatch( getAuthorStepGuide( getDictionaryFromApi ) );
         dispatch( getAllCountries( getAllCountriesUrl ) );
         dispatch( formValidator( true ) );
     }, [wizard.formStep]);
+    useEffect( () => {
+      dispatch( getAuthorsAffiliations( getAuthorsAffiliationsFromApi ) );
+    }, [formState.authorsList]);
     useImperativeHandle(ref, () => ({
         submitForm () {
           return true;
@@ -120,7 +124,9 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
               </Scrollbars>
               {
                 wizard.workflow?.storage?.revision === undefined && 
-                  <Button className="btn btn-primary btn-lg mb-4" onClick={() => dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep } ) )}>
+                  <Button className="btn btn-primary btn-lg mb-4" onClick={() => {
+                    dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep } ) )}
+                  }>
                     Add Author
                   </Button>
               }
@@ -153,6 +159,54 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                           },
                         })}
                       />
+                  </div>
+              }
+              {
+                Object.keys( formState.authorsAffiliations ).length > 0 &&
+                  <div id="affiliations">
+                    <div id="authors-list">
+                      {
+                        formState.authorsAffiliations.names.map( ( item: any, index: number ) => (
+                          <span key={ `author-${ index }` }>
+                            <span className="fw-bold text-muted">
+                              { `${ item.first_name }${ item.middl_ename || '' } ${ item.last_name }` }
+                            </span>
+                            { item['orcid-id']
+                              ? <a href={ `https://orcid.org/${ item['orcid-id'] }` }>
+                                    <img 
+                                      className="ms-1" 
+                                      src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
+                                      width="15" 
+                                      height="15" title="ORCID" alt="ORCID"
+                                    />
+                                </a>
+                                : '' 
+                            }
+                            <sup className="ms-1">
+                              { `${ item.affiliations.map( ( affiliation: number ) => affiliation ) } ${ item.cor || '' }` }
+                            </sup>
+                          </span>
+                        ))
+                      }
+                    </div>
+                    <div id="authors-affiliations" className="fs-7">
+                      {
+                        formState.authorsAffiliations.affiliations.map( ( item: any, index: number ) => (
+                          <div key={ `affiliation-${ index }` }>
+                              { `${ index + 1 } ${ item }` }
+                          </div>
+                        ))
+                      }
+                    </div>
+                    <div id="authors-affiliations" className="fs-7">
+                      {
+                        Object.entries( formState.authorsAffiliations.correspondings ).map( ([ key, value ]) => (
+                          <span key={ `corresponding-${ key }` }>
+                              { `${ key } ${ value }` }
+                          </span>
+                        ))
+                      }
+                    </div>
                   </div>
               }
           </div>

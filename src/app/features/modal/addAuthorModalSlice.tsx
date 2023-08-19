@@ -1,10 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { searchPeople, getAllCountries, loadEditAuthorForm } from '@/app/api/author'
+import { searchPeople, getAllCountries, loadEditAuthorForm, handleCloseAuthorModal } from '@/app/api/author'
 
 interface AuthorModalState {
   isVerified: boolean;
   isLoading: boolean;
   countriesList: any[];
+  countriesPhoneList: any[];
   datatableRows: any[];
   inputStatus: {
     email: boolean;
@@ -40,6 +41,7 @@ export const addAuthorModalSlice = createSlice({
     isVerified: false,
     isLoading: false,
     countriesList: [],
+    countriesPhoneList: [],
     datatableRows: [],
     inputStatus: {
       email: true,
@@ -112,7 +114,7 @@ export const addAuthorModalSlice = createSlice({
         ...state,
         value: action.payload
       };
-    },
+    }
   },
   extraReducers: ( builder ) => {
     builder
@@ -200,16 +202,73 @@ export const addAuthorModalSlice = createSlice({
       }).addCase(getAllCountries.fulfilled, ( state, action ) => {
         state.isLoading = false;
         const countriesList: any = [];
+        const countriesPhoneList: any = [];
         action.payload.data.forEach( ( country: any ) => {
           countriesList.push({ id: parseInt( country.id ), label: country.attributes.title });
+          countriesPhoneList.push({ id: parseInt( country.id ), label: country.attributes.title });
         });
         state.countriesList = countriesList;
+        state.countriesPhoneList = countriesList;
       }).addCase(loadEditAuthorForm.pending, ( state ) => {
         state.isLoading = true;
-      }).addCase(loadEditAuthorForm.fulfilled, ( state, action ) => {
+      }).addCase(loadEditAuthorForm.fulfilled, ( state ) => {
         state.isLoading = false;
-        state.value['middle-name'] === '' && ( state.inputStatus.firstName = true );
-        state.value['orcid-id'] === '' && ( state.inputStatus.orcid = true );
+        if ( state.value['email'] !== '' ) {
+          state.inputStatus.email = false;
+        }
+        if ( state.value['first-name'] !== undefined && state.value['first-name'] !== '' ) {
+          state.inputStatus.firstName = false;
+        } else {
+          state.inputStatus.firstName = true;
+        }
+        if ( state.value['middle-name'] !== undefined && state.value['middle-name'] !== '' ) {
+          state.inputStatus.middleName = false;
+        } else {
+          state.inputStatus.middleName = true;
+        }
+        if ( state.value['last-name'] !== undefined && state.value['last-name'] !== '' ) {
+          state.inputStatus.lastName = false;
+        } else {
+          state.inputStatus.lastName = true;
+        }
+        if ( state.value['orcid-id'] !== undefined && state.value['orcid-id'] !== '' && state.value['orcid-id'] !== null ) {
+          state.inputStatus.orcid = false;
+        } else {
+          state.inputStatus.orcid = true;
+        }
+        if ( state.value['country'] !== undefined && state.value['country'] !== '' ) {
+          state.inputStatus.country = false;
+        } else {
+          state.inputStatus.country = true;
+        }
+        if ( state.value['phone_type'] !== undefined && state.value['phone_type'].length > 0 ) {
+          state.inputStatus.phoneType = false;
+        } else {
+          state.inputStatus.phoneType = true;
+        }
+        if ( state.value['country_phone'] !== undefined && state.value['country_phone'].length > 0 ) {
+          state.inputStatus.countryPhone = false;
+        } else {
+          state.inputStatus.countryPhone = true;
+        }
+        if ( state.value['phone_number'] !== undefined && state.value['phone_number'].length > 0 ) {
+          state.inputStatus.phoneNumber = false;
+        } else {
+          state.inputStatus.phoneNumber = true;
+        }
+      }).addCase(handleCloseAuthorModal.pending, ( state ) => {
+        state.isLoading = true;
+      }).addCase(handleCloseAuthorModal.fulfilled, ( state ) => {
+        state.isLoading = false;
+        state.inputStatus.email = true;
+        state.inputStatus.firstName = false;
+        state.inputStatus.middleName = false;
+        state.inputStatus.lastName = false;
+        state.inputStatus.orcid = false;
+        state.inputStatus.country = false;
+        state.inputStatus.phoneType = false;
+        state.inputStatus.countryPhone = false;
+        state.inputStatus.phoneNumber = false;
       });
   },
 });

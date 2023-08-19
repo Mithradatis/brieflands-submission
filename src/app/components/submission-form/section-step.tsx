@@ -77,7 +77,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                                ) : []
                         }
                         value={
-                            ( formState.value && formState.value.id )
+                            ( formState.value && formState.value.id && formState.value.id !== 0 )
                               ? documentSections.find(
                                 ( item: any ) => formState.value.id === parseInt( item.id )
                               )?.attributes?.title

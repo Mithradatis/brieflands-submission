@@ -16,7 +16,7 @@ export const modalSnackbarSlice = createSlice({
         ...state,
         isOpen: true,
         severity: action.payload.severity,
-        message: action.payload.message.data.message,
+        message: action.payload.message,
         vertical: action.payload.vertical,
         horizontal: action.payload.horizontal
       }

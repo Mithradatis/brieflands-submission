@@ -103,29 +103,29 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                             Standard cord count is: { formState.value.standard_word_count }
                         </div> 
                     }
-                    { 
+                    {
                         formState.value.word_count && 
                         <div>
-                            Word count(Total) of manuscript is about: { formState.value.word_count }
+                            Word count(Total) of manuscript is about: <span className="fw-bold">{ formState.value.word_count }</span>
                         </div> 
                     }
                     { 
                         ( wizard.journal?.attributes?.shopping_status === 'active' && formState.value.word_count_include_in_fee ) && 
                         <div>
-                            Word count(include in fee) of manuscript is about: { formState.value.word_count_include_in_fee }
+                            Word count(include in fee) of manuscript is about: <span className="fw-bold">{ formState.value.word_count_include_in_fee }</span>
                         </div> 
                     }
                     { 
                         (wizard.journal?.attributes?.shopping_status === 'active' && formState.value.prices) && 
                         <div>
                             Invoice amount(VAT included) will be: 
-                            {/* {
-                                Object.keys(formState.value.prices).map( ( product: any ) => (
-                                    Object.values(product).map( ( currency: any ) => (
-                                        <span key={currency}>{currency}: {formState.value.prices[currency]}</span>
-                                    ))
+                            {
+                                Object.entries( formState.value.prices['Acceptance Fee']).map(([currency, value]) => (
+                                    <span key={currency} className="fw-bold">
+                                        { ` ${ value } ${ currency }` }
+                                    </span>
                                 ))
-                            } */}
+                            }
                         </div> 
                     }
                 </Alert>

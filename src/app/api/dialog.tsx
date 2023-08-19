@@ -22,9 +22,11 @@ export const handleOperation = createAsyncThunk(
             case 'delete-file': 
                 dispatch( deleteFile( { url: dialog.action, uuid: dialog.data } ) );
                 dispatch( handleDialogClose() );
+            break;
             case 'reuse-file': 
                 dispatch( reuseFile( { url: dialog.action, uuid: dialog.data } ) );
                 dispatch( handleDialogClose() );
+            break;
             case 'finish-submission': 
                 dispatch( finishSubmission( dialog.action ) );
                 dispatch( handleDialogClose() );

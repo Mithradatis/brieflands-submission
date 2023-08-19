@@ -42,7 +42,7 @@ export const wizardSlice = createSlice({
     formStep: 'agreement',
     currentStep: activeTab,
     hasDocumentType: false,
-    workflowId: workflowId || 365,
+    workflowId: workflowId || 284,
     workflow: {},
     journal: {},
     user: {},

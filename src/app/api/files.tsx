@@ -90,12 +90,14 @@ export const addFile = createAsyncThunk(
     if ( !response.ok ) {
       if ( response.status === 422 ) {
         const errorData = await response.json();
-        dispatch( handleSnackbarOpen( { severity: 'error', message: errorData.data.errors.file[0] } ) );
+        const message = errorData.data.hasOwnProperty('message') ? errorData.data.message : errorData.data.errors.file[0];
+        dispatch( handleSnackbarOpen( { severity: 'error', message: message } ) );
       } else {
-        dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to update reviewers step', vertical: 'top', horizontal: 'center' } ) );
+        dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to update files step', vertical: 'top', horizontal: 'center' } ) );
       }
       throw new Error('Failed to update author step');
     }
+    dispatch( handleSnackbarOpen( { severity: 'success', message: 'File uploaded successfuly' } ) );
     const getStepDataFromApi = `${ state.wizardSlice.baseUrl }/api/v1/submission/workflow/${ state.wizardSlice.workflowId }/files`;
     try {
       const response = await fetch(getStepDataFromApi, {
@@ -114,7 +116,7 @@ export const addFile = createAsyncThunk(
 
 export const deleteFile = createAsyncThunk(
   'submission/deleteFile',
-  async ( payload: any, { getState } ) => {
+  async ( payload: any, { getState, dispatch } ) => {
     try {
       const state: any = getState();
       const { url, uuid } = payload;
@@ -133,6 +135,7 @@ export const deleteFile = createAsyncThunk(
       if (!response.ok) {
         throw new Error('Failed to delete file');
       }
+      dispatch( handleSnackbarOpen( { severity: 'success', message: 'File deleted successfuly' } ) );
       const getStepDataFromApi = `${ state.wizardSlice.baseUrl }/api/v1/submission/workflow/${ state.wizardSlice.workflowId }/files`;
       try {
         const response = await fetch(getStepDataFromApi, {

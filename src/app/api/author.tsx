@@ -46,6 +46,13 @@ export const getAllCountries = createAsyncThunk(
   }
 );
 
+export const getAuthorsAffiliations = createAsyncThunk(
+  'submission/getAuthorsAffiliations',
+  async (url: string) => {
+    return fetchDataFromApi(url);
+  }
+);
+
 export const addAuthor = createAsyncThunk(
   'addAuthorModal/addAuthor',
   async ( modalFormData: any, { getState, dispatch }) => {
@@ -73,7 +80,7 @@ export const addAuthor = createAsyncThunk(
         const errorData = await response.json();
         dispatch( handleModalSnackbarOpen( { severity: 'error', message: errorData.data.message, vertical: 'top', horizontal: 'center' } ) );
       } else {
-        dispatch( handleModalSnackbarOpen({  severity: 'error', message: 'Failed to update reviewers step', vertical: 'top', horizontal: 'center' } ) );
+        dispatch( handleModalSnackbarOpen({  severity: 'error', message: 'Failed to update Authors step', vertical: 'top', horizontal: 'center' } ) );
       }
       throw new Error('Failed to update author step');
     }
@@ -276,7 +283,11 @@ export const searchPeople = createAsyncThunk(
         },
         body: JSON.stringify( data ),
       });
-      if (!response.ok) {
+      if ( !response.ok ) {
+        if ( response.status === 422 ) {
+          const errorData = await response.json();
+          dispatch( handleModalSnackbarOpen( { severity: 'error', message: errorData.data.errors.email , vertical: 'top', horizontal: 'center' } ) );
+        }
         throw new Error('No author has been find!');
       }
       const jsonData = await response.json();
@@ -286,5 +297,12 @@ export const searchPeople = createAsyncThunk(
       console.log(error);
       throw error;
     }
+  }
+);
+
+export const handleCloseAuthorModal = createAsyncThunk(
+  'addAuthorsModal/handleCloseAuthorModal',
+  async () => {
+    return true;
   }
 );

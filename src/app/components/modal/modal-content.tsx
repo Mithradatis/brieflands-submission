@@ -5,7 +5,7 @@ import { wizardState } from '@/app/features/wizard/wizardSlice'
 import { modalState, saveModal } from '@/app/features/modal/modalSlice'
 import { saveAuthorModal } from '@/app/features/modal/addAuthorModalSlice'
 import { saveReviewerModal } from '@/app/features/modal/addReviewerModalSlice'
-import { handleAuthorOperation } from '@/app/api/author'
+import { handleAuthorOperation, handleCloseAuthorModal } from '@/app/api/author'
 import { handleReviewerOperation } from '@/app/api/reviewers'
 import { Scrollbars } from 'react-custom-scrollbars'
 import AddAuthorModal from '@/app/components/modal/add-author'
@@ -38,7 +38,11 @@ const ModalContent = () => {
             case 'authors':
                 setAction(
                     <Button className="btn btn-primary" 
-                        onClick={ () => dispatch( handleAuthorOperation() ) }>
+                        onClick={ () => {
+                            dispatch( handleCloseAuthorModal() ); 
+                            dispatch( handleAuthorOperation() ); 
+                          } 
+                        }>
                       {modalData.modalActionButton.caption}
                     </Button>
                 );
@@ -83,6 +87,7 @@ const ModalContent = () => {
                   onClick={ () => {
                     switch( modalData.modalForm ) {
                       case 'authors':
+                        dispatch( handleCloseAuthorModal() );
                         dispatch( saveAuthorModal() )
                       break;
                       case 'reviewers':

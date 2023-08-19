@@ -196,6 +196,9 @@ export const documentFilesSlice = createSlice({
     })
     .addCase(addFile.fulfilled, ( state, action: any ) => {
       state.isLoading = false;
+      state.value.file_type_id = '';
+      state.captionRequired = false;
+      state.value.caption = '';
       state.oldFilesList = [];
       state.newFilesList = [];
       const oldFiles = action.payload.data.step_data.old_files;

@@ -44,7 +44,7 @@ const WizardNavigation = () => {
                                     <li 
                                         className={`pe-5 ${wizard.formStep === formStepTitle ? 'active' : ''}`} key={ formStepTitle }>
                                         <a href={`#${formStepTitle}`}
-                                           className={`d-flex flex-column align-items-center text-center ${ ( wizard.workflow?.storage?.types?.doc_type === undefined && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }`} 
+                                        //    className={`d-flex flex-column align-items-center text-center ${ ( wizard.workflow?.storage?.types?.doc_type === undefined && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }`} 
                                            onClick={() => dispatch( loadStep( formStepTitle ) )}>
                                             <span className="fw-bold index d-flex align-items-center justify-content-center">{ index + 1 }</span>
                                             <span className="fs-bold index-title text-shadow text-capitalize">{ formStepTitle?.replace(/_/g, ' ') }</span>
