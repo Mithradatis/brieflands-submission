@@ -242,26 +242,27 @@ const FilesStep = forwardRef( ( prop, ref ) => {
             name: 'Actions',
             cell: ( row ) => (
                 <div className="d-flex align-items-center justify-content-center flex-wrap">
-                    {   !row.reuse &&
-                        <Button
-                            title="Reuse"
-                            className="py-2 me-2"
-                            variant="contained"
-                            color="secondary"
-                            size="small"
-                            sx={{ minWidth: 0 }}
-                            onClick={ () => dispatch( handleDialogOpen( 
-                                { 
-                                    action: reuseFileUrl, 
-                                    data: row.uuid, 
-                                    dialogTitle: 'Reuse File', 
-                                    dialogContent: { content: 'Are you sure?' }, 
-                                    dialogAction: 'reuse-file' } 
-                                    ) ) 
-                                }
-                            >
-                            <i className="fa-duotone fa-repeat"></i>
-                        </Button>
+                    {   
+                        row.reuse &&
+                            <Button
+                                title="Reuse"
+                                className="py-2 me-2"
+                                variant="contained"
+                                color="secondary"
+                                size="small"
+                                sx={{ minWidth: 0 }}
+                                onClick={ () => dispatch( handleDialogOpen( 
+                                    { 
+                                        action: reuseFileUrl, 
+                                        data: row.uuid, 
+                                        dialogTitle: 'Reuse File', 
+                                        dialogContent: { content: 'Are you sure?' }, 
+                                        dialogAction: 'reuse-file' } 
+                                        ) ) 
+                                    }
+                                >
+                                <i className="fa-duotone fa-repeat"></i>
+                            </Button>
                     }
                     <a href={ `/cdn/dl/${ row.uuid }` }>
                         <Button

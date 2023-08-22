@@ -1,7 +1,7 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
-import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions } from '@mui/joy'
+import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions, CircularProgress } from '@mui/joy'
 import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput, handleKeywordsList, emptyKeywordsList } from '@/app/features/submission/keywordsSlice'
 import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide, updateKeywordsStepData, addNewKeyword, getKeywords, findKeywords } from '@/app/api/keywords'
@@ -20,6 +20,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
     const getAllKeywordsFromApi = `${ wizard.baseUrl }/api/v1/journal/keyword`;
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${wizard.formStep}`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
+    const loading = formState.isLoading;
     useEffect( () => {
         dispatch( getKeywordsList( getAllKeywordsFromApi ) );
         dispatch( getKeywordsStepData( getStepDataFromApi ) );
@@ -85,6 +86,12 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                         disabled={false}
                         name="documentKeywords"
                         id="documentKeywords"
+                        loading={ loading }
+                        endDecorator={
+                            loading ? (
+                              <CircularProgress size="sm" sx={{ bgcolor: 'background.surface' }} />
+                            ) : null
+                        }
                         options={ formState.keywordsBuffer.length > 0 
                             ? formState.keywordsBuffer.map( ( item: any ) => item.attributes?.title )
                             : []
@@ -127,6 +134,9 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                             } 
                         }}
                         filterOptions={ ( options, params ) => {
+                            if ( formState.isLoading ) {
+                                return ['Please wait...'];
+                            }
                             const filtered = filter(options, params);
                             const { inputValue } = params;
                             const isExisting = options.some((option) =>
@@ -138,6 +148,10 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                         
                             return filtered;
                         }}
+                        getOptionDisabled={ ( option: any ) =>
+                            option === 'Please wait...'
+                        }
+
                     />
                     {
                         ( wizard.isVerified && formState.ids === '' && !isValid.ids ) 

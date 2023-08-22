@@ -116,7 +116,6 @@ const SubmissionForm = () => {
             }
         }
     }
-
     useEffect( () => {
         if ( wizard.workflow?.journal_id !== undefined ) {
             const getAllDocumentTypesFromApi = `${ wizard.baseUrl }/api/v1/journal/type?
@@ -128,6 +127,17 @@ const SubmissionForm = () => {
           dispatch( getScreening( getScreeningFromApi ) );
         }
     }, [wizard.workflow]);
+    useEffect( () => {
+        if ( wizard.journal?.attributes?.services?.goftino ) {
+            const script = document.createElement('script');
+            script.src = 'https://www.goftino.com/widget/M41vwQ';
+            script.async = true;
+            document.head.appendChild(script);
+            return () => {;
+                document.head.removeChild(script);
+            };
+        }
+    }, [wizard.journal]);
 
     return (
         <div className="wizard mb-4">

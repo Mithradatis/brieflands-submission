@@ -28,14 +28,14 @@ const SectionStep = forwardRef( ( prop, ref ) => {
         }
     }, [wizard.formStep]);
     useEffect(() => {
-        const formIsValid = formState.value.id !== '';
+        const formIsValid = formState.value.id !== '' && formState.value.id !== 0;
         dispatch( formValidator( formIsValid ) );
     }, [wizard.formStep, formState.value]);
     useEffect(() => {
         if ( wizard.isVerified ) {
             setIsValid( prevState => ({
                 ...prevState,
-                id: formState.value.id !== '',
+                id: formState.value.id !== '' && formState.value.id !== 0,
             }));
         }
     }, [formState.value, wizard.isVerified]);
@@ -62,7 +62,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                         { ReactHtmlParser( formState.stepGuide ) }
                     </Alert>
                 }
-                <FormControl className="mb-3" error={ wizard.isVerified && formState.value.id === '' && !isValid.id }>
+                <FormControl className="mb-3" error={ wizard.isVerified && !isValid.id }>
                     <FormLabel className="fw-bold mb-1">
                         Please Choose
                     </FormLabel>
@@ -100,7 +100,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
                         }}
                     />
                     {
-                        ( formState.value.id === '' && !isValid.id )
+                        ( wizard.isVerified && !isValid.id )
                         && <FormHelperText className="fs-7 text-danger mt-1">You should choose a section.</FormHelperText> 
                     }
                 </FormControl>

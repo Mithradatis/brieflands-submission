@@ -4,6 +4,7 @@ import { searchPeople, getAllCountries, loadEditAuthorForm, handleCloseAuthorMod
 interface AuthorModalState {
   isVerified: boolean;
   isLoading: boolean;
+  isEditing: boolean;
   countriesList: any[];
   countriesPhoneList: any[];
   datatableRows: any[];
@@ -40,6 +41,7 @@ export const addAuthorModalSlice = createSlice({
   initialState: {
     isVerified: false,
     isLoading: false,
+    isEditing: false,
     countriesList: [],
     countriesPhoneList: [],
     datatableRows: [],
@@ -160,17 +162,17 @@ export const addAuthorModalSlice = createSlice({
           } else {
             state.inputStatus.country = true;
           }
-          if ( phoneType.length > 0 || ( phoneType.length === 1 && phoneType[0] === '' ) ) {
+          if ( phoneType.length > 0 && phoneType[0] !== '' ) {
             state.value['phone_type'] = phoneType;
           } else {
             state.inputStatus.phoneType = true;
           }
-          if ( phoneCountry.length > 0 || ( phoneCountry.length === 1 && phoneCountry[0] === '' ) ) {
+          if ( phoneCountry.length > 0 && phoneCountry[0] !== '' ) {
             state.value['country_phone'] = phoneCountry;
           } else {
             state.inputStatus.countryPhone = true;
           }
-          if ( phoneNumber.length > 0 || ( phoneNumber.length === 1 && phoneNumber[0] === '' ) ) {
+          if ( phoneNumber.length > 0 && phoneNumber[0] !== '' ) {
             state.value['phone_number'] = phoneNumber;
           } else {
             state.inputStatus.phoneNumber = true;
@@ -213,6 +215,7 @@ export const addAuthorModalSlice = createSlice({
         state.isLoading = true;
       }).addCase(loadEditAuthorForm.fulfilled, ( state ) => {
         state.isLoading = false;
+        state.isEditing = true;
         if ( state.value['email'] !== '' ) {
           state.inputStatus.email = false;
         }
@@ -241,17 +244,17 @@ export const addAuthorModalSlice = createSlice({
         } else {
           state.inputStatus.country = true;
         }
-        if ( state.value['phone_type'] !== undefined && state.value['phone_type'].length > 0 ) {
+        if ( state.value['phone_type'] !== undefined && state.value['phone_type'][0] !== '' ) {
           state.inputStatus.phoneType = false;
         } else {
           state.inputStatus.phoneType = true;
         }
-        if ( state.value['country_phone'] !== undefined && state.value['country_phone'].length > 0 ) {
+        if ( state.value['country_phone'] !== undefined && state.value['country_phone'][0] !== '' ) {
           state.inputStatus.countryPhone = false;
         } else {
           state.inputStatus.countryPhone = true;
         }
-        if ( state.value['phone_number'] !== undefined && state.value['phone_number'].length > 0 ) {
+        if ( state.value['phone_number'] !== undefined && state.value['phone_number'][0] !== '' ) {
           state.inputStatus.phoneNumber = false;
         } else {
           state.inputStatus.phoneNumber = true;
@@ -260,6 +263,7 @@ export const addAuthorModalSlice = createSlice({
         state.isLoading = true;
       }).addCase(handleCloseAuthorModal.fulfilled, ( state ) => {
         state.isLoading = false;
+        state.isEditing = false;
         state.inputStatus.email = true;
         state.inputStatus.firstName = false;
         state.inputStatus.middleName = false;
@@ -280,7 +284,7 @@ export const {
   handleInputArray,
   handleDisabledInputs,
   saveAuthorModal,
-  setModalData 
+  setModalData
 } = addAuthorModalSlice.actions;
 
 export const addAuthorModalState = ( state: any ) => state.addAuthorModalSlice;

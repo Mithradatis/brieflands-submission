@@ -23,11 +23,27 @@ const AddAuthorModal = () => {
     const [ authorCountryInputValue, setAuthorCountryInputValue ]: any = useState({});
     const [ authorPhoneTypeInputValue, setAuthorPhoneTypeInputValue ]: any = useState({});
     const [ authorPhoneCountryInputValue, setAuthorPhoneCountryInputValue ]: any = useState({});
-    const [affiliations, setAffiliations] = useState([{
-        id: 1,
-        value: addAuthorModalData.value['affiliations'] || '',
-        required: true
-    }]);
+    const [affiliations, setAffiliations] = useState( () => {
+        const affiliationsInput: any = [];
+        if ( addAuthorModalData.value['affiliations']?.length > 0 ) {
+            addAuthorModalData.value['affiliations'].map( ( affiliation: any, index: number ) => {
+                affiliationsInput.push({
+                    id: index + 1,
+                    value: affiliation,
+                    required: index === 0
+                });
+            });
+        } else {
+            affiliationsInput.push({
+                id: 1,
+                value: '',
+                required: true
+            });
+        }
+        
+        return affiliationsInput;
+    }     
+    );
     const [ isValid, setIsValid ] = useState({
         'email': false,
         'first-name': false,
@@ -75,7 +91,7 @@ const AddAuthorModal = () => {
         const updatedAffiliations = [...affiliations];
         updatedAffiliations[index].value = event.target.value;
         setAffiliations( updatedAffiliations );
-        const affiliationValues = updatedAffiliations.map( ( item: any ) => item.value );
+        const affiliationValues = updatedAffiliations.map( ( item: any ) => Array.isArray( item.value ) ? item.value[0] : item.value );
         dispatch( handleInputArray( { name: 'affiliations', value: updatedAffiliations[index].value !== '' ? affiliationValues : '' } ) );
     }
 
@@ -100,10 +116,13 @@ const AddAuthorModal = () => {
                             dispatch( handleInput( { name: 'email', value: event.target.value } ) ) } 
                         }
                     />
-                    <Button className="btn btn-primary ms-2" onClick={ () => dispatch( searchPeople( authorEmailInputValue ) ) }>
-                        <i className="fa-duotone fa-search me-1"></i>
-                        <span>Search</span>
-                    </Button>
+                    {
+                        !addAuthorModalData.isEditing &&
+                            <Button className="btn btn-primary ms-2" onClick={ () => dispatch( searchPeople( authorEmailInputValue ) ) }>
+                                <i className="fa-duotone fa-search me-1"></i>
+                                <span>Search</span>
+                            </Button>
+                    }
                 </div>
                 {
                     ( !isValid['email'] && !formIsValid ) 
@@ -261,7 +280,7 @@ const AddAuthorModal = () => {
             </fieldset>
             <fieldset className="fieldset mb-4">
                 <legend>Affiliations</legend>
-                {affiliations.map((affiliation, index) => (
+                {affiliations.map( ( affiliation: any, index: number ) => (
                     <FormControl className="mb-3 required" key={affiliation.id} error={ index === 0 && !isValid['affiliations'] && !formIsValid }>
                         <FormLabel className="fw-bold mb-1">
                             Affiliation { index !== 0 && (index + 1)}
@@ -272,7 +291,7 @@ const AddAuthorModal = () => {
                             name={`authorAffiliations_${index}`}
                             id={`authorAffiliations_${index}`}
                             placeholder="Author Affiliation(s)"
-                            defaultValue={affiliation.value}
+                            defaultValue={ affiliation.value }
                             onChange={ event => handleAffiliationChange( event, index ) }
                         />
                         {

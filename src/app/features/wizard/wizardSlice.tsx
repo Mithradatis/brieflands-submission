@@ -42,7 +42,7 @@ export const wizardSlice = createSlice({
     formStep: 'agreement',
     currentStep: activeTab,
     hasDocumentType: false,
-    workflowId: workflowId || 366,
+    workflowId: workflowId,
     workflow: {},
     journal: {},
     user: {},
@@ -120,7 +120,7 @@ export const wizardSlice = createSlice({
         if ( workflow?.hasOwnProperty('document_id') && workflow.document_id !== null && workflow.document_id !== 0 ) {
           state.documentId = workflow.document_id;
           state.formSteps.push( { id: 0, attributes: { title: 'Revision Message', slug: 'revision_message'} } );
-          state.formStep = 'revision_message';
+          state.currentStep === '' && ( state.formStep = 'revision_message' );
         }
       })
       .addCase(getJournal.pending, ( state ) => {
