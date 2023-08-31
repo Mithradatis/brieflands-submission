@@ -14,22 +14,17 @@ import classificationsReducer from '@/app/features/submission/classificationsSli
 import commentReducer from '@/app/features/submission/commentSlice'
 import editorReducer from './features/submission/editorSlice'
 import regionReducer from './features/submission/regionSlice'
-import authorContributionReducer from './features/submission/authorContributionSlice'
 import financialDisclosureReducer from './features/submission/financialDisclosureSlice'
-import fundingSupportReducer from './features/submission/fundingSupportSlice'
-import clinicalTrialRegistrationCodeReducer from './features/submission/clinicalTrialRegistrationCodeSlice'
 import abstractReducer from './features/submission/abstractSlice'
-import ethicalApprovalReducer from './features/submission/ethicalApprovalSlice'
 import twitterReducer from './features/submission/twitterSlice'
-import conflictOfInterestsReducer from './features/submission/conflictOfInterestsSlice'
-import informedConsentReducer from './features/submission/informedConsentSlice'
-import dataReproducibilityReducer from './features/submission/dataReproducibilitySlice'
 import reviewersReducer from './features/submission/reviewersSlice'
 import buildReducer from '@/app/features/submission/buildSlice'
 import zeroReducer from '@/app/features/submission/zeroSlice'
 import dialogReducer from '@/app/features/dialog/dialogSlice'
 import snackbarReducer from '@/app/features/snackbar/snackbarSlice'
-import modalSnackbarReducer from './features/snackbar/modalSnackbarSlice'
+import modalSnackbarReducer from '@/app/features/snackbar/modalSnackbarSlice'
+import footnotesReducer from '@/app/features/submission/footnotesSlice'
+import permissionsReducer from '@/app/features/submission/permissionsSlice'
 
 export const store = configureStore({
   reducer: {
@@ -48,21 +43,16 @@ export const store = configureStore({
     commentSlice: commentReducer,
     editorSlice: editorReducer,
     regionSlice: regionReducer,
-    authorContributionSlice: authorContributionReducer,
     financialDisclosureSlice: financialDisclosureReducer,
-    fundingSupportSlice: fundingSupportReducer,
-    clinicalTrialRegistrationCodeSlice: clinicalTrialRegistrationCodeReducer,
     abstractSlice: abstractReducer,
-    ethicalApprovalSlice: ethicalApprovalReducer,
     twitterSlice: twitterReducer,
-    conflictOfInterestsSlice: conflictOfInterestsReducer,
-    informedConsentSlice: informedConsentReducer,
-    dataReproducibilitySlice: dataReproducibilityReducer,
     reviewersSlice: reviewersReducer,
     buildSlice: buildReducer,
     zeroSlice: zeroReducer,
     dialogSlice: dialogReducer,
     snackbarSlice: snackbarReducer,
-    modalSnackbarSlice: modalSnackbarReducer
+    modalSnackbarSlice: modalSnackbarReducer,
+    footnotesSlice: footnotesReducer,
+    permissionsSlice: permissionsReducer
   }
 });

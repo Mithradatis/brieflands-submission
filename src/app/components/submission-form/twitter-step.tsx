@@ -21,10 +21,17 @@ const TwitterStep = forwardRef( ( prop, ref ) => {
         dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateTwitterStepData( getStepDataFromApi ) );
-
-          return true;
+        async submitForm () {
+          let isAllowed = false;   
+          try {
+            await dispatch( updateTwitterStepData( getStepDataFromApi ) );
+            
+            isAllowed = true;
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }  
+          
+          return isAllowed;
         }
     }));
 

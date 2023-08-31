@@ -18,8 +18,10 @@ const ZeroStep = forwardRef( ( prop, ref ) => {
         dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-            return true;
+        async submitForm () {
+          let isAllowed = true;  
+          
+          return isAllowed;
         }
     }));
 

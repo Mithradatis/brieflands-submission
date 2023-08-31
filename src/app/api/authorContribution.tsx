@@ -34,7 +34,7 @@ export const updateAuthorContributionStepData = createAsyncThunk(
   async ( url: string, { getState } ) => {
     try {
       const state: any = getState();
-      const data = state.authorContributionSlice.value;
+      const data = state.footnotesSlice.value.authorsContribution;
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',

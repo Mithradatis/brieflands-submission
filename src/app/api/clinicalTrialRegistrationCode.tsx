@@ -34,7 +34,7 @@ export const updateClinicalTrialRegistrationCodeStepData = createAsyncThunk(
   async ( url: string, { getState } ) => {
     try {
       const state: any = getState();
-      const data = state.clinicalTrialRegistrationCodeSlice.value;
+      const data = state.permissionsSlice.value.clinicalTrialRegistrationCode;
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',

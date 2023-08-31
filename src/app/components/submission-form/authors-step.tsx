@@ -31,9 +31,11 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
       dispatch( getAuthorsAffiliations( getAuthorsAffiliationsFromApi ) );
     }, [formState.authorsList]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          return true;
-        }
+      async submitForm () {
+        let isAllowed = true;  
+        
+        return isAllowed;
+      }
     }));
     const deleteAuthorUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/remove`;
     const updateAuthorsOrderUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/change_order`;
@@ -92,7 +94,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                 sx={{ minWidth: 0 }}
                 onClick={() => dispatch( handleDialogOpen( 
                 { 
-                    action: deleteAuthorUrl, 
+                    actions: { deleteAuthor: deleteAuthorUrl }, 
                     data: row.original.email,
                     dialogTitle: 'Delete Author', 
                     dialogContent: { content: 'Are you sure?' }, 

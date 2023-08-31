@@ -24,10 +24,17 @@ const EditorStep = forwardRef( ( prop, ref ) => {
         dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateEditorStepData( getStepDataFromApi ) );
-
-          return true;
+        async submitForm () {
+          let isAllowed = false;   
+          try {
+            await dispatch( updateEditorStepData( getStepDataFromApi ) );
+            
+            isAllowed = true;
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }  
+          
+          return isAllowed;
         }
     }));
 

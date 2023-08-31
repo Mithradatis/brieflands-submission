@@ -38,10 +38,16 @@ const AgreementStep = forwardRef(( props, ref ) => {
         }
     }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
-        submitForm () {  
-          dispatch( updateAgreementStepData( getStepDataFromApi ) );
-
-          return true;
+        async submitForm () {
+          let isAllowed = false;   
+          try {
+            await dispatch( updateAgreementStepData( getStepDataFromApi ) );
+            isAllowed = true;
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }  
+          
+          return isAllowed;
         }
     }));
   

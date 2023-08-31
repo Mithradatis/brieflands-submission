@@ -26,7 +26,7 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
         dispatch( getClassificationsStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
     useEffect(() => {
-        const formIsValid = Object.values( formState.value ).every(value => value !== '');
+        const formIsValid = Object.values( formState.value ).every( ( value: any ) => value.length > 0 );
         dispatch( formValidator( formIsValid ) );
     }, [wizard.formStep, formState.value]);
     useEffect(() => {
@@ -38,10 +38,16 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
         }
     }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateClassificationsStepData( getStepDataFromApi ) );
+        async submitForm () {
+          let isAllowed = false;   
+          try {
+            await dispatch( updateClassificationsStepData( getStepDataFromApi ) );
+            isAllowed = true;
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }  
           
-          return true;
+          return isAllowed;
         }
     }));
 

@@ -94,7 +94,7 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
                   sx={{ minWidth: 0 }}
                   onClick={ () => dispatch( handleDialogOpen( 
                     { 
-                        action: deleteReviewerUrl, 
+                        actions: { deleteReviewer: deleteReviewerUrl }, 
                         data: row.email, 
                         dialogTitle: 'Delete Reviewer', 
                         dialogContent: { content: 'Are you sure?' }, 

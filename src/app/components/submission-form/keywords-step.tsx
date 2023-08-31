@@ -49,10 +49,17 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
         }
     }, [formState.isInitialized]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateKeywordsStepData( getStepDataFromApi ) );
-
-          return true;
+        async submitForm () {
+          let isAllowed = false;   
+          try {
+            await dispatch( updateKeywordsStepData( getStepDataFromApi ) );
+            
+            isAllowed = true;
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }  
+          
+          return isAllowed;
         }
     }));
 

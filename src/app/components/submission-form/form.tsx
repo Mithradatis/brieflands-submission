@@ -19,22 +19,17 @@ import ReviewersStep from '@/app/components/submission-form/reviewers-step'
 import FilesStep from '@/app/components/submission-form/files-step'
 import CommentStep from '@/app/components/submission-form/comment-step'
 import RegionStep from '@/app/components/submission-form/region-step'
-import AuthorContributionStep from '@/app/components/submission-form/author-contribution-step'
+import FootnotesStep from '@/app/components/submission-form/footnotes-step'
+import PermissionsStep from '@/app/components/submission-form/permissions-step'
 import FinancialDisclosureStep from '@/app/components/submission-form/finantial-disclosure-step'
-import ClinicalTrialRegistrationCodeStep from '@/app/components/submission-form/clinical-trial-registration-code-step'
-import EthicalApprovalStep from '@/app/components/submission-form/ethical-approval-step'
 import Twitter from '@/app/components/submission-form/twitter-step'
-import ConflictOfInterestStep from '@/app/components/submission-form/conflict-of-interests-step'
-import InformedConsentStep from '@/app/components/submission-form/informed-consent-step'
-import FundingSupportStep from '@/app/components/submission-form/funding-support-step'
-import DataReproducibilityStep from '@/app/components/submission-form/data-reproducibility-step'
 import BuildStep from '@/app/components/submission-form/build-step'
 import DialogComponent from '@/app/components/dialog/dialog'
 import FlashMessage from '@/app/components/snackbar/snackbar'
 import ZeroStep from '@/app/components/submission-form/zero-step'
 
 interface ChildComponentProps {
-    submitForm: () => void;
+    submitForm: () => Promise<boolean>;
 }
 
 const SubmissionForm = () => {
@@ -52,17 +47,13 @@ const SubmissionForm = () => {
     const commentChildRef = useRef<ChildComponentProps>( null );
     const regionChildRef = useRef<ChildComponentProps>( null );
     const authorContributionChildRef = useRef<ChildComponentProps>( null );
+    const footnotesChildRef = useRef<ChildComponentProps>( null );
     const financialDisclosureChildRef = useRef<ChildComponentProps>( null );
-    const clinicalTrialRegistrationCodeChildRef = useRef<ChildComponentProps>( null );
-    const ethicalApprovalChildRef = useRef<ChildComponentProps>( null );
     const twitterChildRef = useRef<ChildComponentProps>( null );
-    const conflictOfInterestChildRef = useRef<ChildComponentProps>( null );
-    const informedConsentChildRef = useRef<ChildComponentProps>( null );
-    const fundingSupportChildRef = useRef<ChildComponentProps>( null );
-    const dataReproducibilityChildRef = useRef<ChildComponentProps>( null );
+    const permissionsChildRef = useRef<ChildComponentProps>( null );
     const dispatch:any = useDispatch();
     const wizard = useSelector( wizardState );
-    const handleNextStep = () => {
+    const handleNextStep = async () => {
         const activeStepRef = wizard.formStep === 'revision_message'
             ? zeroChildRef
             : wizard.formStep === 'agreement'
@@ -93,26 +84,23 @@ const SubmissionForm = () => {
             ? authorContributionChildRef
             : wizard.formStep === 'financial_disclosure'
             ? financialDisclosureChildRef
-            : wizard.formStep === 'clinical_trial_registration_code'
-            ? clinicalTrialRegistrationCodeChildRef
-            : wizard.formStep === 'ethical_approval'
-            ? ethicalApprovalChildRef
             : wizard.formStep === 'twitter'
             ? twitterChildRef
-            : wizard.formStep === 'conflict_of_interests'
-            ? conflictOfInterestChildRef
-            : wizard.formStep === 'informed_consent'
-            ? informedConsentChildRef
-            : wizard.formStep === 'funding_support'
-            ? fundingSupportChildRef
-            : wizard.formStep === 'data_reproducibility'
-            ? dataReproducibilityChildRef
+            : wizard.formStep === 'footnotes'
+            ? footnotesChildRef
+            : wizard.formStep === 'permissions'
+            ? permissionsChildRef
             : null;
         !wizard.isVerified && dispatch( handleIsVerified() );
         if ( wizard.isFormValid ) {
-            const submitForm = activeStepRef?.current?.submitForm();
-            if ( submitForm ) {
-                dispatch( nextStep( wizard.isFormValid ) );
+            try {
+                await activeStepRef?.current?.submitForm().then( ( isAllowed ) => {
+                    if ( isAllowed ) {
+                        dispatch( nextStep( wizard.isFormValid ) );
+                    }
+                });
+            } catch ( error ) {
+                console.error("Error while submitting form:", error);
             }
         }
     }
@@ -144,7 +132,7 @@ const SubmissionForm = () => {
             <DialogComponent/>
             <FlashMessage className="z-index-1050"/>
             { wizard.formSteps.length > 0 && 
-                <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item.attributes?.slug?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
+                <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item?.attributes?.slug?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
             }
             <WizardNavigation />
             <div className="d-flex align-items-start">
@@ -220,31 +208,16 @@ const SubmissionForm = () => {
                         wizard.formStep === 'region' && <RegionStep ref={regionChildRef} />
                     }
                     {
-                        wizard.formStep === 'authors_contribution' && <AuthorContributionStep ref={authorContributionChildRef} />
-                    }
-                    {
                         wizard.formStep === 'financial_disclosure' && <FinancialDisclosureStep ref={financialDisclosureChildRef} />
-                    }
-                    {
-                        wizard.formStep === 'clinical_trial_registration_code' && <ClinicalTrialRegistrationCodeStep ref={clinicalTrialRegistrationCodeChildRef} />
-                    }
-                    {
-                        wizard.formStep === 'ethical_approval' && <EthicalApprovalStep ref={ethicalApprovalChildRef} />
                     }
                     {
                         wizard.formStep === 'twitter' && <Twitter ref={twitterChildRef} />
                     }
                     {
-                        wizard.formStep === 'conflict_of_interests' && <ConflictOfInterestStep ref={conflictOfInterestChildRef} />
+                        wizard.formStep === 'footnotes' && <FootnotesStep ref={footnotesChildRef} />
                     }
                     {
-                        wizard.formStep === 'informed_consent' && <InformedConsentStep ref={informedConsentChildRef} />
-                    }
-                    {
-                        wizard.formStep === 'funding_support' && <FundingSupportStep ref={fundingSupportChildRef} />
-                    }
-                    {
-                        wizard.formStep === 'data_reproducibility' && <DataReproducibilityStep ref={dataReproducibilityChildRef} />
+                        wizard.formStep === 'permissions' && <PermissionsStep ref={permissionsChildRef} />
                     }
                     {
                         wizard.formStep === 'build' && <BuildStep/>

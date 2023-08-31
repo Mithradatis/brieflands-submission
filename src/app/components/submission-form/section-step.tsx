@@ -40,10 +40,17 @@ const SectionStep = forwardRef( ( prop, ref ) => {
         }
     }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateSectionStepData( getStepDataFromApi ) );
+        async submitForm () {
+          let isAllowed = false;   
+          try {
+            await dispatch( updateSectionStepData( getStepDataFromApi ) );
+            
+            isAllowed = true;
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }  
           
-          return true;
+          return isAllowed;
         }
     }));
 

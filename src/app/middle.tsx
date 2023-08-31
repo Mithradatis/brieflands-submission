@@ -41,6 +41,10 @@ export default function App() {
     }
   }, [wizard.workflow]);
 
+  const handleModalClose = () => {
+    dispatch( handleClose() );
+  }
+
   return (
     <>
         <div id="loading" className={`d-flex flex-column align-items-center justify-content-center ${ wizard.isLoading ? ' d-block' : ' d-none'}`}>
@@ -57,7 +61,7 @@ export default function App() {
         <Modal
             id="modal"
             open={modalData.modalOpen}
-            onClose={ () => dispatch( handleClose ) }
+            onClose={ handleModalClose }
             aria-labelledby="parent-modal-title"
             aria-describedby="parent-modal-description"
         >

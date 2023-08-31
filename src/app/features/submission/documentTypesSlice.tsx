@@ -6,7 +6,11 @@ export const documentTypesSlice = createSlice({
   initialState: {
     isLoading: false,
     stepGuide: {},
+    sameArticlesGuide: '',
     documentTypesList: [{}],
+    dialog: {
+      isOpen: false
+    },
     value: {
       doc_type: '',
       manuscript_title: ''
@@ -38,7 +42,7 @@ export const documentTypesSlice = createSlice({
     .addCase(getTypesStepData.fulfilled, ( state, action ) => {
       state.isLoading = false;
       const stepData = action.payload.data.step_data;
-      if ( Object.keys(stepData).length > 0 ) {
+      if ( stepData !== undefined && Object.keys(stepData).length > 0 ) {
         state.value = stepData;
       }
     });

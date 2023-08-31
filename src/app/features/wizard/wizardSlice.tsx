@@ -16,11 +16,17 @@ if ( typeof window !== 'undefined' ) {
   baseUrl = `${window.location.protocol}//${window.location.hostname}`;
 }
 
+interface subSteps {
+  slug: string;
+  required: boolean;
+}
+
 interface FormSteps {
   id: number,
   attributes: {
     title: string,
-    slug: string
+    slug: string,
+    subSteps: subSteps[]
   }
 }
 
@@ -30,7 +36,7 @@ const updateHashInUrl = ( url: string, hash: string ): string => {
   return urlObj.toString();
 }
 
-export const wizardSlice = createSlice({
+export const wizardSlice: any = createSlice({
   name: 'submission',
   initialState: {
     baseUrl: baseUrl,
@@ -42,7 +48,7 @@ export const wizardSlice = createSlice({
     formStep: 'agreement',
     currentStep: activeTab,
     hasDocumentType: false,
-    workflowId: workflowId,
+    workflowId: workflowId || 365,
     workflow: {},
     journal: {},
     user: {},
@@ -119,7 +125,7 @@ export const wizardSlice = createSlice({
         state.workflow = workflow;
         if ( workflow?.hasOwnProperty('document_id') && workflow.document_id !== null && workflow.document_id !== 0 ) {
           state.documentId = workflow.document_id;
-          state.formSteps.push( { id: 0, attributes: { title: 'Revision Message', slug: 'revision_message'} } );
+          state.formSteps.push( { id: 0, attributes: { title: 'Revision Message', slug: 'revision_message', subSteps: []} } );
           state.currentStep === '' && ( state.formStep = 'revision_message' );
         }
       })
@@ -141,13 +147,56 @@ export const wizardSlice = createSlice({
         state.isLoading = true;
       })
       .addCase( getSubmissionSteps.fulfilled, ( state, action ) => {
-        state.formSteps = state.formSteps[0]?.attributes?.slug === 'revision_message' ? [{ id: 0, attributes: { title: 'Revision Message',  slug: 'revision_message' } }] : [];
+        state.formSteps = state.formSteps[0]?.attributes?.slug === 'revision_message' ? [{ id: 0, attributes: { title: 'Revision Message',  slug: 'revision_message', subSteps: [] } }] : [];
         const activeSteps = action.payload.data;
+        const footnotes = ['authors_contribution', 'conflict_of_interests', 'funding_support'];
+        const permissions = ['clinical_trial_registration_code', 'ethical_approval', 'informed_consent', 'data_reproducibility'];
+        const footnotesSteps = activeSteps?.filter( ( step: any ) => footnotes.includes( step.attributes?.slug ) );
+        const permissionsSteps = activeSteps?.filter( ( step: any ) => permissions.includes( step.attributes?.slug ) );
+        const duplicateIndicator = {
+          footnotes: false,
+          permissions: false
+        };
         if ( activeSteps !== undefined ) {
-          state.formSteps = [
-            ...state.formSteps,
-            ...activeSteps.map((step: any) => ({ attributes: { slug: step.attributes.slug, required: step.attributes.requirement } })),
-          ];
+          const newSteps = activeSteps.flatMap( ( step: any ) => {
+            if ( footnotes.includes( step.attributes?.slug ) ) {
+              if ( !duplicateIndicator.footnotes ) {
+                duplicateIndicator.footnotes = true;
+                return [{
+                  attributes: {
+                    slug: 'footnotes',
+                    required: footnotesSteps.some( ( item: any ) => item.attributes?.required ),
+                    subSteps: footnotesSteps.map( ( item: any ) => { return { slug: item.attributes?.slug, required: item.attributes?.required || false } } )
+                  }
+                }];
+              } else {
+                return [];
+              }
+            } else if ( permissions.includes( step.attributes?.slug ) ) {
+              if ( !duplicateIndicator.permissions ) {
+                duplicateIndicator.permissions = true;
+                return [{
+                  attributes: {
+                    slug: 'permissions',
+                    required: permissionsSteps.some( ( item: any ) => item.attributes?.required ),
+                    subSteps: permissionsSteps.map( ( item: any ) => { return { slug: item.attributes?.slug, required: item.attributes?.required || false } } )
+                  }
+                }];
+              } else {
+                return [];
+              }
+            } else {
+              return [{
+                attributes: {
+                  slug: step.attributes?.slug,
+                  required: step.attributes?.requirement,
+                  subSteps: []
+                }
+              }];
+            }
+          });
+        
+          state.formSteps = [...state.formSteps, ...newSteps];
         }
       }).addCase( buildNewWorkflow.pending, ( state ) => {
         state.isLoading = true;

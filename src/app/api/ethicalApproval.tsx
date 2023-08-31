@@ -34,7 +34,7 @@ export const updateEthicalApprovalStepData = createAsyncThunk(
   async ( url: string, { getState } ) => {
     try {
       const state: any = getState();
-      const data = state.ethicalApprovalSlice.value;
+      const data = state.permissionsSlice.value.ethicalApproval;
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',

@@ -84,8 +84,10 @@ const FilesStep = forwardRef( ( prop, ref ) => {
         setOldFilteredItems( oldfilteredData );
     }, [formState.oldFilesList, filterText, wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-            return true;
+        async submitForm () {
+          let isAllowed = true;  
+
+          return isAllowed;
         }
     }));
     const deleteFileUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/remove`;
@@ -156,7 +158,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                         sx={{ minWidth: 0 }}
                         onClick={ () => dispatch( handleDialogOpen( 
                             { 
-                                action: deleteFileUrl, 
+                                actions: { deleteFile: deleteFileUrl }, 
                                 data: row.uuid, 
                                 dialogTitle: 'Delete File', 
                                 dialogContent: { content: 'Are you sure?' }, 
@@ -253,7 +255,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
                                 sx={{ minWidth: 0 }}
                                 onClick={ () => dispatch( handleDialogOpen( 
                                     { 
-                                        action: reuseFileUrl, 
+                                        actions: { reuseFile: reuseFileUrl }, 
                                         data: row.uuid, 
                                         dialogTitle: 'Reuse File', 
                                         dialogContent: { content: 'Are you sure?' }, 

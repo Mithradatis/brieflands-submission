@@ -11,12 +11,18 @@ const DialogComponent = () => {
     const fullScreen = useMediaQuery( theme.breakpoints.down('md') );
     const dialog: any = useSelector( dialogState );
 
+    const handleClose = ( event: any, reason: string ) => {
+        if ( reason !== 'backdropClick' ) {
+            dispatch( handleDialogClose() )
+        }
+    }
+
     return (
         <Dialog
             fullWidth={true}
             fullScreen={fullScreen}
             open={ dialog.isOpen }
-            onClose={ () => dispatch( handleDialogClose() ) }
+            onClose={ handleClose }
             aria-labelledby="responsive-dialog-title"
         >
             <DialogTitle id="responsive-dialog-title">
@@ -27,12 +33,15 @@ const DialogComponent = () => {
                     { ReactHtmlParser( dialog.dialogContent.content ) }
                 </DialogContentText>
             </DialogContent>
-            <DialogActions>
+            <DialogActions className="p-4">
                 <Button onClick={ () => dispatch( handleDialogClose() ) }>
-                    No
+                    { dialog.denyPhrase || 'No' }
                 </Button>
-                <Button onClick={ () => dispatch( handleOperation( dialog.dialogAction ) ) } autoFocus>
-                    Yes
+                <Button
+                    className="btn btn-primary" 
+                    onClick={ () => dispatch( handleOperation( dialog.dialogAction ) ) } 
+                    autoFocus>
+                    { dialog.approvePhrase || 'Yes' }
                 </Button>
             </DialogActions>
         </Dialog>

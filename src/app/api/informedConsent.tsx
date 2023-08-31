@@ -34,7 +34,7 @@ export const updateInformedConsentStepData = createAsyncThunk(
   async ( url: string, { getState } ) => {
     try {
       const state: any = getState();
-      const data = state.informedConsentSlice.value;
+      const data = state.permissionsSlice.value.informedConsent;
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',

@@ -5,7 +5,6 @@ export const classificationsSlice = createSlice({
   name: 'classifications',
   initialState: {
     isLoading: false,
-    isFormValid: true,
     isVisited: false,
     stepGuide: {},
     classificationsList: [{}],

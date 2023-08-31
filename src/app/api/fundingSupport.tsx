@@ -34,7 +34,7 @@ export const updateFundingSupportStepData = createAsyncThunk(
   async ( url: string, { getState } ) => {
     try {
       const state: any = getState();
-      const data = state.fundingSupportSlice.value;
+      const data = state.footnotesSlice.value.fundingSupport;
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',

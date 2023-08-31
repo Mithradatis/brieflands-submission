@@ -172,7 +172,7 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                         onClick={ () => {
                             if ( formState.value.terms ) {
                                 dispatch( handleDialogOpen({ 
-                                    action: finishWorkflowUrl,
+                                    actions: { finishWorkflow: finishWorkflowUrl },
                                     data: '',
                                     dialogTitle: 'Finish Submission', 
                                     dialogContent: { content: formState.value.final_message }, 

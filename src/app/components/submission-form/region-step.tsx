@@ -38,10 +38,17 @@ const RegionStep = forwardRef( ( prop, ref ) => {
         }
     }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateRegionStepData( getStepDataFromApi ) );
-
-          return true;
+        async submitForm () {
+          let isAllowed = false;   
+          try {
+            await dispatch( updateRegionStepData( getStepDataFromApi ) );
+            
+            isAllowed = true;
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }  
+          
+          return isAllowed;
         }
     }));
 

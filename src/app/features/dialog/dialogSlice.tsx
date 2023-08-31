@@ -4,7 +4,9 @@ export const dialogSlice = createSlice({
   name: 'dialog',
   initialState: {
     isOpen: false,
-    action: '',
+    actions: {},
+    approvePhrase: 'Yes',
+    denyPhrase: 'No',
     data: '',
     dialogTitle: '',
     dialogContent: {},
@@ -15,8 +17,10 @@ export const dialogSlice = createSlice({
       return {
         ...state,
         isOpen: true,
-        action: action.payload.action,
-        data: action.payload.data,
+        actions: action.payload.actions,
+        approvePhrase: action.payload.approvePhrase || 'Yes',
+        denyPhrase: action.payload.denyPhrase || 'No',
+        data: action.payload.data || '',
         dialogTitle: action.payload.dialogTitle,
         dialogContent: action.payload.dialogContent,
         dialogAction: action.payload.dialogAction
@@ -26,6 +30,7 @@ export const dialogSlice = createSlice({
       return {
         ...state,
         isOpen: false,
+        actions: {},
         data: '',
         dialogTitle: '',
         dialogContent: '',

@@ -1,10 +1,12 @@
 import { useState, useEffect,forwardRef, useImperativeHandle } from 'react'
+import * as ReactDOMServer from 'react-dom/server'
 import { useDispatch, useSelector } from 'react-redux'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { stepState, handleInput } from '@/app/features/submission/documentTypesSlice'
-import { getTypesStepData, getTypesStepGuide, updateTypesStepData } from '@/app/api/types'
+import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
+import { getTypesStepData, getTypesStepGuide, updateTypesStepData, getSameArticles, getSameArticlesGuide } from '@/app/api/types'
 import ReactHtmlParser from 'react-html-parser'
 import { getSubmissionSteps, getWorkflow } from '@/app/api/client'
 
@@ -40,16 +42,86 @@ const TypesStep = forwardRef( ( prop, ref ) => {
     }, [formState.value, wizard.isVerified]);
     const getWorkflowFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }`;
     const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
+    const getSameArticlesFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/type/same_articles`;
+    const getSameArticlesGuideFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.similar_article`;
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateTypesStepData( getStepDataFromApi ) );
-          dispatch( getWorkflow( getWorkflowFromApi ) ).then( () => {
-            dispatch( getSubmissionSteps( getStepsFromApi ) )
-          });
-          
-          return true;
-        }
-    }));
+        async submitForm() {
+          let isAllowed = false;
+          try {
+            await dispatch(
+              getSameArticles({
+                url: getSameArticlesFromApi,
+                documentDetails: {
+                    doc_type: formState.value.doc_type,
+                    manuscript_title: formState.value.manuscript_title
+                }
+              })
+            ).then( async ( data: any ) => {
+                const sameArticles = data.payload;
+                await dispatch( getSameArticlesGuide( getSameArticlesGuideFromApi ) ).then( async ( data: any ) => {
+                    const sameArticlesGuide = data.payload;
+                    if ( sameArticles !== undefined && sameArticles.length > 0 ) {
+                        const sameArticlesTable = <div className="alert alert-warning" role="alert">
+                            <div className="fs-7 mb-4 d-flex align-items-start justify-content-start">
+                                <i className="fs-5 me-2 text-warning fa-regular fa-triangle-exclamation"></i>
+                                <div className="d-block">
+                                    { ReactHtmlParser( sameArticlesGuide ) }
+                                </div>
+                            </div>
+                            <table className='fs-7 table table-bordered table-striped table-responsive'>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>State</th>
+                                        <th>Correspond</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {
+                                        sameArticles.map( ( row: any ) => 
+                                            <tr key={ `same-article-${ row.id }` }>
+                                                <td>{ row.id }</td>
+                                                <td>{ row.title }</td>
+                                                <td>{ row.state }</td>
+                                                <td>{ row.correspond }</td>
+                                            </tr>
+                                        )
+                                    }
+                                </tbody>
+                            </table>
+                        </div>;
+                        dispatch( handleDialogOpen(
+                            {
+                                actions: {
+                                    updateTypesStepData: getStepDataFromApi, 
+                                    getWorkflow: getWorkflowFromApi, 
+                                    getSubmissionSteps: getStepsFromApi,
+                                    currentFormStep: wizard.formStep 
+                                },
+                                approvePhrase: 'Proceed',
+                                denyPhrase: 'Cancel',
+                                dialogTitle: 'Same Articles', 
+                                dialogContent: { content: ReactDOMServer.renderToString( sameArticlesTable ) },
+                                dialogAction: 'proceed-submission'
+                            } 
+                        ));
+                        isAllowed = false;
+                    } else {
+                        isAllowed = true;
+                        await dispatch( updateTypesStepData( getStepDataFromApi ) );
+                        await dispatch( getWorkflow( getWorkflowFromApi ) );
+                        await dispatch( getSubmissionSteps( getStepsFromApi ) );
+                    }    
+                });
+            });
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }
+
+          return isAllowed;
+        },
+      }));
 
     return (
         <>

@@ -21,10 +21,16 @@ const AbstractStep = forwardRef( ( prop, ref ) => {
         dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-          dispatch( updateAbstractStepData( getStepDataFromApi ) );
-
-          return true;
+        async submitForm () {
+          let isAllowed = false;   
+          try {
+            await dispatch( updateAbstractStepData( getStepDataFromApi ) );
+            isAllowed = true;
+          } catch (error) {
+            console.error("Error while submitting form:", error);
+          }  
+          
+          return isAllowed;
         }
     }));
 

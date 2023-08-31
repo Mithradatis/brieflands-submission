@@ -36,6 +36,50 @@ export const getTypesStepData = createAsyncThunk(
   }
 );
 
+export const getSameArticlesGuide = createAsyncThunk(
+  'submission/getSameArticlesGuide',
+  async ( url: string ) => {
+    try {
+      const response = await fetch(url, {
+        method: 'GET',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+
+      return data.data.value;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
+export const getSameArticles = createAsyncThunk(
+  'submission/getSameArticles',
+  async ( payload: any ) => {
+    const { url, documentDetails } = payload;
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify( documentDetails ),
+      });
+      const data = await response.json();
+
+      return data.data.same_articles;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
+
 export const updateTypesStepData = createAsyncThunk(
   'submission/updateTypesStepData',
   async ( url: string, { getState } ) => {
