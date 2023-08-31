@@ -64,29 +64,10 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                 }
                 <div className="d-flex align-items-center">
                     {
-                        formState.value.files?.blind !== '' && 
-                        <div className="flex-fill w-50 pe-4">
-                            <a href={ formState.value.files?.blind }>
-                                <Card variant="solid" color="primary" className="dashboard-stat pb-0 px-0 pt-4 mb-4">
-                                    <CardContent>
-                                        <div className="overflow-hidden mb-3">
-                                            <i className="dashboard-stat-icon fa-duotone fa-file-pdf text-white opacity-50"></i>
-                                            <span className="fs-4 ps-5 pt-1 ms-3">Blind File</span>
-                                        </div>
-                                        <div className="dashboard-stat-footer text-light fs-7 px-3 py-1">
-                                            <i className="fa-duotone fa-download me-1"></i>
-                                            <span>Get File</span>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </a>
-                        </div>
-                    }
-                    {
                         formState.value.files?.full !== '' &&
-                        <div className="flex-fill">
+                        <div className="w-50">
                             <a href={ formState.value.files?.full }>
-                                <Card variant="solid" color="primary" className="dashboard-stat pb-0 px-0 pt-4 mb-4" sx={{ width: 320 }}>
+                                <Card variant="solid" color="primary" className="dashboard-stat pb-0 px-0 pt-4 mb-4">
                                     <CardContent>
                                         <div className="overflow-hidden mb-3">
                                             <i className="dashboard-stat-icon fa-duotone fa-file-pdf text-white opacity-50"></i>
@@ -123,18 +104,18 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                             Word count(include in fee) of manuscript is about: <span className="fw-bold">{ formState.value.word_count_include_in_fee }</span>
                         </div> 
                     }
-                    { 
-                        (wizard.journal?.attributes?.shopping_status === 'active' && formState.value.prices) && 
-                        <div>
-                            Invoice amount(VAT included) will be: 
-                            {
-                                Object.entries( formState.value.prices['Acceptance Fee']).map(([currency, value]) => (
-                                    <span key={currency} className="fw-bold">
-                                        { ` ${ value } ${ currency }` }
-                                    </span>
-                                ))
-                            }
-                        </div> 
+                    {
+                        ( wizard.journal?.attributes?.shopping_status === 'active' && formState.value.prices && Object.keys( formState.value.prices ).length > 0 ) && 
+                            <div>
+                                Invoice amount(VAT included) will be: 
+                                {
+                                    Object.entries( formState.value.prices['Acceptance Fee']).map(([currency, value]) => (
+                                        <span key={currency} className="fw-bold">
+                                            { ` ${ value } ${ currency }` }
+                                        </span>
+                                    ))
+                                }
+                            </div> 
                     }
                 </Alert>
                 <form name="build-form" id="build-form">

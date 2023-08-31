@@ -5,7 +5,6 @@ export const twitterSlice = createSlice({
   name: 'comment',
   initialState: {
     isLoading: false,
-    isFormValid: true,
     isVisited: false,
     stepGuide: {},
     value: {

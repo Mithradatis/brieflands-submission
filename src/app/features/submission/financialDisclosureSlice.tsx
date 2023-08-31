@@ -5,7 +5,6 @@ export const financialDisclosureSlice = createSlice({
   name: 'comment',
   initialState: {
     isLoading: false,
-    isFormValid: true,
     isVisited: false,
     stepGuide: {},
     value: {

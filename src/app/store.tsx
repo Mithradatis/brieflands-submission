@@ -3,7 +3,6 @@ import wizardReducer from '@/app/features/wizard/wizardSlice'
 import modalReducer from '@/app/features/modal/modalSlice'
 import addAuthorModalReducer from '@/app/features/modal/addAuthorModalSlice'
 import addReviewerModalReducer from '@/app/features/modal/addReviewerModalSlice'
-import submissionReducer from '@/app/features/submission/submissionSlice'
 import agreementReducer from '@/app/features/submission/agreementSlice'
 import documentTypesReducer from '@/app/features/submission/documentTypesSlice'
 import documentSectionReducer from '@/app/features/submission/documentSectionSlice'
@@ -32,7 +31,6 @@ export const store = configureStore({
     modalSlice: modalReducer,
     addAuthorModalSlice: addAuthorModalReducer,
     addReviewerModalSlice: addReviewerModalReducer,
-    submissionSlice: submissionReducer,
     agreementSlice: agreementReducer,
     documentTypesSlice: documentTypesReducer,
     documentSectionSlice: documentSectionReducer,

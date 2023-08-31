@@ -5,7 +5,6 @@ export const zeroSlice = createSlice({
   name: 'abstract',
   initialState: {
     isLoading: false,
-    isFormValid: true,
     isVisited: false,
     stepGuide: {},
     value: {

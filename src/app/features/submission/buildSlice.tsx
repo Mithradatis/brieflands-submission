@@ -5,7 +5,6 @@ export const buildSlice = createSlice({
   name: 'build',
   initialState: {
     isLoading: false,
-    isFormValid: true,
     isVisited: false,
     hasError: false,
     errorMessage: '',

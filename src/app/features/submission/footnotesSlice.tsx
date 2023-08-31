@@ -7,7 +7,6 @@ export const footnotesSlice = createSlice({
   name: 'footnotes',
   initialState: {
     isLoading: false,
-    isFormValid: true,
     isVisited: false,
     stepGuide: {
         authorsContribution: null,

@@ -14,7 +14,6 @@ export const authorSlice = createSlice({
   name: 'authors',
   initialState: {
     isLoading: false,
-    isFormValid: true,
     stepGuide: {},
     authorsList: [] as Author[],
     authorsAffiliations: {},

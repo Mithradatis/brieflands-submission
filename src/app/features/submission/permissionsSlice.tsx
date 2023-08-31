@@ -8,7 +8,6 @@ export const permissionsSlice = createSlice({
   name: 'permissions',
   initialState: {
     isLoading: false,
-    isFormValid: true,
     isVisited: false,
     stepGuide: {
         clinicalTrialRegistrationCode: null,
