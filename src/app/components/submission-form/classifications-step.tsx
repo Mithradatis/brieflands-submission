@@ -1,9 +1,9 @@
 import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, createFilterOptions } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput } from '@/app/features/submission/classificationsSlice'
+import { stepState, handleInput, handleLoading } from '@/app/features/submission/classificationsSlice'
 import { getClassificationsList, getClassificationsStepData, getClassificationsStepGuide, updateClassificationsStepData } from '@/app/api/classifications'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -25,6 +25,7 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );
           let isAllowed = false;   
           try {
             await dispatch( updateClassificationsStepData( getStepDataFromApi ) );
@@ -39,7 +40,12 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="classifications" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="classifications" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Classifications</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

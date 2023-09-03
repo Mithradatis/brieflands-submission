@@ -1,9 +1,9 @@
 import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl } from '@mui/joy'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput } from '@/app/features/submission/editorSlice'
+import { stepState, handleInput, handleLoading } from '@/app/features/submission/editorSlice'
 import { getEditors, getEditorStepData, getEditorStepGuide, updateEditorStepData } from '@/app/api/editor'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -25,6 +25,7 @@ const EditorStep = forwardRef( ( prop, ref ) => {
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
             await dispatch( updateEditorStepData( getStepDataFromApi ) );
@@ -40,7 +41,12 @@ const EditorStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="editors" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="editors" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Editor</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

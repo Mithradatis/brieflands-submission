@@ -1,9 +1,9 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
-import { stepState, handleInput } from '@/app/features/submission/footnotesSlice'
+import { stepState, handleInput, handleLoading } from '@/app/features/submission/footnotesSlice'
 import { getAuthorContributionStepData, getAuthorContributionStepGuide, updateAuthorContributionStepData } from '@/app/api/authorContribution' 
 import { getFundingSupportStepData, getFundingSupportStepGuide, updateFundingSupportStepData } from '@/app/api/fundingSupport'
 import { getConflictOfInterestsStepData, getConflictOfInterestsStepGuide, updateConflictOfInterestsStepData } from '@/app/api/conflictOfInterests'
@@ -40,6 +40,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );
           let isAllowed = false;
           try {   
             await dispatch( updateAuthorContributionStepData( getAuthorsContributionDataFromApi ) );
@@ -56,7 +57,12 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="footnotes" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="footnotes" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Footnotes</h3>
                 <Alert severity="info" className="mb-4">
                     {   

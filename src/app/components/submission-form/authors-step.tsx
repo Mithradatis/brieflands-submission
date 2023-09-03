@@ -1,9 +1,9 @@
 import { useMemo, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Box, Button, Alert } from '@mui/material'
+import { Box, Button, Alert, Skeleton } from '@mui/material'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState } from '@/app/features/submission/authorSlice'
+import { stepState, handleLoading } from '@/app/features/submission/authorSlice'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
 import { getAuthorStepData, getAuthorStepGuide, loadEditAuthorForm, updateAuthorsOrder, getAllCountries, getAuthorsAffiliations } from '@/app/api/author'
@@ -32,6 +32,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
     }, [formState.authorsList]);
     useImperativeHandle(ref, () => ({
       async submitForm () {
+        dispatch( handleLoading( true ) );
         let isAllowed = true;  
         
         return isAllowed;
@@ -110,7 +111,12 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-          <div id="authors" className="tab">
+          <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+              <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+              <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+              <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+          </div>
+          <div id="authors" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
               <h3 className="mb-4 text-shadow-white">Authors</h3>
               {
                   ( details !== undefined && details !== '' ) &&

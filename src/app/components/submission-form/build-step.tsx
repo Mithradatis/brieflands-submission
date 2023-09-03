@@ -1,9 +1,9 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState, formValidator, prevStep, handleIsVerified } from '@/app/features/wizard/wizardSlice'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { Checkbox, FormControl, Card, CardContent } from '@mui/joy'
-import { stepState, handleCheckbox } from '@/app/features/submission/buildSlice'
+import { stepState, handleCheckbox, handleLoading } from '@/app/features/submission/buildSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
 import { getBuildStepGuide, getBuildStepData, getFinalAgreementGuide } from '@/app/api/build'
 import ReactHtmlParser from 'react-html-parser'
@@ -49,7 +49,12 @@ const BuildStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="build" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="build" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Build</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

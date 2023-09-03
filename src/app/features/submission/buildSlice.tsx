@@ -23,6 +23,9 @@ export const buildSlice = createSlice({
         [ action.payload.name ]: !action.payload.value,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -67,7 +70,7 @@ export const buildSlice = createSlice({
   },
 });
 
-export const { handleCheckbox } = buildSlice.actions;
+export const { handleCheckbox, handleLoading } = buildSlice.actions;
 
 export const stepState = ( state: any ) => state.buildSlice;
 

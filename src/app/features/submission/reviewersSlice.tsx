@@ -18,6 +18,9 @@ export const reviewersSlice = createSlice({
           [ action.payload.name ]: action.payload.value,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -105,7 +108,7 @@ export const reviewersSlice = createSlice({
   },
 });
 
-export const { handleInput } = reviewersSlice.actions;
+export const { handleInput, handleLoading } = reviewersSlice.actions;
 
 export const stepState = ( state: any ) => state.reviewersSlice;
 

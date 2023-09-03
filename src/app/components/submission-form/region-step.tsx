@@ -1,9 +1,9 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl, FormHelperText } from '@mui/joy'
 import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput } from '@/app/features/submission/regionSlice'
+import { stepState, handleInput, handleLoading } from '@/app/features/submission/regionSlice'
 import { getRegions, getRegionStepData, getRegionStepGuide, updateRegionStepData } from '@/app/api/region'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -39,6 +39,7 @@ const RegionStep = forwardRef( ( prop, ref ) => {
     }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
             await dispatch( updateRegionStepData( getStepDataFromApi ) );
@@ -54,7 +55,12 @@ const RegionStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="region" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="region" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Region</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

@@ -26,6 +26,9 @@ export const keywordsSlice = createSlice({
     handleKeywordsList: ( state, action ) => {
         state.keywordsList.push( action.payload );
     },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
+    },
     emptyKeywordsList: ( state ) => {
       state.keywordsList = [];
     }
@@ -82,7 +85,7 @@ export const keywordsSlice = createSlice({
   },
 });
 
-export const { handleInput, handleKeywordsList, emptyKeywordsList } = keywordsSlice.actions;
+export const { handleInput, handleKeywordsList, handleLoading, emptyKeywordsList } = keywordsSlice.actions;
 
 export const stepState = ( state: any ) => state.keywordsSlice;
 

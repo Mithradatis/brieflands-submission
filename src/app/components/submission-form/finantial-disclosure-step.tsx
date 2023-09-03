@@ -1,9 +1,9 @@
 import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
-import { stepState, handleInput } from '@/app/features/submission/financialDisclosureSlice'
+import { stepState, handleInput, handleLoading } from '@/app/features/submission/financialDisclosureSlice'
 import { getFinancialDisclosureStepData, getFinancialDisclosureStepGuide, updateFinancialDisclosureStepData } from '@/app/api/financialDisclosure' 
 import ReactHtmlParser from 'react-html-parser'
 
@@ -22,6 +22,7 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
             await dispatch( updateFinancialDisclosureStepData( getStepDataFromApi ) );
@@ -37,7 +38,12 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="financial-disclosure" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="financial-disclosure" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Financial Disclosure</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

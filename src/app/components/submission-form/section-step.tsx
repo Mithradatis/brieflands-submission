@@ -1,9 +1,9 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText } from '@mui/joy'
 import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
-import { handleInput, stepState } from '@/app/features/submission/documentSectionSlice'
+import { stepState, handleInput, handleLoading } from '@/app/features/submission/documentSectionSlice'
 import { getDocumentSections, getSectionStepData, getSectionStepGuide, updateSectionStepData } from '@/app/api/section'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -41,6 +41,7 @@ const SectionStep = forwardRef( ( prop, ref ) => {
     }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
             await dispatch( updateSectionStepData( getStepDataFromApi ) );
@@ -56,7 +57,12 @@ const SectionStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="section" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="section" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Section</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

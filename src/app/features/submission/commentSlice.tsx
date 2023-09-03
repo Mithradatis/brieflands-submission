@@ -20,6 +20,9 @@ export const commentSlice = createSlice({
           text: action.payload,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -50,7 +53,7 @@ export const commentSlice = createSlice({
   },
 });
 
-export const { handleInput } = commentSlice.actions;
+export const { handleInput, handleLoading } = commentSlice.actions;
 
 export const stepState = ( state: any ) => state.commentSlice;
 

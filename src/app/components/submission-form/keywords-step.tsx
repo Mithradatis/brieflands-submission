@@ -1,9 +1,9 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText, createFilterOptions, CircularProgress } from '@mui/joy'
 import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput, handleKeywordsList, emptyKeywordsList } from '@/app/features/submission/keywordsSlice'
+import { stepState, handleInput, handleKeywordsList, handleLoading, emptyKeywordsList } from '@/app/features/submission/keywordsSlice'
 import { getKeywordsList, getKeywordsStepData, getKeywordsStepGuide, updateKeywordsStepData, addNewKeyword, getKeywords, findKeywords } from '@/app/api/keywords'
 import ReactHtmlParser from 'react-html-parser'
 
@@ -26,8 +26,6 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
         dispatch( getKeywordsStepData( getStepDataFromApi ) );
         dispatch( getKeywordsStepGuide( getDictionaryFromApi ) );
     }, [wizard.formStep]);
-
-
     useEffect(() => {
         const formIsValid = Object.values( formState.value ).every(value => value !== '');
         dispatch( formValidator( formIsValid ) );
@@ -50,6 +48,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
     }, [formState.isInitialized]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
             await dispatch( updateKeywordsStepData( getStepDataFromApi ) );
@@ -65,7 +64,12 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="keywords" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="keywords" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Keywords</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

@@ -25,7 +25,7 @@ const WizardOutline = () => {
                             return (
                                 <li className={ wizard.formStep === formStepTitle ? 'active' : '' } key={ formStepTitle }>
                                     <a href={`#${formStepTitle}`}
-                                    //    className={ ( !isDocumentTypeSet && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }
+                                       className={ ( !isDocumentTypeSet && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }
                                        onClick={() => dispatch( loadStep( formStepTitle ) ) }>
                                         <span className="text-capitalize">
                                             { formStepTitle?.replace(/_/g, ' ') }

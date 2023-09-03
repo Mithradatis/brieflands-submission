@@ -25,6 +25,9 @@ export const documentTypesSlice = createSlice({
           [ action.payload.name ]: action.payload.value,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -49,7 +52,7 @@ export const documentTypesSlice = createSlice({
   },
 });
 
-export const { handleInput } = documentTypesSlice.actions;
+export const { handleInput, handleLoading } = documentTypesSlice.actions;
 
 export const stepState = ( state: any ) => state.documentTypesSlice;
 

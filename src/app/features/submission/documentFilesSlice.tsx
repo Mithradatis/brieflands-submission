@@ -67,6 +67,9 @@ export const documentFilesSlice = createSlice({
           [ action.payload.name ]: action.payload.value,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -304,7 +307,7 @@ export const documentFilesSlice = createSlice({
   },
 });
 
-export const { handleFileType, handleInput, handleDropzoneStatus } = documentFilesSlice.actions;
+export const { handleFileType, handleInput, handleDropzoneStatus, handleLoading } = documentFilesSlice.actions;
 
 export const stepState = ( state: any ) => state.documentFilesSlice;
 

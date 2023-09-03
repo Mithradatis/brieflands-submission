@@ -12,7 +12,11 @@ export const zeroSlice = createSlice({
         revise_message: ''
     }
   },
-  reducers: {},
+  reducers: {
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
+    }
+  },
   extraReducers( builder ) {
     builder
       .addCase( getZeroStepGuide.pending, ( state ) => {
@@ -40,6 +44,8 @@ export const zeroSlice = createSlice({
       });
   },
 });
+
+export const { handleLoading } = zeroSlice.actions;
 
 export const stepState = ( state: any ) => state.zeroSlice;
 

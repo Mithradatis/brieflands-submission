@@ -20,6 +20,9 @@ export const editorSlice = createSlice({
           [ action.payload.name ]: action.payload.value,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -61,7 +64,7 @@ export const editorSlice = createSlice({
   },
 });
 
-export const { handleInput } = editorSlice.actions;
+export const { handleInput, handleLoading } = editorSlice.actions;
 
 export const stepState = ( state: any ) => state.editorSlice;
 

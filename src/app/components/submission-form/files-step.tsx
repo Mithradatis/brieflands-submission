@@ -1,10 +1,10 @@
 import { useState, useEffect, forwardRef, useImperativeHandle, useMemo, useCallback } from 'react'
-import { Alert, Button } from '@mui/material'
+import { Alert, Button, Skeleton } from '@mui/material'
 import { useDispatch, useSelector } from 'react-redux'
 import {  Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { useDropzone } from 'react-dropzone'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleFileType, handleInput, handleDropzoneStatus } from '@/app/features/submission/documentFilesSlice'
+import { stepState, handleFileType, handleInput, handleDropzoneStatus, handleLoading } from '@/app/features/submission/documentFilesSlice'
 import { getFileTypes, getFilesStepData, getFilesStepGuide, updateFilesStepData, addFile } from '@/app/api/files'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
 import DataTable, { TableColumn } from 'react-data-table-component'
@@ -85,6 +85,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
     }, [formState.oldFilesList, filterText, wizard.formStep]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );  
           let isAllowed = true;  
 
           return isAllowed;
@@ -322,7 +323,12 @@ const FilesStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="files" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="files" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Files</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

@@ -20,6 +20,9 @@ export const regionSlice = createSlice({
           [ action.payload.name ]: action.payload.value,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -49,7 +52,7 @@ export const regionSlice = createSlice({
   },
 });
 
-export const { handleInput } = regionSlice.actions;
+export const { handleInput, handleLoading } = regionSlice.actions;
 
 export const stepState = ( state: any ) => state.regionSlice;
 

@@ -20,6 +20,9 @@ export const twitterSlice = createSlice({
           text: action.payload,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -50,7 +53,7 @@ export const twitterSlice = createSlice({
   },
 });
 
-export const { handleInput } = twitterSlice.actions;
+export const { handleInput, handleLoading } = twitterSlice.actions;
 
 export const stepState = ( state: any ) => state.twitterSlice;
 

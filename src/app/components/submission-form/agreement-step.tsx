@@ -1,9 +1,9 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { Scrollbars } from 'react-custom-scrollbars'
-import { Checkbox, FormControl, FormControlLabel, Alert } from '@mui/material'
+import { Checkbox, FormControl, FormControlLabel, Alert, Skeleton } from '@mui/material'
 import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleCheckbox } from '@/app/features/submission/agreementSlice' 
+import { stepState, handleCheckbox, handleLoading } from '@/app/features/submission/agreementSlice'
 import { getAgreementStepData, getAgreementStepGuide, getAgreementTerms, updateAgreementStepData } from '@/app/api/agreement'
 import Divider from '@mui/material/Divider'
 import ReactHtmlParser from 'react-html-parser'
@@ -39,6 +39,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
     }, [formState.value, wizard.isVerified]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
+          dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
             await dispatch( updateAgreementStepData( getStepDataFromApi ) );
@@ -53,7 +54,12 @@ const AgreementStep = forwardRef(( props, ref ) => {
   
     return (
         <>
-            <div id="agreement" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="agreement" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Agreement</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

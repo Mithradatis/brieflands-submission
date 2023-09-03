@@ -21,6 +21,9 @@ export const classificationsSlice = createSlice({
         [ action.payload.name ]: action.payload.value,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -61,7 +64,7 @@ export const classificationsSlice = createSlice({
   },
 });
 
-export const { handleInput } = classificationsSlice.actions;
+export const { handleInput, handleLoading } = classificationsSlice.actions;
 
 export const stepState = ( state: any ) => state.classificationsSlice;
 

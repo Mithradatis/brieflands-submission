@@ -20,6 +20,9 @@ export const financialDisclosureSlice = createSlice({
           text: action.payload,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -50,7 +53,7 @@ export const financialDisclosureSlice = createSlice({
   },
 });
 
-export const { handleInput } = financialDisclosureSlice.actions;
+export const { handleInput, handleLoading } = financialDisclosureSlice.actions;
 
 export const stepState = ( state: any ) => state.financialDisclosureSlice;
 

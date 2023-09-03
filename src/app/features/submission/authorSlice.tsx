@@ -19,7 +19,11 @@ export const authorSlice = createSlice({
     authorsAffiliations: {},
     value: {}
   },
-  reducers: {},
+  reducers: {
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
+    }
+  },
   extraReducers( builder ) {
     const createAuthorsTable = ( state: any, authors: any ) => {
       state.authorsList = [];
@@ -109,6 +113,8 @@ export const authorSlice = createSlice({
     });
   }
 });
+
+export const  { handleLoading } = authorSlice.actions;
 
 export const stepState = ( state: any ) => state.authorSlice;
 

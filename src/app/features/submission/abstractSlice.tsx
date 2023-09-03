@@ -20,6 +20,9 @@ export const abstractSlice = createSlice({
           text: action.payload,
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -50,7 +53,7 @@ export const abstractSlice = createSlice({
   },
 });
 
-export const { handleInput } = abstractSlice.actions;
+export const { handleInput, handleLoading } = abstractSlice.actions;
 
 export const stepState = ( state: any ) => state.abstractSlice;
 

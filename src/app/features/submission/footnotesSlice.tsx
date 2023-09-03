@@ -36,6 +36,9 @@ export const footnotesSlice = createSlice({
           }
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -111,7 +114,7 @@ export const footnotesSlice = createSlice({
   },
 });
 
-export const { handleInput } = footnotesSlice.actions;
+export const { handleInput, handleLoading } = footnotesSlice.actions;
 
 export const stepState: any = ( state: any ) => state.footnotesSlice;
 

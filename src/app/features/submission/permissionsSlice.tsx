@@ -41,6 +41,9 @@ export const permissionsSlice = createSlice({
           }
         },
       };
+    },
+    handleLoading: ( state, action ) => {
+      state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
@@ -137,7 +140,7 @@ export const permissionsSlice = createSlice({
   },
 });
 
-export const { handleInput } = permissionsSlice.actions;
+export const { handleInput, handleLoading } = permissionsSlice.actions;
 
 export const stepState: any = ( state: any ) => state.permissionsSlice;
 

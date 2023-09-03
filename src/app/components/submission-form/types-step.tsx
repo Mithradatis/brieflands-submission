@@ -1,10 +1,10 @@
 import { useState, useEffect,forwardRef, useImperativeHandle } from 'react'
 import * as ReactDOMServer from 'react-dom/server'
 import { useDispatch, useSelector } from 'react-redux'
-import { Alert } from '@mui/material'
+import { Alert, Skeleton } from '@mui/material'
 import { Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { wizardState, formValidator, handleIsVerified } from '@/app/features/wizard/wizardSlice'
-import { stepState, handleInput } from '@/app/features/submission/documentTypesSlice'
+import { stepState, handleInput, handleLoading } from '@/app/features/submission/documentTypesSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
 import { getTypesStepData, getTypesStepGuide, updateTypesStepData, getSameArticles, getSameArticlesGuide } from '@/app/api/types'
 import ReactHtmlParser from 'react-html-parser'
@@ -46,6 +46,7 @@ const TypesStep = forwardRef( ( prop, ref ) => {
     const getSameArticlesGuideFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.similar_article`;
     useImperativeHandle(ref, () => ({
         async submitForm() {
+          dispatch( handleLoading( true ) );  
           let isAllowed = false;
           try {
             await dispatch(
@@ -125,7 +126,12 @@ const TypesStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div id="types" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="types" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Types</h3>
                 {
                     ( details !== undefined && details !== '' ) &&

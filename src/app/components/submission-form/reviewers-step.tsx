@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Button, Alert } from '@mui/material'
+import { Button, Alert, Skeleton } from '@mui/material'
 import { Input } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
 import { handleOpen } from '@/app/features/modal/modalSlice'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
-import { stepState } from '@/app/features/submission/reviewersSlice'
+import { stepState, handleLoading } from '@/app/features/submission/reviewersSlice'
 import { handleDialogOpen } from '@/app/features/dialog/dialogSlice'
 import { getReviewersStepGuide, getReviewersStepData, loadEditReviewerForm } from '@/app/api/reviewers'
 import DataTable, { TableColumn } from 'react-data-table-component'
@@ -42,8 +42,11 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
         dispatch( formValidator( true ) );
     }, [wizard.formStep]);
     useImperativeHandle(ref, () => ({
-        submitForm () {
-            return true;
+        async submitForm () {
+            dispatch( handleLoading( true ) );
+            let isAllowed = true;  
+        
+            return isAllowed;
         }
     }));
     const deleteReviewerUrl = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${ wizard.formStep }/remove`;
@@ -143,7 +146,12 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
 
     return (
         <>
-            <div id="reviewers" className="tab">
+            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
+                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
+            </div>
+            <div id="reviewers" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Reviewers</h3>
                 {
                     ( details !== undefined && details !== '' ) &&
