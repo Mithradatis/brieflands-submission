@@ -16,6 +16,10 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
     const formState: any = useSelector( stepState );
     const wizard: any = useSelector( wizardState );
     const [ subSteps, setSubSteps ]: any = useState([]);
+    const [ clinicalTrialRegistrationCodeStep, setClinicalTrialRegistrationCodeStep ] = useState( false );
+    const [ ethicalApprovalStep, setEthicalApprovalStep ] = useState( false );
+    const [ informedConsentStep, setInformedConsentStep ] = useState( false );
+    const [ dataReproducibilityStep, setDataReproducibilityStep ] = useState( false );
     const clinicalTrialRegistrationCodeDetails = wizard.screeningDetails?.find( ( item: any ) => 
         ( item.attributes?.step_slug === 'clinical_trial_registration_code' && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     const ethicalApprovalDetails = wizard.screeningDetails?.find( ( item: any ) => 
@@ -33,7 +37,16 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
     const getInformedConsentDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.informed_consent`;
     const getDataReproducibilityDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.data_reproducibility`;
     useEffect( () => {
-        setSubSteps( wizard.formSteps.length > 0 ? wizard.formSteps.find( ( item: any ) => item.attributes.slug === wizard.formStep ).attributes.subSteps : [] );
+        const subStepsList = wizard.formSteps.length > 0 ? wizard.formSteps.find( ( item: any ) => item.attributes.slug === wizard.formStep ).attributes.subSteps : [];
+        setSubSteps( subStepsList );
+        if ( subStepsList.length > 0 ) {
+            subStepsList.map( ( subStep: any ) =>  {
+                subStep.slug === 'clinical_trial_registration_code' && setClinicalTrialRegistrationCodeStep( true );
+                subStep.slug === 'ethical_approval' && setEthicalApprovalStep( true );
+                subStep.slug === 'informed_consent' && setInformedConsentStep( true );
+                subStep.slug === 'data_reproducibility' && setDataReproducibilityStep( true );
+            });
+        } 
     }, [wizard.formSteps]);
     useEffect( () => {
         dispatch( getClinicalTrialRegistrationCodeStepData( getClinicalTrialRegistrationCodeDataFromApi ) );
@@ -66,28 +79,42 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+            <div className={ `step-loader ${ ( formState.isLoading 
+                    || ( 
+                        ( clinicalTrialRegistrationCodeStep && typeof formState.stepGuide.clinicalTrialRegistrationCode !== 'string' )
+                        || ( ethicalApprovalStep && typeof formState.stepGuide.ethicalApproval !== 'string' )
+                        || ( informedConsentStep && typeof formState.stepGuide.informedConsent !== 'string' )
+                        || ( dataReproducibilityStep && typeof formState.stepGuide.dataReproducibility !== 'string' ) 
+                    ) ) 
+                    ? ' d-block' : ' d-none' }` }>
                 <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
             </div>
-            <div id="permissions" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
+            <div id="permissions" className={ `tab ${ ( formState.isLoading 
+                    || ( 
+                        ( clinicalTrialRegistrationCodeStep && typeof formState.stepGuide.clinicalTrialRegistrationCode !== 'string' )
+                        || ( ethicalApprovalStep && typeof formState.stepGuide.ethicalApproval !== 'string' )
+                        || ( informedConsentStep && typeof formState.stepGuide.informedConsent !== 'string' )
+                        || ( dataReproducibilityStep && typeof formState.stepGuide.dataReproducibility !== 'string' ) 
+                    ) ) 
+                    ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Permissions</h3>
                 <Alert severity="info" className="mb-4">
                     {   
-                        ( subSteps.length > 0 && subSteps.find( ( subStep: any ) => subStep.slug === 'clinical_trial_registration_code' ) && formState.stepGuide.clinicalTrialRegistrationCode !== undefined ) &&     
+                        ( clinicalTrialRegistrationCodeStep && formState.stepGuide.clinicalTrialRegistrationCode !== undefined ) &&     
                             <div className="mb-2 fs-7">{ ReactHtmlParser( formState.stepGuide.clinicalTrialRegistrationCode ) }</div>
                     }
                     {   
-                        ( subSteps.length > 0 && subSteps.find( ( subStep: any ) => subStep.slug === 'ethical_approval' ) && formState.stepGuide.ethicalApproval !== undefined ) &&     
+                        ( ethicalApprovalStep && formState.stepGuide.ethicalApproval !== undefined ) &&     
                             <div className="mb-2 fs-7">{ ReactHtmlParser( formState.stepGuide.ethicalApproval ) }</div>
                     }
                     {
-                        ( subSteps.length > 0 && subSteps.find( ( subStep: any ) => subStep.slug === 'informed_consent' ) && formState.stepGuide.informedConsent !== undefined ) &&     
+                        ( informedConsentStep && formState.stepGuide.informedConsent !== undefined ) &&     
                             <div className="mb-2 fs-7">{ ReactHtmlParser( formState.stepGuide.informedConsent ) }</div>
                     }
                     {
-                        ( subSteps.length > 0 && subSteps.find( ( subStep: any ) => subStep.slug === 'data_reproducibility' ) && formState.stepGuide.dataReproducibility !== undefined ) &&     
+                        ( dataReproducibilityStep && formState.stepGuide.dataReproducibility !== undefined ) &&     
                             <div className="mb-2 fs-7">{ ReactHtmlParser( formState.stepGuide.dataReproducibility ) }</div>
                     }
                  </Alert>

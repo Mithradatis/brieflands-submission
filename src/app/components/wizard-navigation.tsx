@@ -5,10 +5,9 @@ import { loadStep, wizardState } from '@/app/features/wizard/wizardSlice'
 
 const WizardNavigation = () => {
     const dispatch = useDispatch();
-    const [ formSteps, setFormSteps ] = useState([]);
     const [ isDocumentTypeSet, setIsDocumentTypeSet ] = useState( false );
     const wizard = useSelector( wizardState );
-    useEffect(() => {
+    useEffect( () => {
         const stepsList = document.querySelector('.wizard-navigation > ol');
         if ( stepsList instanceof HTMLElement ) {
             const activeStep = stepsList.querySelector('li.active');
@@ -22,13 +21,10 @@ const WizardNavigation = () => {
                 }
             }
         }
-    }, [wizard.formStep]);
-    useEffect( () => {
         if ( wizard.workflow?.storage?.types?.doc_type !== undefined ) {
             setIsDocumentTypeSet( true );
         }
-        setFormSteps( wizard.formSteps );
-    }, [wizard.formSteps]);
+    }, [wizard.formSteps, wizard.formStep]);
 
     return (
         <>
@@ -38,7 +34,7 @@ const WizardNavigation = () => {
                     <div className="end-gradient bg-texture"></div>
                     <ol className="d-flex align-items-center text-shado position-relative">
                         {
-                            formSteps.map( ( item: any, index: number ) => {
+                            wizard.formSteps?.map( ( item: any, index: number ) => {
                                 const formStepTitle = item.attributes?.slug;
 
                                 return (

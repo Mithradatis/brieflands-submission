@@ -146,12 +146,12 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
 
     return (
         <>
-            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
                 <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
             </div>
-            <div id="reviewers" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
+            <div id="reviewers" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Reviewers</h3>
                 {
                     ( details !== undefined && details !== '' ) &&
@@ -159,20 +159,21 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
                             { ReactHtmlParser( details ) }
                         </Alert>
                 }
-                {   formState.stepGuide !== undefined &&     
-                    <Scrollbars
-                        className="mb-4"
-                        style={{ width: 500, height: 200 }}
-                        universal={true}
-                        autoHide
-                        autoHideTimeout={500}
-                        autoHideDuration={200}>
-                        {   formState.stepGuide !== undefined &&     
-                            <Alert severity="info" className="mb-4">
-                                { ReactHtmlParser( formState.stepGuide ) }
-                            </Alert>
-                        }
-                    </Scrollbars>
+                {   
+                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' &&  
+                        <Scrollbars
+                            className="mb-4"
+                            style={{ width: 500, height: 200 }}
+                            universal={true}
+                            autoHide
+                            autoHideTimeout={500}
+                            autoHideDuration={200}>
+                            {   formState.stepGuide !== undefined &&     
+                                <Alert severity="info" className="mb-4">
+                                    { ReactHtmlParser( formState.stepGuide ) }
+                                </Alert>
+                            }
+                        </Scrollbars>
                 }
                 <Button className="btn btn-primary btn-lg mb-4" onClick={ () => dispatch( handleOpen( { title: 'Add an Reviewer', parent: wizard.formStep } ) ) }>
                     Add Reviewer

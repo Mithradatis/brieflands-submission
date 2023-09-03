@@ -14,6 +14,9 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
     const formState: any = useSelector( stepState );
     const wizard: any = useSelector( wizardState );
     const [ subSteps, setSubSteps ]: any = useState([]);
+    const [ authorsContributionStep, setAuthorsContributionStep ] = useState( false );
+    const [ fundingSupportStep, setFundingSupportStep ] = useState( false );
+    const [ conflictOfInterestsStep, setConflictOfInterestsStep ] = useState( false );
     const authorsContributionDetails = wizard.screeningDetails?.find( ( item: any ) => 
         ( item.attributes?.step_slug === 'authors_contribution' && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     const fundingSupportDetails = wizard.screeningDetails?.find( ( item: any ) => 
@@ -27,7 +30,15 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
     const getFundingSupportDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.funding_support`;
     const getConflictOfInterestsDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.conflict_of_interests`;
     useEffect( () => {
-        setSubSteps( wizard.formSteps.length > 0 ? wizard.formSteps.find( ( item: any ) => item.attributes.slug === wizard.formStep ).attributes.subSteps : [] );
+        const subStepsList = wizard.formSteps.length > 0 ? wizard.formSteps.find( ( item: any ) => item.attributes.slug === wizard.formStep ).attributes.subSteps : [];
+        setSubSteps( subStepsList );
+        if ( subStepsList.length > 0 ) {
+            subStepsList.map( ( subStep: any ) =>  {
+                subStep.slug === 'authors_contribution' && setAuthorsContributionStep( true );
+                subStep.slug === 'funding_support' && setFundingSupportStep( true );
+                subStep.slug === 'conflict_of_interests' && setConflictOfInterestsStep( true );
+            });
+        }
     }, [wizard.formSteps]);
     useEffect( () => {
         dispatch( getAuthorContributionStepData( getAuthorsContributionDataFromApi ) );
@@ -57,12 +68,26 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+            <div className={ `step-loader 
+                ${ ( formState.isLoading 
+                    || ( 
+                        ( authorsContributionStep && typeof formState.stepGuide.authorsContribution !== 'string' )
+                        || ( fundingSupportStep && typeof formState.stepGuide.fundingSupport !== 'string' )
+                        || ( conflictOfInterestsStep && typeof formState.stepGuide.conflictOfInterests !== 'string' ) 
+                    ) ) 
+                    ? ' d-block' : ' d-none' }` 
+                }>
                 <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
             </div>
-            <div id="footnotes" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
+            <div id="footnotes" className={ `tab ${ ( formState.isLoading 
+                    || ( 
+                        ( authorsContributionStep && typeof formState.stepGuide.authorsContribution !== 'string' )
+                        || ( fundingSupportStep && typeof formState.stepGuide.fundingSupport !== 'string' )
+                        || ( conflictOfInterestsStep && typeof formState.stepGuide.conflictOfInterests !== 'string' ) 
+                    ) ) 
+                    ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Footnotes</h3>
                 <Alert severity="info" className="mb-4">
                     {   

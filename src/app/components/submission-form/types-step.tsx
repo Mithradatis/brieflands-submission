@@ -126,12 +126,12 @@ const TypesStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
                 <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
             </div>
-            <div id="types" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
+            <div id="types" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Types</h3>
                 {
                     ( details !== undefined && details !== '' ) &&
@@ -139,11 +139,12 @@ const TypesStep = forwardRef( ( prop, ref ) => {
                             { ReactHtmlParser( details ) }
                         </Alert>
                 }
-                {   
-                    formState.stepGuide !== undefined &&
+                {
+                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
                         <Alert severity="info" className="mb-4">
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
+                    )
                 }
                 <FormControl className="mb-3 required" error={ wizard.isVerified && formState.value.doc_type === '' && !isValid.doc_type }>
                     <FormLabel className="fw-bold mb-1">

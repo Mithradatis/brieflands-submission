@@ -54,12 +54,12 @@ const AgreementStep = forwardRef(( props, ref ) => {
   
     return (
         <>
-            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
                 <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
             </div>
-            <div id="agreement" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
+            <div id="agreement" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Agreement</h3>
                 {
                     ( details !== undefined && details !== '' ) &&
@@ -68,7 +68,7 @@ const AgreementStep = forwardRef(( props, ref ) => {
                         </Alert>
                 }
                 {   
-                    formState.stepGuide !== undefined &&
+                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' &&
                         <Scrollbars
                             className="mb-4"
                             style={{ width: 600, height: 200 }}

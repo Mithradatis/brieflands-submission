@@ -28,17 +28,19 @@ const ZeroStep = forwardRef( ( prop, ref ) => {
 
     return (
         <>
-            <div className={ `step-loader ${ formState.isLoading ? ' d-block' : ' d-none' }` }>
+            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
                 <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
             </div>
-            <div id="zero" className={ `tab ${ formState.isLoading ? ' d-none' : ' d-block' }` }>
+            <div id="zero" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
                 <h3 className="mb-4 text-shadow-white">Revise/Revission Message</h3>
-                {   formState.stepGuide !== undefined &&     
-                    <Alert severity="info" className="mb-4">
-                        { ReactHtmlParser( formState.stepGuide ) }
-                    </Alert>
+                {
+                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
+                        <Alert severity="info" className="mb-4">
+                            { ReactHtmlParser( formState.stepGuide ) }
+                        </Alert>
+                    )
                 }
                 <Alert severity="info" className="mb-4 break-word">
                     { formState.value.revise_message !== undefined 
