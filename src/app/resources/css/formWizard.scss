@@ -42,9 +42,10 @@
             transition: all ease-in .5s;
             list-style: none;
             li {
-                transition: all ease-in .5s;
                 a {
+                    transition: all ease-in .2s;
                     font-size: .8rem;
+                    opacity: .75;
                     .index {
                         border-radius: 50%;
                     }
@@ -55,23 +56,28 @@
                 }
                 &.active {
                     a {
+                        opacity: 1;
                         min-width: 10rem;
                         font-weight: 700;
                         font-size: 1rem;
                         transform: scale(1.1, 1.1);
                         .index {
+                            position: relative;
+                            transition: all ease-in .2s;
                             display: flex;
                             align-items: center;
                             justify-content: center;
-                            position: relative;
                             top: -1.25rem;
                             margin-bottom: .5rem;
-                            font-size: 1.2rem;
-                            color: darken($mainColor, 25%);
-                            text-shadow: 1px 1px 0 lighten($mainColor, 30%);
+                            font-size: 1rem;
+                            // color: darken($mainColor, 25%);
+                            color: $secondColor;
+                            // text-shadow: 1px 1px 0 lighten($mainColor, 30%);
+                            text-shadow: 1px 1px 0 lighten(#f7c370, 10%);
                             width: 2.5rem;
                             height: 2.5rem;
-                            background-image: linear-gradient(45deg, lighten($mainColor, 5%), lighten($mainColor, 20%));
+                            // background-image: linear-gradient(45deg, lighten($mainColor, 5%), lighten($mainColor, 20%));
+                            background-image: linear-gradient(45deg, desaturate($orange, 15%), $orange);
                             box-shadow: 0 0 10px rgba(black, .1);
                             &::before {
                                 content: '';
@@ -95,11 +101,44 @@
                                 background-color: $mainColor;
                                 border-radius: 50%;
                                 z-index: -2;
-                            }                        
+                            }
+                            .number {
+                                z-index: 3;
+                            }
+                            .waves {
+                                overflow: hidden;
+                                position: absolute;
+                                width: 100%;
+                                height: 100%;
+                                border-radius: 50%;
+                                .wave {
+                                    opacity: .4;
+                                    position: absolute;
+                                    top: -50%;
+                                    left: -25%;
+                                    background: rgb(233, 207, 135);
+                                    width: 150%;
+                                    height: 150%;
+                                    margin-top: -10px;
+                                    transform-origin: 50% 48%;
+                                    border-radius: 43%;
+                                    animation: drift 5s infinite linear;
+                                }
+                                .wave.-two {
+                                    animation: drift 9s infinite linear;
+                                    opacity: .1;
+                                    background: yellow;
+                                }
+                                .wave.-three {
+                                    animation: drift 7s infinite linear;
+                                }             
+                            }          
                         }
                         .index-title {
+                            color: lighten($mainColor, 30%);
                             position: relative;
                             top: -1rem;
+                            text-shadow: 1px 1px 0 rgba(darken($mainColor, 20%), .75);
                         }
                     }
                 }
@@ -128,7 +167,7 @@
     max-width: 725px;
     min-width: 675px;
     border: 1px solid white;
-    box-shadow:  20px 30px 100px darken( $mainColor, 10% ),
+    box-shadow:  20px 50px 100px darken( $mainColor, 10% ),
         20px 20px 60px $mainColor,
         inset 20px 20px 60px rgba(220, 220, 220, 1);
 }
@@ -136,7 +175,8 @@
 .wizard-outline {
     max-width: 15rem;
     li {
-        transition: all ease-in-out .2s;
+        // transition: all ease-in-out .2s;
+        opacity: 0;
         a {
             &.disabled {
                 pointer-events: none;
@@ -147,8 +187,8 @@
             font-size: 1rem;
             font-weight: 700;
             a {
-                color: lighten($mainColor, 25%);
-                text-shadow: none;
+                color: lighten($mainColor, 30%);
+                text-shadow: 1px 1px 0 rgba(darken($mainColor, 20%), .75);
             }
         }
     }
@@ -219,16 +259,16 @@
     &.btn_primary {
         grid-column: 1 / 2;
         grid-row: 4 / 5;
-        background: $mainColor;
-        box-shadow:inset .2rem .2rem .5rem lighten($mainColor, 5%), 
-                inset -.2rem -.2rem .5rem darken($mainColor, 5%),
+        background: $secondColor;
+        box-shadow:inset .2rem .2rem .5rem lighten($secondColor, 5%), 
+                inset -.2rem -.2rem .5rem darken($secondColor, 5%),
                 $shadow;
         color: white;
 
         &:hover { color: white; }
         &:active {
-        box-shadow:inset .2rem .2rem 1rem lighten($mainColor, 5%), 
-                inset -.2rem -.2rem 1rem darken($mainColor, 5%);
+        box-shadow:inset .2rem .2rem 1rem lighten($secondColor, 5%), 
+                inset -.2rem -.2rem 1rem darken($secondColor, 5%);
         }
     }
     &.btn_secondary {
@@ -254,3 +294,5 @@
     height: 100%;
     background-color: $mainColor;
 }
+
+@import 'media'

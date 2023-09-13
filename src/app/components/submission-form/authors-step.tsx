@@ -125,8 +125,8 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                       </Alert>
               }
               <Scrollbars
-                  className="mb-4"
-                  style={{ width: 600, height: 200 }}
+                  className="mb-2"
+                  style={{ width: 100 + '%', minHeight: 150 }}
                   universal={true}
                   autoHide
                   autoHideTimeout={500}
@@ -140,7 +140,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
               </Scrollbars>
               {
                 wizard.workflow?.storage?.revision === undefined && 
-                  <Button className="btn btn-primary btn-lg mb-4" onClick={() => {
+                  <Button className="btn btn-primary btn-lg mb-0" onClick={() => {
                     dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep } ) )}
                   }>
                     Add Author

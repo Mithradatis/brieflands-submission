@@ -70,7 +70,7 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                 <div className="d-flex align-items-center">
                     {
                         formState.value.files?.full !== '' &&
-                        <div className="w-50">
+                        <div className="w-50 w-md-50">
                             <a href={ formState.value.files?.full }>
                                 <Card variant="solid" color="primary" className="dashboard-stat pb-0 px-0 pt-4 mb-4">
                                     <CardContent>

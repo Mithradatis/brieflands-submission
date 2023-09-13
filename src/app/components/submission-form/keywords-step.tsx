@@ -20,7 +20,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
     const getAllKeywordsFromApi = `${ wizard.baseUrl }/api/v1/journal/keyword`;
     const getStepDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/${wizard.formStep}`;
     const getDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.${wizard.formStep}`;
-    const loading = formState.isLoading;
+    const searching = formState.isSearching;
     useEffect( () => {
         dispatch( getKeywordsList( getAllKeywordsFromApi ) );
         dispatch( getKeywordsStepData( getStepDataFromApi ) );
@@ -99,9 +99,9 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                         disabled={false}
                         name="documentKeywords"
                         id="documentKeywords"
-                        loading={ loading }
+                        loading={ searching }
                         endDecorator={
-                            loading ? (
+                            searching ? (
                               <CircularProgress size="sm" sx={{ bgcolor: 'background.surface' }} />
                             ) : null
                         }
@@ -128,12 +128,15 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                                 if ( value.length > 0 && formState.keywordsBuffer.length === 0 ) {
                                     dispatch( addNewKeyword( { url: getAllKeywordsFromApi, keyword: value[value.length - 1] } ) );
                                 } else {
-                                    const selectedOption = formState.keywordsBuffer.find( ( item: any ) =>
-                                        item.attributes.title === value[value.length - 1]
-                                    );
-                                    selectedIds.push( selectedOption?.id );
-                                    dispatch( handleKeywordsList( selectedOption ) );
-                                    dispatch( handleInput( { name: 'ids', value: selectedIds } ) );
+                                    const selectedOptions: any = [];
+                                    value.map( ( keyword: string ) => {
+                                        const selectedOption = formState.keywordsBuffer.find( ( item: any ) =>
+                                            item.attributes.title === keyword
+                                        );
+                                        selectedOptions.push( selectedOption?.id);
+                                        dispatch( handleKeywordsList( selectedOption ) );
+                                    });
+                                    dispatch( handleInput( { name: 'ids', value: selectedOptions } ) );
                                 }   
                             }
                             if ( reason === 'removeOption' ) {
@@ -147,7 +150,7 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
                             } 
                         }}
                         filterOptions={ ( options, params ) => {
-                            if ( formState.isLoading ) {
+                            if ( formState.isSearching ) {
                                 return ['Please wait...'];
                             }
                             const filtered = filter(options, params);

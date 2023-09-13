@@ -28,7 +28,7 @@ const WizardNavigation = () => {
 
     return (
         <>
-            <div className="wizard-navigation-container position-relative pt-5 overflow-hidden">
+            <div className="wizard-navigation-container position-relative pt-5 overflow-hidden mb-2">
                 <div className="wizard-navigation position-relative" id="submission-form-wizard">
                     <div className="start-gradient bg-texture"></div>
                     <div className="end-gradient bg-texture"></div>
@@ -43,7 +43,14 @@ const WizardNavigation = () => {
                                         <a href={`#${formStepTitle}`}
                                            className={`d-flex flex-column align-items-center text-center ${ ( !isDocumentTypeSet && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? ' disabled' : '' }`} 
                                            onClick={() => dispatch( loadStep( formStepTitle ) )}>
-                                            <span className="fw-bold index d-flex align-items-center justify-content-center">{ index + 1 }</span>
+                                            <span className="fw-bold index d-flex align-items-center justify-content-center">
+                                                <span className="number">{ index + 1 }</span>
+                                                <span className="waves">
+                                                    <span className="wave"></span>
+                                                    <span className="wave -two"></span>
+                                                    <span className="wave -three"></span>
+                                                </span>
+                                            </span>
                                             <span className="fs-bold index-title text-shadow text-capitalize">{ formStepTitle?.replace(/_/g, ' ') }</span>
                                         </a>
                                     </li>

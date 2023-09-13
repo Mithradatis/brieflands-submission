@@ -14,16 +14,24 @@ const WizardOutline = () => {
         setFormSteps( wizard.formSteps );
         
     }, [wizard.formSteps]);
+    useEffect( () => {
+        const animationDuration = .5;
+        const animationDelay = .05;
+        const items = document.querySelectorAll('.animated-items > .item');
+        items.forEach( ( item: any, index: number ) => {
+            item.style.animation = `fadeInRight ${animationDuration}s ease ${index * animationDelay}s both`;
+        });
+    }, [formSteps]);
 
     return (
         <>
-            <div className="wizard-outline position-relative pe-4 py-4 text-shadow">
-                <ol className="fs-7">
+            <div className="wizard-outline position-relative pe-4 py-4 text-shadow d-none d-md-block">
+                <ol className="fs-7 animated-items">
                     {
                         formSteps.map( ( item: any ) => {
                             const formStepTitle = item.attributes?.slug;
                             return (
-                                <li className={ wizard.formStep === formStepTitle ? 'active' : '' } key={ formStepTitle }>
+                                <li className={ `${ wizard.formStep === formStepTitle ? 'active ' : ''}item` } key={ formStepTitle }>
                                     <a href={`#${formStepTitle}`}
                                        className={ ( !isDocumentTypeSet && ( formStepTitle !== 'agreement' && formStepTitle !== 'types' ) ) ? 'disabled' : '' }
                                        onClick={() => dispatch( loadStep( formStepTitle ) ) }>

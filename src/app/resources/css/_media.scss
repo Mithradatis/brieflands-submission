@@ -1,0 +1,19 @@
+@media (max-width: 768px) {
+    .w-md-50 {
+        width: 100% !important;
+    }
+    .wizard {
+        width: 100%;
+    }
+    .wizard-steps {
+        min-width: auto;
+        width: 100%;
+    }
+    .wizard-navigation-container {
+        .wizard-navigation {
+            .start-gradient {
+                width: 4rem;
+            }
+        }
+    }
+}

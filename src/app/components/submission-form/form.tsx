@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
+import { Breadcrumbs, Typography, Link } from '@mui/material'
 import { getScreening } from '@/app/api/client'
 import { wizardState, prevStep, nextStep, handleIsVerified } from '@/app/features/wizard/wizardSlice'
 import { getDocumentTypes } from '@/app/api/types'
@@ -131,41 +132,54 @@ const SubmissionForm = () => {
         <div className="wizard mb-4">
             <DialogComponent/>
             <FlashMessage className="z-index-1050"/>
-            { wizard.formSteps.length > 0 && 
-                <p className="mb-0">Step <b>{ wizard.formSteps.findIndex( ( item: any ) => item?.attributes?.slug?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
-            }
+            <div className="d-flex align-items-center justify-content-between">
+                <Breadcrumbs aria-label="breadcrumb">
+                    <Link underline="hover" color="inherit" href="/" className="d-flex align-items-center">
+                    <i className="fa-duotone fa-home fs-7 me-1"></i>
+                    <span>Home</span>
+                    </Link>
+                    <Typography color="text.primary" className="d-flex align-items-center">Submission</Typography>
+                </Breadcrumbs>
+            </div>
             <WizardNavigation />
             <div className="d-flex align-items-start">
                 <WizardOutline />
-                <div className="wizard-steps tab-container p-5 rounded-double bg-white flex-fill position-relative overflow-hidden">
+                <div className="wizard-steps tab-container p-4 p-md-5 rounded-double bg-white flex-fill position-relative overflow-hidden">
                     <div className="custom-shape-divider-top">
                         <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
                             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
                         </svg>
                     </div>
-                    <div className="z-index-2">
-                        {
-                            ( wizard.workflow?.storage?.types?.doc_type !== undefined && wizard.workflow?.storage?.types?.doc_type !== '' ) &&
-                                <p className="fs-7">
-                                    <label className="me-2 fw-bold">Document Type:</label>
-                                    <span className="text-muted">
-                                        { wizard.workflow?.storage?.types?.doc_type
-                                            && wizard.documentTypesList.find( 
-                                                ( item: any ) => parseInt( item.id ) === parseInt( wizard.workflow.storage.types.doc_type ) 
-                                                )?.attributes?.title 
-                                        }
-                                    </span>
-                                </p>
-                        }
-                        {
-                            ( wizard.workflow?.storage?.types?.manuscript_title !== undefined && wizard.workflow?.storage?.types?.manuscript_title !== '' ) &&
-                                <p className="fs-7">
-                                    <label className="me-2 fw-bold">Manuscript Title:</label>
-                                    <span className="text-muted">
-                                        { wizard.workflow?.storage?.types?.manuscript_title }
-                                    </span>
-                                </p>
-                        }
+                    <div className="d-flex flex-column flex-md-row align-items-start align-items-md-end justify-content-between z-index-2">
+                        <div>
+                            {
+                                ( wizard.workflow?.storage?.types?.doc_type !== undefined && wizard.workflow?.storage?.types?.doc_type !== '' ) &&
+                                    <p className="fs-7">
+                                        <label className="me-2 fw-bold">Document Type:</label>
+                                        <span className="text-muted">
+                                            { wizard.workflow?.storage?.types?.doc_type
+                                                && wizard.documentTypesList.find( 
+                                                    ( item: any ) => parseInt( item.id ) === parseInt( wizard.workflow.storage.types.doc_type ) 
+                                                    )?.attributes?.title 
+                                            }
+                                        </span>
+                                    </p>
+                            }
+                            {
+                                ( wizard.workflow?.storage?.types?.manuscript_title !== undefined && wizard.workflow?.storage?.types?.manuscript_title !== '' ) &&
+                                    <p className="fs-7">
+                                        <label className="me-2 fw-bold">Manuscript Title:</label>
+                                        <span className="text-muted">
+                                            { wizard.workflow?.storage?.types?.manuscript_title }
+                                        </span>
+                                    </p>
+                            }
+                        </div>
+                        <div>
+                            { wizard.formSteps.length > 0 && 
+                                <p className="mb-0 text-muted fs-7">Step <b className="text-success">{ wizard.formSteps.findIndex( ( item: any ) => item?.attributes?.slug?.includes(wizard.formStep) ) + 1 }</b> of <b>{ wizard.formSteps.length }</b></p>
+                            }
+                        </div>
                     </div>
                     <hr className="mt-2 mb-4"/>
                     {

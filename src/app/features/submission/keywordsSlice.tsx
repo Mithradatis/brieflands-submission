@@ -6,6 +6,7 @@ export const keywordsSlice = createSlice({
   initialState: {
     isInitialized: false,
     isLoading: false,
+    isSearching: false,
     stepGuide: {},
     keywordsBuffer: [] as any,
     keywordsList: [] as any,
@@ -24,7 +25,10 @@ export const keywordsSlice = createSlice({
       };
     },
     handleKeywordsList: ( state, action ) => {
-        state.keywordsList.push( action.payload );
+        const isDuplicate = state.keywordsList.some(( item: any ) => item.id === action.payload.id );
+        if (!isDuplicate) {
+          state.keywordsList.push( action.payload );
+        }
     },
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
@@ -63,10 +67,10 @@ export const keywordsSlice = createSlice({
       state.keywordsList.push( keyword );
     })
     .addCase(findKeywords.pending, ( state ) => {
-      state.isLoading = true;
+      state.isSearching = true;
     })
     .addCase(findKeywords.fulfilled, ( state, action: any ) => {
-      state.isLoading = false;
+      state.isSearching = false;
       const keywords = action.payload.data;
       state.keywordsBuffer = [];
       keywords.map( ( item: any ) => {
@@ -74,10 +78,10 @@ export const keywordsSlice = createSlice({
       });
     })
     .addCase(addNewKeyword.pending, (state) => {
-      state.isLoading = true;
+      state.isSearching = true;
     })
     .addCase(addNewKeyword.fulfilled, ( state, action ) => {
-      state.isLoading = false;
+      state.isSearching = false;
       const keyword = action.payload;
       state.keywordsList.push( keyword );
       state.value.ids.push( keyword.id );

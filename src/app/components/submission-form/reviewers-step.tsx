@@ -163,7 +163,7 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
                     typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' &&  
                         <Scrollbars
                             className="mb-4"
-                            style={{ width: 500, height: 200 }}
+                            style={{ width: 100 + '%', height: 200 }}
                             universal={true}
                             autoHide
                             autoHideTimeout={500}

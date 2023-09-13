@@ -48,7 +48,7 @@ export const wizardSlice: any = createSlice({
     formStep: 'agreement',
     currentStep: activeTab,
     hasDocumentType: false,
-    workflowId: workflowId,
+    workflowId: workflowId || 365,
     workflow: {},
     journal: {},
     user: {},
@@ -57,11 +57,14 @@ export const wizardSlice: any = createSlice({
   },
   reducers: {
     loadStep: ( state, action ) => {
-      return {
-        ...state,
-        formStep: action.payload,
-        isVerified: false,
-        isFormValid: false
+      if ( typeof action.payload === 'object' ) {
+        state.formStep = action.payload.currentStep;
+        state.isVerified = false;
+        state.isFormValid = action.payload.isRefereshed;
+      } else {
+        state.formStep = action.payload;
+        state.isVerified = false;
+        state.isFormValid = false;
       }
     },
     prevStep: ( state ) => {

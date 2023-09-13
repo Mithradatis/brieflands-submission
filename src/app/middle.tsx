@@ -4,7 +4,6 @@ import SubmissionForm from './components/submission-form/form'
 import styles from '@/app/page.module.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import '@/app/resources/css/customStyle.scss'
-import { Breadcrumbs, Typography, Link } from '@mui/material'
 import { Modal, ModalDialog } from '@mui/joy'
 import ModalContent from './components/modal/modal-content'
 import '@/app/resources/fontawesome-6/css/all.min.css'
@@ -28,7 +27,7 @@ export default function App() {
         dispatch( getWorkflow( getWorkflowFromApi ) ).then( () => {
           const getStepsFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/steps`;
           dispatch( getSubmissionSteps( getStepsFromApi ) );
-          wizard.currentStep !== '' && dispatch( loadStep( wizard.currentStep ) );
+          wizard.currentStep !== '' && dispatch( loadStep( { currentStep: wizard.currentStep, isRefereshed: true } ) );
         });
     }
   },[wizard.workflowId]);
@@ -71,7 +70,7 @@ export default function App() {
         </Modal>
         <div className="main-container bg-texture">
           <div id="logo" className="d-flex align-items-center justify-content-between">
-            <div className="logo">
+            <div className="logo w-100 w-md-auto">
               <div className="d-flex align-items-center">
                 <div className="image ms-4">
                   <Image
@@ -82,28 +81,32 @@ export default function App() {
                   />
                 </div>
                 <h1 className="fw-bold ms-3 mb-0 fs-3">Brieflands</h1>
-                <span className="ms-2">{ wizard.journal?.attributes?.title }</span>
+                <span className="ms-2 d-none d-md-block">{ wizard.journal?.attributes?.title }</span>
               </div>
             </div> 
             <div className="logo px-3 d-flex align-items-center">
-              <span className="me-2">{ wizard.user.attributes?.full_name }</span>
-              <img className="img-circle img-tiny" src={ wizard.user.attributes?.avatar } alt={ wizard.user.attributes?.full_name } title={ wizard.user.attributes?.full_name } />
+              <span className="me-2 d-none d-md-block text-nowrap fs-7 fw-bold text-blue-light text-shadow-dark">{ wizard.user.attributes?.full_name }</span>
+              <img className="img-circle img-tiny box-shadow" src={ wizard.user.attributes?.avatar } alt={ wizard.user.attributes?.full_name } title={ wizard.user.attributes?.full_name } />
             </div>
           </div>
-          <main className={`${styles.main} pt-4`}>
-          <Breadcrumbs aria-label="breadcrumb">
-            <Link underline="hover" color="inherit" href="/">
-              <i className="fa-duotone fa-home fs-7 me-1"></i>
-              <span>Home</span>
-            </Link>
-            <Typography color="text.primary">Submission</Typography>
-          </Breadcrumbs>
+          <main className={`${styles.main} p-4 `}>
+            <h2 className="d-block d-md-none w-100">{ wizard.journal?.attributes?.title }</h2>
             {
               ( !wizard.workflow?.locked && wizard.workflowId !== '' ) 
               ? <SubmissionForm/>
               : <h1>You have no permission</h1>
             }
           </main>
+          <footer className="position-absolute w-100">
+            <div className="d-flex align-items-center justify-content-between">
+              <div className="fs-7 p-2 text-blue-light">
+                  Copyright © { new Date().getFullYear() }, <a href="https://brieflands.com" target="_blank" rel="noopener noreferrer" className="light">Brieflands.</a> <span className="opacity-25">|</span> All Rights Reserved. <span className="opacity-25">|</span> <a href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer" className="light">CC BY-NC 4.0</a>
+              </div>
+              <div className="fs-7 p-2 text-blue-light">    
+                  Powered by <a href="https://www.neoscriber.com" target="_blank" rel="noopener noreferrer" className="light">NeoScriber ®</a> <span className="opacity-25">|</span> <a href="https://brieflands.com/brieflands/forms/support.html" target="_blank" rel="noopener noreferrer" className="light"> Feedback </a>
+              </div>
+            </div>
+          </footer>
         </div>
     </>
   )

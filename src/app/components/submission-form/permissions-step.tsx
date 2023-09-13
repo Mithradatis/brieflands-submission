@@ -29,7 +29,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
     const dataReproducibilityDetails = wizard.screeningDetails?.find( ( item: any ) => 
         ( item.attributes?.step_slug === 'data_reproducibility' && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
     const getClinicalTrialRegistrationCodeDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/clinical_trial_registration_code`;
-    const getEthicalApprovalDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/ethicalApproval`;
+    const getEthicalApprovalDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/ethical_approval`;
     const getInformedConsentDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/informed_consent`;
     const getDataReproducibilityDataFromApi = `${ wizard.baseUrl }/api/v1/submission/workflow/${ wizard.workflowId }/data_reproducibility`;
     const getClinicalTrialRegistrationCodeDictionaryFromApi = `${ wizard.baseUrl }/api/v1/dictionary/get/journal.submission.step.clinical_trial_registration_code`;
