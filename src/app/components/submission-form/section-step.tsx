@@ -6,6 +6,7 @@ import { wizardState, formValidator, handleIsVerified } from '@/app/features/wiz
 import { stepState, handleInput, handleLoading } from '@/app/features/submission/documentSectionSlice'
 import { getDocumentSections, getSectionStepData, getSectionStepGuide, updateSectionStepData } from '@/app/api/section'
 import ReactHtmlParser from 'react-html-parser'
+import CKEditorComponent from '@/app/components/ckeditor/ckeditor'
 
 const SectionStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();

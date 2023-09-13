@@ -140,7 +140,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                                     placeholder="Enter your text here"
                                     minRows={4}
                                     maxRows={10}
-                                    defaultValue={ formState.value?.clinicalTrialRegistrationCode?.text ? formState.value.clinicalTrialRegistrationCode.text : '' }
+                                    value={ formState.value?.clinicalTrialRegistrationCode?.text ? formState.value.clinicalTrialRegistrationCode.text : '' }
                                     onChange={( event: any ) => {
                                         dispatch( handleInput( { name: event.target.name, value: event.target.value } ) );
                                     }}
@@ -170,7 +170,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                                     placeholder="Enter your text here"
                                     minRows={4}
                                     maxRows={10}
-                                    defaultValue={ formState.value?.ethicalApproval?.text ? formState.value.ethicalApproval.text : '' }
+                                    value={ formState.value?.ethicalApproval?.text ? formState.value.ethicalApproval.text : '' }
                                     onChange={( event: any ) => {
                                         dispatch( handleInput( { name: event.target.name, value: event.target.value } ) );
                                     }}
@@ -200,7 +200,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                                     placeholder="Enter your text here"
                                     minRows={4}
                                     maxRows={10}
-                                    defaultValue={ formState.value?.informedConsent?.text ? formState.value.informedConsent.text : '' }
+                                    value={ formState.value?.informedConsent?.text ? formState.value.informedConsent.text : '' }
                                     onChange={( event: any ) => {
                                         dispatch( handleInput( { name: event.target.name, value: event.target.value } ) );
                                     }}
@@ -230,7 +230,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                                     placeholder="Enter your text here"
                                     minRows={4}
                                     maxRows={10}
-                                    defaultValue={ formState.value?.dataReproducibility?.text ? formState.value.dataReproducibility.text : '' }
+                                    value={ formState.value?.dataReproducibility?.text ? formState.value.dataReproducibility.text : '' }
                                     onChange={( event: any ) => {
                                         dispatch( handleInput( { name: event.target.name, value: event.target.value } ) );
                                     }}

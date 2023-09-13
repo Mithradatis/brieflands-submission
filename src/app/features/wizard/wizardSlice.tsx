@@ -48,7 +48,7 @@ export const wizardSlice: any = createSlice({
     formStep: 'agreement',
     currentStep: activeTab,
     hasDocumentType: false,
-    workflowId: workflowId || 365,
+    workflowId: workflowId,
     workflow: {},
     journal: {},
     user: {},

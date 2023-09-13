@@ -125,7 +125,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                                     placeholder="Enter your text here"
                                     minRows={4}
                                     maxRows={10}
-                                    defaultValue={ formState.value?.authorsContribution?.text ? formState.value.authorsContribution.text : '' }
+                                    value={ formState.value?.authorsContribution?.text ? formState.value.authorsContribution.text : '' }
                                     onChange={( event: any ) => {
                                         dispatch( handleInput( { name: event.target.name, value: event.target.value } ) );
                                     }}
@@ -155,7 +155,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                                     placeholder="Enter your text here"
                                     minRows={4}
                                     maxRows={10}
-                                    defaultValue={ formState.value?.fundingSupport.text ? formState.value.fundingSupport.text : '' }
+                                    value={ formState.value?.fundingSupport.text ? formState.value.fundingSupport.text : '' }
                                     onChange={( event: any ) => {
                                         dispatch( handleInput( { name: event.target.name, value: event.target.value } ) );
                                     }}
@@ -185,7 +185,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                                     placeholder="Enter your text here"
                                     minRows={4}
                                     maxRows={10}
-                                    defaultValue={ formState.value?.conflictOfInterests?.text ? formState.value.conflictOfInterests.text : '' }
+                                    value={ formState.value?.conflictOfInterests?.text ? formState.value.conflictOfInterests.text : '' }
                                     onChange={( event: any ) => {
                                         dispatch( handleInput( { name: event.target.name, value: event.target.value } ) );
                                     }}

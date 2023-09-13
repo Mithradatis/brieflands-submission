@@ -70,7 +70,7 @@ const AbstractStep = forwardRef( ( prop, ref ) => {
                         placeholder="Enter your text here"
                         minRows={4}
                         maxRows={10}
-                        defaultValue={ formState.value?.text ? formState.value.text : '' }
+                        value={ formState.value?.text ? formState.value.text : '' }
                         onChange={( event: any ) => {
                             dispatch( handleInput( event.target.value ) );
                         }}
