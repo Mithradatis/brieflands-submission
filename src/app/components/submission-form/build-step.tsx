@@ -71,7 +71,7 @@ const BuildStep = forwardRef( ( prop, ref ) => {
                     {
                         formState.value.files?.full !== '' &&
                         <div className="w-50 w-md-50">
-                            <a href={ formState.value.files?.full }>
+                            <a href={ formState.value.files?.full } target="_blank" rel="noopener noreferrer">
                                 <Card variant="solid" color="primary" className="dashboard-stat pb-0 px-0 pt-4 mb-4">
                                     <CardContent>
                                         <div className="overflow-hidden mb-3">

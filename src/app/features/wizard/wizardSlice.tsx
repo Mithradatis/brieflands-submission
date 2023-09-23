@@ -153,12 +153,12 @@ export const wizardSlice: any = createSlice({
         state.formSteps = state.formSteps[0]?.attributes?.slug === 'revision_message' ? [{ id: 0, attributes: { title: 'Revision Message',  slug: 'revision_message', subSteps: [] } }] : [];
         const activeSteps = action.payload.data;
         const footnotes = ['authors_contribution', 'conflict_of_interests', 'funding_support'];
-        const permissions = ['clinical_trial_registration_code', 'ethical_approval', 'informed_consent', 'data_reproducibility'];
-        const footnotesSteps = activeSteps?.filter( ( step: any ) => footnotes.includes( step.attributes?.slug ) );
-        const permissionsSteps = activeSteps?.filter( ( step: any ) => permissions.includes( step.attributes?.slug ) );
+        const ethicalStatements = ['clinical_trial_registration_code', 'ethical_approval', 'informed_consent', 'data_reproducibility'];
+        const footnotesStep = activeSteps?.filter( ( step: any ) => footnotes.includes( step.attributes?.slug ) );
+        const ethicalStatementsStep = activeSteps?.filter( ( step: any ) => ethicalStatements.includes( step.attributes?.slug ) );
         const duplicateIndicator = {
           footnotes: false,
-          permissions: false
+          ethicalStatements: false
         };
         if ( activeSteps !== undefined ) {
           const newSteps = activeSteps.flatMap( ( step: any ) => {
@@ -168,21 +168,21 @@ export const wizardSlice: any = createSlice({
                 return [{
                   attributes: {
                     slug: 'footnotes',
-                    required: footnotesSteps.some( ( item: any ) => item.attributes?.required ),
-                    subSteps: footnotesSteps.map( ( item: any ) => { return { slug: item.attributes?.slug, required: item.attributes?.required || false } } )
+                    required: footnotesStep.some( ( item: any ) => item.attributes?.required ),
+                    subSteps: footnotesStep.map( ( item: any ) => { return { slug: item.attributes?.slug, required: item.attributes?.required || false } } )
                   }
                 }];
               } else {
                 return [];
               }
-            } else if ( permissions.includes( step.attributes?.slug ) ) {
-              if ( !duplicateIndicator.permissions ) {
-                duplicateIndicator.permissions = true;
+            } else if ( ethicalStatements.includes( step.attributes?.slug ) ) {
+              if ( !duplicateIndicator.ethicalStatements ) {
+                duplicateIndicator.ethicalStatements = true;
                 return [{
                   attributes: {
-                    slug: 'permissions',
-                    required: permissionsSteps.some( ( item: any ) => item.attributes?.required ),
-                    subSteps: permissionsSteps.map( ( item: any ) => { return { slug: item.attributes?.slug, required: item.attributes?.required || false } } )
+                    slug: 'ethical_statements',
+                    required: ethicalStatementsStep.some( ( item: any ) => item.attributes?.required ),
+                    subSteps: ethicalStatementsStep.map( ( item: any ) => { return { slug: item.attributes?.slug, required: item.attributes?.required || false } } )
                   }
                 }];
               } else {

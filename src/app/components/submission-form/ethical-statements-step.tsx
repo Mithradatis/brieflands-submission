@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { wizardState, formValidator } from '@/app/features/wizard/wizardSlice'
 import { Alert, Skeleton } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
-import { stepState, handleInput, handleLoading } from '@/app/features/submission/permissionsSlice'
+import { stepState, handleInput, handleLoading } from '@/app/features/submission/ethicalStatementsSlice'
 import { getClinicalTrialRegistrationCodeStepData, getClinicalTrialRegistrationCodeStepGuide, updateClinicalTrialRegistrationCodeStepData } from '@/app/api/clinicalTrialRegistrationCode' 
 import { getEthicalApprovalStepData, getEthicalApprovalStepGuide, updateEthicalApprovalStepData } from '@/app/api/ethicalApproval'
 import { getInformedConsentStepData, getInformedConsentStepGuide, updateInformedConsentStepData } from '@/app/api/informedConsent'
@@ -11,7 +11,7 @@ import { getDataReproducibilityStepData, getDataReproducibilityStepGuide, update
 
 import ReactHtmlParser from 'react-html-parser'
 
-const FootnotesStep = forwardRef( ( prop, ref ) => {
+const EthicalStatementsStep = forwardRef( ( prop, ref ) => {
     const dispatch: any = useDispatch();
     const formState: any = useSelector( stepState );
     const wizard: any = useSelector( wizardState );
@@ -91,7 +91,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
                 <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
             </div>
-            <div id="permissions" className={ `tab ${ ( formState.isLoading 
+            <div id="ethical-statements" className={ `tab ${ ( formState.isLoading 
                     || ( 
                         ( clinicalTrialRegistrationCodeStep && typeof formState.stepGuide.clinicalTrialRegistrationCode !== 'string' )
                         || ( ethicalApprovalStep && typeof formState.stepGuide.ethicalApproval !== 'string' )
@@ -99,7 +99,7 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
                         || ( dataReproducibilityStep && typeof formState.stepGuide.dataReproducibility !== 'string' ) 
                     ) ) 
                     ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Permissions</h3>
+                <h3 className="mb-4 text-shadow-white">Ethical Statements</h3>
                 <Alert severity="info" className="mb-4">
                     {   
                         ( clinicalTrialRegistrationCodeStep && formState.stepGuide.clinicalTrialRegistrationCode !== undefined ) &&     
@@ -243,6 +243,6 @@ const FootnotesStep = forwardRef( ( prop, ref ) => {
     );
 });
 
-FootnotesStep.displayName = 'FootnotesStep';
+EthicalStatementsStep.displayName = 'EthicalStatementsStep';
 
-export default FootnotesStep;
+export default EthicalStatementsStep;

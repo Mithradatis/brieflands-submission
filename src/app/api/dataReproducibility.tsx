@@ -34,7 +34,7 @@ export const updateDataReproducibilityStepData = createAsyncThunk(
   async ( url: string, { getState } ) => {
     try {
       const state: any = getState();
-      const data = state.permissionsSlice.value.dataReproducibility;
+      const data = state.ethicalStatementsSlice.value.dataReproducibility;
       const response = await fetch(url, {
         method: 'POST',
         credentials: 'include',

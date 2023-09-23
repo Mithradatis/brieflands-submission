@@ -23,7 +23,7 @@ import dialogReducer from '@/app/features/dialog/dialogSlice'
 import snackbarReducer from '@/app/features/snackbar/snackbarSlice'
 import modalSnackbarReducer from '@/app/features/snackbar/modalSnackbarSlice'
 import footnotesReducer from '@/app/features/submission/footnotesSlice'
-import permissionsReducer from '@/app/features/submission/permissionsSlice'
+import ethicalStatementsReducer from '@/app/features/submission/ethicalStatementsSlice'
 
 export const store = configureStore({
   reducer: {
@@ -51,6 +51,6 @@ export const store = configureStore({
     snackbarSlice: snackbarReducer,
     modalSnackbarSlice: modalSnackbarReducer,
     footnotesSlice: footnotesReducer,
-    permissionsSlice: permissionsReducer
+    ethicalStatementsSlice: ethicalStatementsReducer
   }
 });

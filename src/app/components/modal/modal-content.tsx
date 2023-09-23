@@ -38,9 +38,8 @@ const ModalContent = () => {
             case 'authors':
                 setAction(
                     <Button className="btn btn-primary" 
-                        onClick={ () => {
-                            dispatch( handleCloseAuthorModal() ); 
-                            dispatch( handleAuthorOperation() ); 
+                        onClick={ () => { 
+                            dispatch( handleAuthorOperation() );
                           } 
                         }>
                       {modalData.modalActionButton.caption}

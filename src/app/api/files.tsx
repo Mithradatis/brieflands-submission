@@ -1,5 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { handleSnackbarOpen } from '@/app/features/snackbar/snackbarSlice'
+import { setLoading } from '@/app/features/submission/documentFilesSlice';
 
 const fetchDataFromApi = async (url: string) => {
   try {
@@ -107,11 +108,21 @@ export const addFile = createAsyncThunk(
     if ( !response.ok ) {
       if ( response.status === 422 ) {
         const errorData = await response.json();
-        const message = errorData.data.hasOwnProperty('message') ? errorData.data.message : errorData.data.errors.file[0];
-        dispatch( handleSnackbarOpen( { severity: 'error', message: message } ) );
+        let message: any;
+        if ( errorData.data.hasOwnProperty('message') ) {
+          message = errorData.data.message;
+          dispatch( handleSnackbarOpen( { severity: 'error', message: message } ) );
+        }
+        if ( errorData.data.hasOwnProperty('errors') ) {
+          Object.entries( errorData.data.errors).map( ([key, value]) => {
+            const messages: any = value;
+            dispatch( handleSnackbarOpen( { severity: 'error', message: messages[0] } ) );
+          });
+        }
       } else {
         dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to update files step', vertical: 'top', horizontal: 'center' } ) );
       }
+      dispatch( setLoading( false ) );
       throw new Error('Failed to update author step');
     }
     dispatch( handleSnackbarOpen( { severity: 'success', message: 'File uploaded successfuly' } ) );

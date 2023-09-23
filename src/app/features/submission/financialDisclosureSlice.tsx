@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { getFinancialDisclosureStepGuide, getFinancialDisclosureStepData } from '@/app/api/financialDisclosure'
 
 export const financialDisclosureSlice = createSlice({
-  name: 'comment',
+  name: 'financial-disclosure',
   initialState: {
     isLoading: false,
     isVisited: false,

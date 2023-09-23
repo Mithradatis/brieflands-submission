@@ -97,6 +97,7 @@ export const addAuthor = createAsyncThunk(
     const jsonData = await response.json();
     dispatch( saveAuthorModal() );
     dispatch( saveModal() );
+    dispatch( handleCloseAuthorModal() );
 
     return jsonData;
   }

@@ -4,8 +4,8 @@ import { getEthicalApprovalStepGuide, getEthicalApprovalStepData } from '@/app/a
 import { getInformedConsentStepGuide, getInformedConsentStepData } from '@/app/api/informedConsent'
 import { getDataReproducibilityStepGuide, getDataReproducibilityStepData } from '@/app/api/dataReproducibility'
 
-export const permissionsSlice = createSlice({
-  name: 'permissions',
+export const ethicalStatementsSlice = createSlice({
+  name: 'ethicalStatementsSlice',
   initialState: {
     isLoading: false,
     isVisited: false,
@@ -140,8 +140,8 @@ export const permissionsSlice = createSlice({
   },
 });
 
-export const { handleInput, handleLoading } = permissionsSlice.actions;
+export const { handleInput, handleLoading } = ethicalStatementsSlice.actions;
 
-export const stepState: any = ( state: any ) => state.permissionsSlice;
+export const stepState: any = ( state: any ) => state.ethicalStatementsSlice;
 
-export default permissionsSlice.reducer;
+export default ethicalStatementsSlice.reducer;

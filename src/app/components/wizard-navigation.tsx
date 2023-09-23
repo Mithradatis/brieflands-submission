@@ -28,7 +28,7 @@ const WizardNavigation = () => {
 
     return (
         <>
-            <div className="wizard-navigation-container position-relative pt-5 overflow-hidden mb-2">
+            <div className="wizard-navigation-container position-relative pt-5 overflow-hidden mb-2 float-md-end">
                 <div className="wizard-navigation position-relative" id="submission-form-wizard">
                     <div className="start-gradient bg-texture"></div>
                     <div className="end-gradient bg-texture"></div>

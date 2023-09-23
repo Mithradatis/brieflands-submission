@@ -2,7 +2,7 @@ import { createSlice } from '@reduxjs/toolkit'
 import { getTwitterStepGuide, getTwitterStepData } from '@/app/api/twitter'
 
 export const twitterSlice = createSlice({
-  name: 'comment',
+  name: 'twitter',
   initialState: {
     isLoading: false,
     isVisited: false,

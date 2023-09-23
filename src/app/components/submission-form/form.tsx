@@ -21,7 +21,7 @@ import FilesStep from '@/app/components/submission-form/files-step'
 import CommentStep from '@/app/components/submission-form/comment-step'
 import RegionStep from '@/app/components/submission-form/region-step'
 import FootnotesStep from '@/app/components/submission-form/footnotes-step'
-import PermissionsStep from '@/app/components/submission-form/permissions-step'
+import EthicalStatementsStep from '@/app/components/submission-form/ethical-statements-step'
 import FinancialDisclosureStep from '@/app/components/submission-form/finantial-disclosure-step'
 import Twitter from '@/app/components/submission-form/twitter-step'
 import BuildStep from '@/app/components/submission-form/build-step'
@@ -51,7 +51,7 @@ const SubmissionForm = () => {
     const footnotesChildRef = useRef<ChildComponentProps>( null );
     const financialDisclosureChildRef = useRef<ChildComponentProps>( null );
     const twitterChildRef = useRef<ChildComponentProps>( null );
-    const permissionsChildRef = useRef<ChildComponentProps>( null );
+    const ethicalStatementsChildRef = useRef<ChildComponentProps>( null );
     const dispatch:any = useDispatch();
     const wizard = useSelector( wizardState );
     const handleNextStep = async () => {
@@ -89,8 +89,8 @@ const SubmissionForm = () => {
             ? twitterChildRef
             : wizard.formStep === 'footnotes'
             ? footnotesChildRef
-            : wizard.formStep === 'permissions'
-            ? permissionsChildRef
+            : wizard.formStep === 'ethical_statements'
+            ? ethicalStatementsChildRef
             : null;
         !wizard.isVerified && dispatch( handleIsVerified() );
         if ( wizard.isFormValid ) {
@@ -132,7 +132,7 @@ const SubmissionForm = () => {
         <div className="wizard mb-4">
             <DialogComponent/>
             <FlashMessage className="z-index-1050"/>
-            <div className="d-flex align-items-center justify-content-between">
+            <div className="d-flex align-items-center justify-content-between px-md-4">
                 <Breadcrumbs aria-label="breadcrumb">
                     <Link underline="hover" color="inherit" href="/" className="d-flex align-items-center">
                     <i className="fa-duotone fa-home fs-7 me-1"></i>
@@ -142,9 +142,9 @@ const SubmissionForm = () => {
                 </Breadcrumbs>
             </div>
             <WizardNavigation />
-            <div className="d-flex align-items-start">
+            <div className="d-flex align-items-start" style={{clear: 'both'}}>
                 <WizardOutline />
-                <div className="wizard-steps tab-container p-4 p-md-5 rounded-double bg-white flex-fill position-relative overflow-hidden">
+                <div className="wizard-steps tab-container p-4 p-md-5 mb-5 mb-md-0 rounded-double bg-white flex-fill position-relative overflow-hidden">
                     <div className="custom-shape-divider-top">
                         <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
                             <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
@@ -231,7 +231,7 @@ const SubmissionForm = () => {
                         wizard.formStep === 'footnotes' && <FootnotesStep ref={footnotesChildRef} />
                     }
                     {
-                        wizard.formStep === 'permissions' && <PermissionsStep ref={permissionsChildRef} />
+                        wizard.formStep === 'ethical_statements' && <EthicalStatementsStep ref={ethicalStatementsChildRef} />
                     }
                     {
                         wizard.formStep === 'build' && <BuildStep/>
