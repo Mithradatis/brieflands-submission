@@ -3,10 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "PORT=7200 next start",
-    "lint": "next lint"
+    "dev": "NODE_ENV=development next dev",
+    "build": "NODE_ENV=production next build",
+    "start": "NODE_ENV=production next start",
+    "lint": "next lint",
+    "test": "next test",
+    "flow": "flow"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^39.0.2",
@@ -36,6 +38,7 @@
     "npm": "^9.7.2",
     "react": "18.2.0",
     "react-custom-scrollbars": "^4.2.1",
+    "react-custom-scrollbars-2": "^4.5.0",
     "react-data-table-component": "^7.5.3",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
@@ -52,6 +55,8 @@
   "devDependencies": {
     "@types/react-custom-scrollbars": "^4.0.10",
     "@types/react-html-parser": "^2.0.2",
+    "dotenv": "^16.4.4",
+    "flow-bin": "^0.229.0",
     "mui-file-input": "^2.0.4",
     "rimraf": "^5.0.1"
   }

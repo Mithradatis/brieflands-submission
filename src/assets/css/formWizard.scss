@@ -1,0 +1,298 @@
+@import '_variables.scss';
+@import '_animations.scss';
+
+.fieldset {
+    border: 1px solid rgba(54, 54, 54, .2);
+    border-radius: 0.4rem;
+    padding: 0 1rem 1rem 1rem;
+    legend {
+        margin-top: -0.75rem;
+        margin-bottom: 1.5rem;
+        background-color: white;
+        display: inline-block;
+        width: auto;
+        padding: 0 .5rem;
+        font-weight: bold;
+        font-size: 1rem;
+        color: #999;
+    }
+}
+.tab-container {
+    .tab {
+        position: relative;
+        z-index: 2;
+    }
+}
+.wizard-navigation-container {
+    max-width: 725px;
+    z-index: 2;
+    .wizard-navigation {
+        &::before {
+            content: '';
+            position: absolute;
+            z-index: -1;
+            top: -5px;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            border-top: 1px solid rgba(lighten($mainColor, 20%), .2);
+            background-image: linear-gradient(to left, transparent 0, darken($mainColor, 5%) 30%, darken($mainColor, 5%) 50%, darken($mainColor, 5%) 70%, transparent 100%);
+        }
+        ol {
+            transition: all ease-in .5s;
+            list-style: none;
+            li {
+                a {
+                    transition: all ease-in .2s;
+                    font-size: .8rem;
+                    opacity: .75;
+                    .index {
+                        border-radius: 50%;
+                    }
+                    &.disabled {
+                        pointer-events: none;
+                        opacity: .5;
+                    }   
+                }
+                &.active {
+                    a {
+                        opacity: 1;
+                        min-width: 10rem;
+                        font-weight: 700;
+                        font-size: 1rem;
+                        transform: scale(1.1, 1.1);
+                        .index {
+                            position: relative;
+                            transition: all ease-in .2s;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            top: -1.25rem;
+                            margin-bottom: .5rem;
+                            font-size: 1rem;
+                            // color: darken($mainColor, 25%);
+                            color: $secondColor;
+                            // text-shadow: 1px 1px 0 lighten($mainColor, 30%);
+                            text-shadow: 1px 1px 0 lighten(#f7c370, 10%);
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            // background-image: linear-gradient(45deg, lighten($mainColor, 5%), lighten($mainColor, 20%));
+                            background-image: linear-gradient(45deg, desaturate($orange, 15%), $orange);
+                            box-shadow: 0 0 10px rgba(black, .1);
+                            &::before {
+                                content: '';
+                                width: 3.5rem;
+                                height: 3.5rem;
+                                position: absolute;
+                                top: -.5rem;
+                                left: -.5rem;
+                                background-color: darken($mainColor, 5%);
+                                border-radius: 50%;
+                                z-index: -2;
+                                box-shadow: inset 0 0 6px rgba(black, .1);
+                            }
+                            &::after {
+                                content: '';
+                                width: 3rem;
+                                height: 3rem;
+                                position: absolute;
+                                top: -.25rem;
+                                left: -.25rem;
+                                background-color: $mainColor;
+                                border-radius: 50%;
+                                z-index: -2;
+                            }
+                            .number {
+                                z-index: 3;
+                            }
+                            .waves {
+                                overflow: hidden;
+                                position: absolute;
+                                width: 100%;
+                                height: 100%;
+                                border-radius: 50%;
+                                .wave {
+                                    opacity: .4;
+                                    position: absolute;
+                                    top: -50%;
+                                    left: -25%;
+                                    background: rgb(233, 207, 135);
+                                    width: 150%;
+                                    height: 150%;
+                                    margin-top: -10px;
+                                    transform-origin: 50% 48%;
+                                    border-radius: 43%;
+                                    animation: drift 5s infinite linear;
+                                }
+                                .wave.-two {
+                                    animation: drift 9s infinite linear;
+                                    opacity: .1;
+                                    background: yellow;
+                                }
+                                .wave.-three {
+                                    animation: drift 7s infinite linear;
+                                }             
+                            }          
+                        }
+                        .index-title {
+                            color: lighten($mainColor, 30%);
+                            position: relative;
+                            top: -1rem;
+                            text-shadow: 1px 1px 0 rgba(darken($mainColor, 20%), .75);
+                        }
+                    }
+                }
+            }
+        }
+        .start-gradient, .end-gradient {
+            pointer-events: none;
+            position: absolute;
+            z-index: 3;
+            top: 0;
+            width: 8rem;
+            height: 100%;
+        }
+        .start-gradient {
+            left: 0;
+            background-image: linear-gradient(to right, rgba($mainColor, 1) 0, rgba($mainColor, 1) 20%, rgba($mainColor, .4) 50%, transparent 100%);
+        }
+        .end-gradient {
+            right: 0;
+            background-image: linear-gradient(to left, rgba($mainColor, 1) 0, rgba($mainColor, 1) 20%, rgba($mainColor, .4) 50%, transparent 100%);
+        }
+    }
+}
+
+.wizard-steps {
+    max-width: 725px;
+    min-width: 675px;
+    border: 1px solid white;
+    box-shadow: 3px 3px 5px rgba(#488085, .5), 
+        -3px -3px 5px rgb(143, 181, 185, .5),
+         inset 20px 20px 60px rgb(220, 220, 220)   
+}
+
+.wizard-outline {
+    max-width: 15rem;
+    li {
+        // transition: all ease-in-out .2s;
+        opacity: 0;
+        a {
+            &.disabled {
+                pointer-events: none;
+                opacity: .5;
+            }
+        }
+        &.active {
+            font-size: 1rem;
+            font-weight: 700;
+            a {
+                color: lighten($mainColor, 30%);
+                text-shadow: 1px 1px 0 rgba(darken($mainColor, 20%), .75);
+            }
+        }
+    }
+}
+
+.slideIn {
+    animation: slideIn .5s ease-in 1 both;
+    &.fadeIn {
+        animation: slideIn .5s ease-in 1 both, fadeIn .5s ease-in 1 both;
+    }
+}
+
+.slideOut {
+    animation: slideOut .5s ease-in 1 both;
+    &.fadeOut {
+        animation: slideOut .5s ease-in 1 both, fadeOut .5s ease-in 1 both;
+    }
+}
+
+.fadeIn {
+    animation: fadeIn .5s ease-in 1 both;
+}
+
+.fadeOut {
+    animation: fadeOut .5s ease-in 1 both;
+}
+
+.custom-shape-divider-top {
+    pointer-events: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    opacity: .5;
+    svg {
+        position: relative;
+        display: block;
+        width: calc(195% + 1.3px);
+        height: 150px;
+    }
+    .shape-fill {
+        fill: #f7f7f7;
+    }
+}
+
+/*  BUTTONS  */
+:root {
+    --white: #FFFFFF;
+    --greyLight-1: #E4EBF5;
+    --greyLight-2: #c8d0e7;
+    --greyLight-3: #bec8e4;
+    --greyDark: #9baacf;
+  }
+.button {
+    height: 0;
+    border: none;
+    padding: 1.5rem;
+    border-radius: .6rem;
+    box-shadow: $shadow;
+    justify-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: .3s ease;
+    &.btn_primary {
+        grid-column: 1 / 2;
+        grid-row: 4 / 5;
+        background: $secondColor;
+        box-shadow:inset .2rem .2rem .5rem lighten($secondColor, 5%), 
+                inset -.2rem -.2rem .5rem darken($secondColor, 5%),
+                $shadow;
+        color: white;
+
+        &:hover { color: white; }
+        &:active {
+        box-shadow:inset .2rem .2rem 1rem lighten($secondColor, 5%), 
+                inset -.2rem -.2rem 1rem darken($secondColor, 5%);
+        }
+    }
+    &.btn_secondary {
+        grid-column: 1 / 2;
+        grid-row: 5 / 6;
+        color: var(--greyDark);
+        &:hover { color: var(--primary); }
+        &:active {
+            box-shadow: $inner-shadow;
+        }
+    }
+ }
+ .css-1e6y48t-MuiButtonBase-root-MuiButton-root {
+    text-transform: initial;
+ }
+
+ #loading {
+    z-index: 2;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: $mainColor;
+}
+
+@import 'media'
