@@ -61,4 +61,4 @@ Create a new branch for your submission and make your changes. Once you're ready
 <a name="license"></a>
 
 ## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+Brieflands Submission is proprietary software and is not open-source. All rights reserved by [Brieflands](https://brieflands.com).
