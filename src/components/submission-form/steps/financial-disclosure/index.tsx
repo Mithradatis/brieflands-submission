@@ -1,38 +1,52 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
-import { useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { formValidator } from '@/lib/features/wizard/wizardSlice'
-import { Alert, Skeleton } from '@mui/material'
+import { useEffect, forwardRef, useImperativeHandle, useState } from 'react'
+import { useAppDispatch } from '@/app/store'
+import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
-import { handleInput, handleLoading } from '@/lib/features/submission/steps/financial-disclosure/financialDisclosureSlice'
+import { formValidator } from '@features/wizard/wizardSlice'
+import { handleLoading } from '@features/submission/steps/financial-disclosure/financialDisclosureSlice'
 import { 
-    getFinancialDisclosureStepData, 
-    getFinancialDisclosureStepGuide, 
-    updateFinancialDisclosureStepData 
-} from '@/lib/api/steps/financial-disclosure' 
+    useGetStepDataQuery, 
+    useGetStepGuideQuery, 
+    useUpdateStepDataMutation 
+} from '@/app/services/apiSlice'
 
-const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
-    const dispatch: any = useDispatch();
-    const formState = useSelector( ( state: any ) => state.financialDisclosureSlice );
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${ wizard.formStep }`;
+const FinancialDisclosureStep = forwardRef(
+    ( 
+        props: { 
+            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
+            details: string
+        },
+        ref 
+    ) => {
+    const [ formData, setFormData ] = useState({
+        text: ''
+    }); 
+    const dispatch = useAppDispatch();
+    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
+    const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
+    const isLoading: boolean = ( stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
+    const [ updateStepDataTrigger ] = useUpdateStepDataMutation();
     useEffect( () => {
-        if ( wizard.formStep === 'financial_disclosure' ) {
-            dispatch( getFinancialDisclosureStepData( getStepDataFromApi ) );
-            dispatch( getFinancialDisclosureStepGuide( getDictionaryFromApi ) );
-            dispatch( formValidator( true ) );
-        }
+        dispatch( formValidator( true ) );
     }, []);
+    useEffect( () => {
+        if ( stepData ) {
+            setFormData( stepData );
+        }
+    }, [stepData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
           dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
-            await dispatch( updateFinancialDisclosureStepData( getStepDataFromApi ) );
-            
+            await updateStepDataTrigger( 
+                { 
+                    url: props.apiUrls.stepDataApiUrl, 
+                    data: formData 
+                } 
+            )
             isAllowed = true;
           } catch (error) {
             console.error("Error while submitting form:", error);
@@ -43,48 +57,44 @@ const FinancialDisclosureStep = forwardRef( ( prop, ref ) => {
     }));
 
     return (
-        <>
-            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-            </div>
-            <div id="financial-disclosure" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Financial Disclosure</h3>
-                {
-                    ( details !== undefined && details !== '' ) &&
-                        <Alert severity="error" className="mb-4">
-                            { ReactHtmlParser( details ) }
-                        </Alert>
-                }
-                {
-                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.stepGuide ) }
-                        </Alert>
-                    )
-                }
-                <FormControl className="mb-3">
-                    <FormLabel className="fw-bold mb-1">
-                        Financial Disclosur
-                    </FormLabel>
-                    <Textarea
-                        variant="soft"
-                        name="financialDisclosur"
-                        id="financialDisclosur"
-                        className="rounded"
-                        aria-label="textarea"
-                        placeholder="Enter your text here"
-                        minRows={4}
-                        maxRows={10}
-                        value={ formState.value?.text ? formState.value?.text : '' }
-                        onChange={( event: any ) => {
-                            dispatch( handleInput( event.target.value ) );
-                        }}
-                    />
-                </FormControl>
-            </div>
-        </>
+        isLoading
+            ? <StepPlaceholder/>
+            :
+                <div id="financial-disclosure" className="tab">
+                    <h3 className="mb-4 text-shadow-white">Financial Disclosure</h3>
+                    {
+                        ( props.details !== undefined && props.details !== '' ) &&
+                            <Alert severity="error" className="mb-4">
+                                { ReactHtmlParser( props.details ) }
+                            </Alert>
+                    }
+                    {
+                        typeof stepGuide === 'string' && stepGuide.trim() !== '' && (
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( stepGuide ) }
+                            </Alert>
+                        )
+                    }
+                    <FormControl className="mb-3">
+                        <FormLabel className="fw-bold mb-1">
+                            Financial Disclosur
+                        </FormLabel>
+                        <Textarea
+                            variant="soft"
+                            name="financialDisclosur"
+                            id="financialDisclosur"
+                            className="rounded"
+                            aria-label="textarea"
+                            placeholder="Enter your text here"
+                            minRows={4}
+                            maxRows={10}
+                            value={ formData?.text ? formData?.text : '' }
+                            onChange={( event: any ) => {
+                                setFormData( { text: event.target.value } );
+                            }}
+                        />
+                    </FormControl>
+                </div>
     );
 });
 

@@ -1,26 +1,12 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { handleSnackbarOpen } from '@/lib/features/snackbar/snackbarSlice'
-import { setLoading } from '@/lib/features/submission/steps/files/filesSlice'
-import { fetchDataFromApi, deleteCache } from '@/lib/api/client'
-
-export const getFilesStepGuide = createAsyncThunk(
-  'submission/getFilesStepGuide',
-  async (url: string) => {
-    return fetchDataFromApi(url, 'getFilesStepGuide');
-  }
-);
+import { handleSnackbarOpen } from '@features/snackbar/snackbarSlice'
+import { setLoading } from '@features/submission/steps/files/filesSlice'
+import { fetchDataFromApi, deleteCache } from '@api/client'
 
 export const getFiles = createAsyncThunk(
   'submission/getFiles',
-  async (url: string) => {
-    return fetchDataFromApi(url, 'getFiles');
-  }
-);
-
-export const getFilesStepData = createAsyncThunk(
-  'submission/getFilesStepData',
-  async (url: string) => {
-    return fetchDataFromApi(url, 'getFilesStepData');
+  async ( url: string ) => {
+    return fetchDataFromApi( url );
   }
 );
 
@@ -35,7 +21,7 @@ export const getFileTypes = createAsyncThunk(
       });
       if (!response.ok) {
         const errorData = await response.json();
-        dispatch( handleSnackbarOpen({  severity: 'error', message: errorData.data.message }) );
+        dispatch( handleSnackbarOpen({ severity: 'error', message: errorData.data.message }) );
 
         return {};
       }
@@ -67,13 +53,9 @@ export const updateFilesStepData = createAsyncThunk(
         throw new Error('Failed to update files step');
       }
       const jsonData = await response.json();
-      // Invalidate cache for getFilesStepData
-      const cacheKey = 'getFilesStepData';
-      deleteCache( cacheKey );
 
       return jsonData;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -87,7 +69,7 @@ export const addFile = createAsyncThunk(
     formData.append('file_type_id', state.filesSlice.value?.file_type_id);
     state.filesSlice.value?.caption !== undefined && formData.append('caption', state.filesSlice.value?.caption);
     formData.append('file', file);
-    const url = `${ process.env.SUBMISSION_API_URL }/${ state.wizardSlice.workflowId }/files/add`;
+    const url = `${ process.env.SUBMISSION_API_URL }/${ state.wizard.workflowId }/files/add`;
     const response = await fetch( url, {
       method: 'POST',
       credentials: 'include',
@@ -115,7 +97,7 @@ export const addFile = createAsyncThunk(
       throw new Error('Failed to add file.');
     }
     dispatch( handleSnackbarOpen( { severity: 'success', message: 'File uploaded successfuly' } ) );
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ state.wizardSlice.workflowId }/files`;
+    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ state.wizard.workflowId }/files`;
     try {
       const response = await fetch(getStepDataFromApi, {
         method: 'GET',
@@ -170,7 +152,7 @@ export const deleteFile = createAsyncThunk(
         throw new Error('Failed to delete file');
       }
       dispatch( handleSnackbarOpen( { severity: 'success', message: 'File deleted successfuly' } ) );
-      const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ state.wizardSlice.workflowId }/files`;
+      const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ state.wizard.workflowId }/files`;
       try {
         const response = await fetch(getStepDataFromApi, {
           method: 'GET',
@@ -184,7 +166,6 @@ export const deleteFile = createAsyncThunk(
         throw error;
       }  
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -228,7 +209,7 @@ export const reuseFile = createAsyncThunk(
         dispatch( setLoading( false ) );
         throw new Error('Failed to reuse file.');
       }
-      const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ state.wizardSlice.workflowId }/files`;
+      const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ state.wizard.workflowId }/files`;
       try {
         const response = await fetch(getStepDataFromApi, {
           method: 'GET',
@@ -242,7 +223,6 @@ export const reuseFile = createAsyncThunk(
         throw error;
       }
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }

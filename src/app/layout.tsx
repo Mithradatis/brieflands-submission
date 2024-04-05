@@ -1,7 +1,8 @@
 'use client'
 
+import React from 'react'
 import { Provider } from 'react-redux'
-import { store } from '@/store'
+import { store } from '@/app/store'
 import styles from '@/page.module.css'
 import Container from '@/components/partials/general'
 import Header from '@/components/partials/header'
@@ -17,13 +18,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html>
-      <head>
-        <title>Submission</title>
-        <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
-      </head>
-      <body>
-        <Provider store={ store }>
+    <React.StrictMode>
+      <html>
+        <head>
+          <title>Submission</title>
+          <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+        </head>
+        <body>
+          <Provider store={store}>
             <Container />
             <div className="main-container bg-texture d-flex flex-column">
               <Header />
@@ -32,8 +34,9 @@ export default function RootLayout({
               </main>
               <Footer />
             </div>
-        </Provider>
-      </body>
-    </html>
+          </Provider>
+        </body>
+      </html>
+    </React.StrictMode>
   )
 }

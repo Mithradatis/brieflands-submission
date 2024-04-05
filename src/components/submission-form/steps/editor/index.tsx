@@ -1,44 +1,60 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
-import { useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Alert, Skeleton } from '@mui/material'
+import { useEffect, forwardRef, useImperativeHandle, useState } from 'react'
+import { useAppDispatch } from '@/app/store'
+import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl } from '@mui/joy'
-import { formValidator } from '@/lib/features/wizard/wizardSlice'
-import { handleInput, handleLoading } from '@/lib/features/submission/steps/editor/editorSlice'
+import { formValidator } from '@features/wizard/wizardSlice'
+import { handleLoading } from '@features/submission/steps/editor/editorSlice'
+import { useGetEditorsQuery } from '@/app/services/steps/editor'
 import { 
-    getEditors, 
-    getEditorStepData, 
-    getEditorStepGuide, 
-    updateEditorStepData 
-} from '@/lib/api/steps/editor'
+    useGetStepDataQuery, 
+    useGetStepGuideQuery, 
+    useUpdateStepDataMutation
+} from '@/app/services/apiSlice'
 
-const EditorStep = forwardRef( ( prop, ref ) => {
-    const dispatch: any = useDispatch();
-    const formState = useSelector( ( state: any ) => state.editorSlice );
-    const editorsList = formState.editorsList;
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
-    const getAllEditorsFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/editor/get_all`;
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/editor`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${wizard.formStep}`;
+const EditorStep = forwardRef(
+    ( 
+        props: { 
+            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
+            details: string,
+            workflowId: string
+        }, 
+        ref 
+    ) => {
+    const dispatch = useAppDispatch();
+    const [ formData, setFormData ] = useState({
+        id: ''
+    });
+    const getAllTypesFromApi = `${ process.env.SUBMISSION_API_URL }/${ props.workflowId }/editor/get_all`;
+    const { data: editors, isLoading: editorsIsLoading } = useGetEditorsQuery( getAllTypesFromApi );
+    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
+    const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
+    const isLoading: boolean = ( editorsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
+    const [ updateStepDataTrigger ] = useUpdateStepDataMutation();
     useEffect(() => {
-        if ( wizard.formStep === 'editor' ) {
-            dispatch( getEditors( getAllEditorsFromApi ) );
-            dispatch( getEditorStepData( getStepDataFromApi ) );
-            dispatch( getEditorStepGuide( getDictionaryFromApi ) );
-            dispatch( formValidator( true ) );
-        }
+        dispatch( formValidator( true ) );
     }, []);
+    useEffect(() => {
+        if ( stepData ) {
+            setFormData({
+                id: stepData.id
+            });
+        }
+    }, [stepData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
           dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
-            await dispatch( updateEditorStepData( getStepDataFromApi ) );
-            
+            await updateStepDataTrigger( 
+                { 
+                    url: props.apiUrls.stepDataApiUrl, 
+                    data: formData 
+                } 
+            );
             isAllowed = true;
-          } catch (error) {
+          } catch ( error ) {
             console.error("Error while submitting form:", error);
           }  
           
@@ -47,69 +63,75 @@ const EditorStep = forwardRef( ( prop, ref ) => {
     }));
 
     return (
-        <>
-            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-            </div>
-            <div id="editors" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Editor</h3>
-                {
-                    ( details !== undefined && details !== '' ) &&
-                        <Alert severity="error" className="mb-4">
-                            { ReactHtmlParser( details ) }
-                        </Alert>
-                }
-                {
-                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.stepGuide ) }
-                        </Alert>
-                    )
-                }
-                <FormControl className="mb-3">
-                    <FormLabel className="fw-bold mb-1">
-                        Editor
-                    </FormLabel>
-                    { editorsList ? (
-                        <Autocomplete
-                            color="neutral"
-                            size="md"
-                            variant="soft"
-                            placeholder="Choose one…"
-                            disabled={false}
-                            name="editor"
-                            id="editor"
-                            options={ 
-                                Array.isArray( editorsList ) 
-                                ? editorsList.map( 
-                                    item => {
-                                        return item.name || '' 
-                                    }
-                                ) : []
-                            }
-                            value={
-                                ( formState.value?.id !== '' && editorsList.length > 0 )
-                                ? editorsList
-                                    .find( ( item: any ) => formState.value?.id === item.id )?.name
-                                : null
-                            }
-                            onChange={(event, value) => {
-                                dispatch( handleInput({ 
-                                        name: 'id',
-                                        value: editorsList.find( 
-                                            ( item: any ) => item.name === value )?.id || '' } 
-                                            ) 
-                                        )
-                            }}
-                        />
-                        ) : (
-                        <div>Loading editors...</div>
-                    )}
-                </FormControl>
-            </div>
-        </>
+        isLoading
+            ? <StepPlaceholder/>
+            :
+                <div id="editors" className="tab">
+                    <h3 className="mb-4 text-shadow-white">Editor</h3>
+                    {
+                        ( props.details !== undefined && props.details !== '' ) &&
+                            <Alert severity="error" className="mb-4">
+                                { ReactHtmlParser( props.details ) }
+                            </Alert>
+                    }
+                    {
+                        typeof stepGuide === 'string' && stepGuide.trim() !== '' && (
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( stepGuide ) }
+                            </Alert>
+                        )
+                    }
+                    <FormControl className="mb-3">
+                        <FormLabel className="fw-bold mb-1">
+                            Editor
+                        </FormLabel>
+                        { editors ? (
+                            <Autocomplete
+                                color="neutral"
+                                size="md"
+                                variant="soft"
+                                placeholder="Choose one…"
+                                disabled={false}
+                                name="editor"
+                                id="editor"
+                                options={ 
+                                    Array.isArray( editors ) 
+                                    ? editors.map( 
+                                        item => {
+                                            return `${ 
+                                                item.attributes.first_name 
+                                            } ${ 
+                                                item.attributes.middle_name 
+                                            } ${ 
+                                                item.attributes.last_name 
+                                            }` || '' 
+                                        }
+                                    ) : []
+                                }
+                                value={
+                                    ( formData?.id !== '' && editors.length > 0 )
+                                    ? editors
+                                        .find( ( item: any ) => formData?.id === item.id )?.name
+                                    : null
+                                }
+                                onChange={(event, value) => {
+                                    setFormData({ 
+                                        id: editors.find( 
+                                            ( item: any ) => `${ 
+                                                item.attributes.first_name 
+                                            } ${ 
+                                                item.attributes.middle_name 
+                                            } ${ 
+                                                item.attributes.last_name 
+                                            }` === value )?.id || '' } 
+                                    )
+                                }}
+                            />
+                            ) : (
+                            <div>Loading editors...</div>
+                        )}
+                    </FormControl>
+                </div>
     );
 });
 

@@ -1,99 +1,35 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { handleOpen, setModalActionButton, setFormIsValid, setFormIsInvalid, saveModal } from '@/lib/features/modal/modalSlice'
-import { setModalData, handleDisabledInputs, saveAuthorModal } from '@/lib/features/modal/addAuthorModalSlice'
-import { handleModalSnackbarOpen } from '@/lib/features/snackbar/modalSnackbarSlice'
-import { fetchDataFromApi, deleteCache } from '@/lib/api/client'
-
-export const getAuthorStepGuide = createAsyncThunk(
-  'submission/getAuthorStepGuide',
-  async (url: string) => {
-    return fetchDataFromApi(url, '');
-  }
-);
+import { handleOpen, setModalActionButton, setFormIsValid, setFormIsInvalid, saveModal } from '@features/modal/modalSlice'
+import { setModalData, handleDisabledInputs, saveAuthorModal } from '@features/modal/addAuthorModalSlice'
+import { handleModalSnackbarOpen } from '@features/snackbar/modalSnackbarSlice'
+import { fetchDataFromApi } from '@api/client'
 
 export const getAuthors = createAsyncThunk(
   'submission/getAuthors',
-  async (url: string) => {
-    return fetchDataFromApi(url, 'getAuthors');
-  }
-);
-
-export const getAuthorStepData = createAsyncThunk(
-  'submission/getAuthorStepData',
-  async (url: string) => {
-    return fetchDataFromApi(url, 'getAuthorStepData');
+  async ( url: string ) => {
+    return fetchDataFromApi( url );
   }
 );
 
 export const getAllCountries = createAsyncThunk(
   'submission/getAllCountries',
-  async (url: string) => {
-    return fetchDataFromApi(url, 'getAllCountries');
+  async ( url: string ) => {
+    return fetchDataFromApi( url );
   }
 );
 
 export const getAuthorsAffiliations = createAsyncThunk(
   'submission/getAuthorsAffiliations',
-  async (url: string) => {
-    return fetchDataFromApi(url, 'getAuthorsAffiliations');
+  async ( url: string ) => {
+    return fetchDataFromApi( url );
   }
 );
-
-export const addAuthor = createAsyncThunk(
-  'addAuthorModal/addAuthor',
-  async ( modalFormData: any, { getState, dispatch }) => {
-    const state: any = getState();
-    let url: string = '';
-    switch ( state.modalSlice.modalActionButton.action ) {
-      case 'add': 
-        url = `${ process.env.SUBMISSION_API_URL }/${ state.wizardSlice.workflowId }/authors/add`;
-        break;
-      case 'edit': 
-        url = `${ process.env.SUBMISSION_API_URL }/${ state.wizardSlice.workflowId }/authors/edit`;
-        break;  
-    }
-    const response = await fetch( url, {
-      method: 'POST',
-      credentials: 'include',
-      redirect: 'follow',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify( modalFormData ),
-    });
-    if ( !response.ok ) {
-      if ( response.status === 422 ) {
-        const errorData = await response.json();
-        let message: any;
-        if ( errorData.data.hasOwnProperty('message') ) {
-          message = errorData.data.message;
-          dispatch( handleModalSnackbarOpen( { severity: 'error', message: message, vertical: 'top', horizontal: 'center' } ) );
-        }
-        if ( errorData.data.hasOwnProperty('errors') ) {
-          Object.entries( errorData.data.errors).map( ([key, value]) => {
-            const message: any = value;
-            dispatch( handleModalSnackbarOpen( { severity: 'error', message: message[0], vertical: 'top', horizontal: 'center' } ) );
-          });
-        }
-      } else {
-        dispatch( handleModalSnackbarOpen({  severity: 'error', message: 'Failed to update Authors step', vertical: 'top', horizontal: 'center' } ) );
-      }
-      throw new Error('Failed to update author step');
-    }
-    const jsonData = await response.json();
-    dispatch( saveAuthorModal() );
-    dispatch( saveModal() );
-    dispatch( handleCloseAuthorModal() );
-
-    return jsonData;
-  }
-); 
 
 export const handleAuthorOperation = createAsyncThunk(
   'addAuthorsModal/handleAuthorOperation',
   async (_, { getState, dispatch }) => {
     const state: any = getState();
-    const modalFormData = state.addAuthorModalSlice.value;
+    const modalFormData = state.addAuthorModal.value;
     if ( Object.keys( modalFormData ).length > 0 ) {
       if (
         ( modalFormData?.['email'] !== '' || modalFormData['email'] !== undefined )
@@ -115,7 +51,6 @@ export const handleAuthorOperation = createAsyncThunk(
         try {
           dispatch( addAuthor( modalFormData ) );
         } catch (error) {
-          console.log(error);
           throw error;
         }
       } else {
@@ -151,13 +86,9 @@ export const updateAuthorStepData = createAsyncThunk(
         throw new Error('Failed to update author step');
       }
       const jsonData = await response.json();
-      // Invalidate cache for getAuthorStepData
-      const cacheKey = 'getAuthorStepData';
-      deleteCache( cacheKey );
 
       return jsonData;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -218,7 +149,6 @@ export const deleteAuthor = createAsyncThunk(
 
       return jsonData;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -259,7 +189,6 @@ export const updateAuthorsOrder = createAsyncThunk(
 
       return jsonData;
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }
@@ -270,7 +199,7 @@ export const searchPeople = createAsyncThunk(
   async ( email: any, { getState, dispatch }) => {
     try {
       const state: any = getState();
-      const url = `${ process.env.SUBMISSION_API_URL }/${ state.wizardSlice.workflowId }/authors/find`;
+      const url = `${ process.env.SUBMISSION_API_URL }/${ state.wizard.workflowId }/authors/find`;
       const data = {
         "email": email
       };
@@ -294,7 +223,6 @@ export const searchPeople = createAsyncThunk(
 
       return { email: email, data: jsonData };
     } catch (error) {
-      console.log(error);
       throw error;
     }
   }

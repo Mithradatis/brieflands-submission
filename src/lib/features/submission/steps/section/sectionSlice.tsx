@@ -1,22 +1,39 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { 
-  getSectionStepGuide, 
-  getSections, 
-  getSectionStepData 
-} from '@/lib/api/steps/section'
 
-interface Value {
+type Value = {
   id: number
+}
+
+export type sectionsListItem = {
+  id: number;
+  type: string;
+  attributes: {
+    journal_id: number;
+    status: string;
+    title: string;
+    flag_id: number;
+    display_order: number;
+    description: string;
+  }
+}
+
+export type Section = {
+  isLoading: boolean;
+  stepGuide: object | string;
+  sectionsList: sectionsListItem[];
+  value: Value;
+}
+
+const initialState = {
+  isLoading: false,
+  stepGuide: {},
+  sectionsList: [{}],
+  value: {} as Value
 }
 
 export const sectionSlice = createSlice({
   name: 'section',
-  initialState: {
-    isLoading: false,
-    stepGuide: {},
-    sectionsList: [{}],
-    value: {} as Value
-  },
+  initialState: initialState,
   reducers: {
     handleInput: ( state, action ) => {
       return {
@@ -29,35 +46,26 @@ export const sectionSlice = createSlice({
     },
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
-    }
-  },
-  extraReducers( builder ) {
-    builder
-    .addCase(getSectionStepGuide.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getSectionStepGuide.fulfilled, ( state, action ) => {
-      state.isLoading = false;
+    },
+    setStepGuide: ( state, action ) => {
       state.stepGuide = action.payload.data.value;
-    })
-    .addCase(getSections.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getSections.fulfilled, ( state, action: any ) => {
-      state.isLoading = false;
-      state.sectionsList = action.payload.data;
-    })
-    .addCase(getSectionStepData.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getSectionStepData.fulfilled, ( state, action ) => {
-      state.isLoading = false;
+    },
+    setStepData: ( state, action ) => {
       const stepData = action.payload.data.step_data;
       state.value.id = stepData !== '' ? parseInt( stepData ) : 0;
-    });
-  },
+    },
+    setSections: ( state, action ) => {
+      state.sectionsList = action.payload.data;
+    }
+  }
 });
 
-export const { handleInput, handleLoading } = sectionSlice.actions;
+export const { 
+  handleInput, 
+  handleLoading,
+  setStepGuide,
+  setStepData,
+  setSections
+} = sectionSlice.actions;
 
 export default sectionSlice.reducer;

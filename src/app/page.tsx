@@ -3,71 +3,123 @@
 import SubmissionForm from '@/components/submission-form'
 import NotPermission from '@/components/not-permission'
 import { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { loadStep,setWorkflowId } from '@/lib/features/wizard/wizardSlice'
 import { usePathname } from 'next/navigation'
-import { setLanguage, setIsInitialized } from '@/lib/features/wizard/wizardSlice'
+import { FormStep } from '@/app/services/types'
+import { 
+  handleLoading,
+  setHasTypeDetermined, 
+  setCurrentStep, 
+  setJournal, 
+  setSubmissionSteps,
+  setWorkflowId
+} from '@features/wizard/wizardSlice'
 import {
-  getWorkflow,
-  buildNewWorkflow,
-  getSubmissionSteps, 
-  getJournal,
-  getUser 
-} from '@/lib/api/client'
+  useBuildNewWorkflowMutation,
+  useGetWorkflowQuery,
+  useLazyGetJournalQuery, 
+  useLazyGetSubmissionStepsQuery
+} from '@/app/services/apiSlice'
+import { useAppDispatch, useAppSelector } from '@/app/store'
+import NotFound from './404'
+
 export default function Page({ params }: { params: { slug: string } }) {
-  const dispatch: any = useDispatch();
-  const wizard = useSelector( ( state: any ) => state.wizardSlice );
+  const dispatch = useAppDispatch();
+  const formSteps = useAppSelector( (state: any) => state.wizard.formSteps );
+  const [buildNewWorkflow] = useBuildNewWorkflowMutation();
+  const [getSubmissionsTrigger] = useLazyGetSubmissionStepsQuery();
+  const [getJournalTrigger] = useLazyGetJournalQuery();
   const router = usePathname();
-  const setWorkflowsId = () => {
-    if (router === '/') {
-      dispatch( setWorkflowId( process.env.DEFAULT_WORKFLOW_ID || '' ) );
-    } else {
-      const routerSegments = router.replace(/^\/|\/$/g, '').split('/');
-      dispatch( setLanguage( routerSegments[0] ) );
-      dispatch( setWorkflowId( routerSegments[3] ) );
+  let workflowId = '';
+  if (router === '/') {
+    workflowId = process.env.DEFAULT_WORKFLOW_ID || '';
+  } else {
+    const routerSegments = router.replace(/^\/|\/$/g, '').split('/');
+    workflowId = routerSegments[3];
+  }
+  const { data: workflow, isLoading, isError, error } = useGetWorkflowQuery( workflowId );
+  const handleFormSteps = async ( steps: FormStep[] ) => {
+    let formSteps: FormStep[] = steps;
+    let isRevised: boolean = false;
+    let isRevision: boolean = false;
+    if ( 
+      workflow?.attributes?.storage?.hasOwnProperty('revision') && 
+      workflow.attributes.storage?.revision !== null && 
+      workflow.attributes.storage?.revision > 0 
+    ) {
+      isRevision = true;
     }
-  };
+    if ( workflow?.hasOwnProperty('document_id') && 
+      workflow.document_id !== null && 
+      workflow.document_id !== 0 
+    ) {
+      isRevised = true;
+    }
+    if ( isRevision || isRevised ) {
+      formSteps.unshift( 
+        { 
+          id: '0', 
+          attributes: { 
+            title: 'Revision Message', 
+            slug: 'revision_message', 
+            subSteps: []
+          } 
+        } 
+      );
+    }
+    await dispatch( setSubmissionSteps( formSteps ) );
+  }
   useEffect(() => {
-    const initializeWorkflow = async () => {
-      await setWorkflowsId();
-      dispatch( setIsInitialized() );
+    const activeTab = window.location.hash.substring(1) || process.env.DEFAULT_STEP;
+    dispatch( setCurrentStep( activeTab ) );
+  }, []);
+  useEffect(() => {
+    dispatch( handleLoading( true ) );
+    const setWorkflowsId = async () => {
+      if ( workflow ) {
+        dispatch( setWorkflowId( workflow.id ) );
+        if ( 
+          workflow?.attributes?.storage?.types?.doc_type !== undefined && 
+          workflow?.attributes?.storage?.types?.doc_type !== '' 
+        ) {
+          await dispatch( setHasTypeDetermined() );
+        }
+        const steps = await getSubmissionsTrigger(`${ workflow.id }/steps`).then( 
+          ( response: any ) => response.data 
+        );
+        await handleFormSteps( steps );
+        const journal = await getJournalTrigger( `journal/journal/${ workflow.attributes.journal_id }` ).then( 
+          ( response: any ) => response.data );
+        await dispatch( setJournal( journal ) );
+      }
+      if ( workflowId === '' ) {
+        const newWorkflow = await buildNewWorkflow( process.env.SUBMISSION_API_URL );
+        window.location.href = `${ process.env.REDIRECT_URL !== undefined 
+          ? process.env.REDIRECT_URL 
+          : process.env.SUBMISSION_API_URL }/${ newWorkflow?.id }`;
+      }
+      dispatch( handleLoading( false ) );
     };
-    initializeWorkflow();
-  }, [router]);
-  useEffect(() => {
-    if ( wizard.isInitialized ) {
-      if ( wizard.workflowId === '' ) {
-        const buildNewWorkflowUrl = `${ process.env.SUBMISSION_API_URL }`;
-        dispatch( buildNewWorkflow( buildNewWorkflowUrl ) );
-      } else {
-        const getWorkflowFromApi = `${process.env.SUBMISSION_API_URL}/${wizard.workflowId}`;
-        dispatch(getWorkflow(getWorkflowFromApi)).then(() => {
-          const getStepsFromApi = `${process.env.SUBMISSION_API_URL}/${wizard.workflowId}/steps`;
-          dispatch( getSubmissionSteps( getStepsFromApi ) );
-          wizard.currentStep !== '' && dispatch( loadStep( { currentStep: wizard.currentStep, isRefereshed: true } ) );
-        });
-      }
+    if ( workflow && !isLoading && !isError ) {
+      setWorkflowsId();
     }
-  }, [wizard.isInitialized]);
-  useEffect( () => {
-      if ( wizard.workflow !== undefined && Object.keys( wizard.workflow ).length > 0 ) {
-        const getJournalFromApi = `${ process.env.API_URL }/journal/journal/${ wizard.workflow.journal_id }`;
-        dispatch( getJournal( getJournalFromApi ) );
-        const getUserFromApi = `${ process.env.API_URL }/journal/profile`;
-        dispatch( getUser( getUserFromApi ) );
-      }
-  }, [wizard.workflow]);
+  }, [workflow]);
 
   return (
-    <>
-      <h2 className="d-block d-md-none w-100">
-        { wizard.journal?.attributes?.title }
-      </h2>
-      {
-        ( !wizard.workflow?.locked && wizard.workflowId !== '' && wizard.hasPermission )
-          ? <SubmissionForm/>
-          : <NotPermission message="You have not permission!"/>
-      }
-    </>
-  )
+    isError
+      ? (() => {
+        dispatch(handleLoading(false));
+        return (
+          error.status === 'FETCH_ERROR' ? <NotPermission message="You have no permission" /> :
+          error.status === 'PARSING_ERROR' ? <NotFound /> :
+          null
+        );
+      })()
+      : (
+        workflow && formSteps.length > 0 && !workflow?.locked ? (
+          <SubmissionForm workflow={workflow} />
+        ) : (
+          <NotPermission message="You have no permission" />
+        )
+      )
+  );
 }

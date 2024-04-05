@@ -1,56 +1,61 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
+import { useAppDispatch, useAppSelector } from '@/app/store'
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Alert, Skeleton } from '@mui/material'
+import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText } from '@mui/joy'
-import { formValidator, handleIsVerified } from '@/lib/features/wizard/wizardSlice'
-import { handleInput, handleLoading } from '@/lib/features/submission/steps/section/sectionSlice'
+import { formValidator, handleIsVerified } from '@features/wizard/wizardSlice'
+import { useGetSectionsQuery } from '@/app/services/steps/section'
 import { 
-    getSections,
-    getSectionStepData, 
-    getSectionStepGuide, 
-    updateSectionStepData 
-} from '@/lib/api/steps/section'
+    handleLoading,
+    sectionsListItem
+} from '@features/submission/steps/section/sectionSlice'
+import {
+    useGetStepDataQuery, 
+    useGetStepGuideQuery, 
+    useUpdateStepDataMutation 
+} from '@/app/services/apiSlice'
 
-const SectionStep = forwardRef( ( prop, ref ) => {
-    const dispatch: any = useDispatch();
-    const formState = useSelector( ( state: any ) => state.sectionSlice );
-    const sections = formState.sectionsList;
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const [ isValid, setIsValid ] = useState({
-        id: true,
+const SectionStep = forwardRef(
+    ( 
+        props: { 
+            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
+            details: string,
+            workflowId: string 
+        },
+        ref 
+    ) => {
+    const dispatch = useAppDispatch();
+    const isVerified = useAppSelector( ( state: any ) => state.wizard.isVerified );
+    const [ formData, setFormData ] = useState({
+        id: 0,
     });
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
-    const getAllTypesFromApi = `${ process.env.API_URL }/journal/section`;
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/section`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${wizard.formStep}`;
-    useEffect(() => {
-        if ( wizard.formStep === 'section' ) {
-            dispatch( getSections( getAllTypesFromApi ) );
-            dispatch( getSectionStepData( getStepDataFromApi ) );
-            dispatch( getSectionStepGuide( getDictionaryFromApi ) );
+    const getAllTypesFromApi = 'journal/section';
+    const { data: sections, isLoading: sectionsIsLoading } = useGetSectionsQuery( getAllTypesFromApi );
+    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
+    const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
+    const isLoading: boolean = ( sectionsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
+    const [ updateStepDataTrigger ] = useUpdateStepDataMutation();
+    useEffect( () => {
+        if ( stepData ) {
+            setFormData( { id: stepData } );
         }
-    }, []);
-    useEffect(() => {
-        const formIsValid = formState.value?.id !== '' && formState.value?.id !== 0;
+    }, [stepData]);
+    useEffect( () => {
+        const formIsValid = formData?.id !== null && formData?.id !== 0;
         dispatch( formValidator( formIsValid ) );
-    }, [wizard.formStep, formState.value]);
-    useEffect(() => {
-        if ( wizard.isVerified ) {
-            setIsValid( prevState => ({
-                ...prevState,
-                id: formState.value?.id !== '' && formState.value?.id !== 0,
-            }));
-        }
-    }, [formState.value, wizard.isVerified]);
+    }, [formData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
-          dispatch( handleLoading( true ) );  
+          dispatch( handleLoading( true ) );
           let isAllowed = false;   
           try {
-            await dispatch( updateSectionStepData( getStepDataFromApi ) );
-            
+            await updateStepDataTrigger( 
+                { 
+                    url: props.apiUrls.stepDataApiUrl, 
+                    data: formData 
+                } 
+            );
             isAllowed = true;
           } catch (error) {
             console.error("Error while submitting form:", error);
@@ -61,71 +66,84 @@ const SectionStep = forwardRef( ( prop, ref ) => {
     }));
 
     return (
-        <>
-            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-            </div>
-            <div id="section" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Section</h3>
-                {
-                    ( details !== undefined && details !== '' ) &&
-                        <Alert severity="error" className="mb-4">
-                            { ReactHtmlParser( details ) }
-                        </Alert>
-                }
-                {
-                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.stepGuide ) }
-                        </Alert>
-                    )
-                }
-                <FormControl className="mb-3" error={ wizard.isVerified && !isValid.id }>
-                    <FormLabel className="fw-bold mb-1">
-                        Please Choose
-                    </FormLabel>
-                    <Autocomplete
-                        required
-                        key="section"
-                        color="neutral"
-                        size="md"
-                        variant="soft"
-                        placeholder="Choose one…"
-                        disabled={false}
-                        name="section"
-                        id="section"
-                        options={ 
-                            Array.isArray( sections ) 
-                            ? sections.map( 
-                                item => {
-                                    return item.attributes?.title || '' 
-                                }
-                               ) : []
-                        }
-                        value={
-                            ( formState.value && formState.value?.id && formState.value?.id !== 0 && sections.length > 0 )
-                              ? sections.find(
-                                ( item: any ) => formState.value?.id === parseInt( item.id )
-                              )?.attributes?.title
-                            : null
-                        }
-                        onChange={(event, value) => {
-                            !wizard.isVerified && dispatch( handleIsVerified() );
-                            dispatch( handleInput({ 
-                                name: 'id',
-                                value: parseInt( sections.find( ( item: any ) => item.attributes.title === value )?.id ) || '' } ) 
-                            )
-                        }}
-                    />
+        isLoading 
+            ? <StepPlaceholder />
+            :
+                <div id="section" className="tab">
+                    <h3 className="mb-4 text-shadow-white">Section</h3>
                     {
-                        ( wizard.isVerified && !isValid.id )
-                        && <FormHelperText className="fs-7 text-danger mt-1">You should choose a section.</FormHelperText> 
+                        ( props.details !== undefined && props.details !== '' ) &&
+                            <Alert severity="error" className="mb-4">
+                                { ReactHtmlParser( props.details ) }
+                            </Alert>
                     }
-                </FormControl>
-            </div>
-        </>
+                    {
+                        typeof stepGuide === 'string' && stepGuide.trim() !== '' && (
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( stepGuide ) }
+                            </Alert>
+                        )
+                    }
+                    <FormControl 
+                        className="mb-3" 
+                        error={ 
+                            isVerified && formData?.id === 0
+                        }
+                    >
+                        <FormLabel className="fw-bold mb-1">
+                            Please Choose
+                        </FormLabel>
+                        <Autocomplete
+                            required
+                            key="section"
+                            color="neutral"
+                            size="md"
+                            variant="soft"
+                            placeholder="Choose one…"
+                            disabled={false}
+                            name="section"
+                            id="section"
+                            options={ 
+                                Array.isArray( sections ) 
+                                ? sections.map( 
+                                    item => {
+                                        return item.attributes?.title || '' 
+                                    }
+                                ) : []
+                            }
+                            value={
+                                ( 
+                                    formData && formData?.id && 
+                                    formData?.id !== 0 && 
+                                    sections.length > 0 
+                                )
+                                ? sections.find(
+                                    ( item: sectionsListItem ) => 
+                                    formData?.id.toString() === item.id.toString()
+                                )?.attributes?.title
+                                : null
+                            }
+                            onChange={(event, value) => {
+                                !isVerified && dispatch( handleIsVerified() );
+                                setFormData(
+                                    {
+                                        id: sections.find( 
+                                            ( item: sectionsListItem ) => 
+                                                item.attributes.title === value )?.id || 0 
+                                    } 
+                                )
+                            }}
+                        />
+                        {
+                            ( 
+                                isVerified && formData?.id === 0
+                            ) &&
+                                <FormHelperText className="fs-7 text-danger mt-1">
+                                    You should choose a section.
+                                </FormHelperText>
+                        }
+                    </FormControl>
+                </div>
     );
 });
 

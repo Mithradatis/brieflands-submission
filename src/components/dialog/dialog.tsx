@@ -1,8 +1,8 @@
 import ReactHtmlParser from 'react-html-parser'
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from '@/app/store'
 import { useTheme } from '@mui/material/styles'
-import { handleDialogClose } from '@/lib/features/dialog/dialogSlice'
-import { handleOperation } from '@/lib/api/dialog'
+import { handleDialogClose } from '@features/dialog/dialogSlice'
+import { handleOperation } from '@api/dialog'
 import { 
     Button, 
     Dialog, 
@@ -14,10 +14,10 @@ import {
 } from '@mui/material'
 
 const DialogComponent = () => {
-    const dispatch: any = useDispatch();
+    const dispatch: any = useAppDispatch();
     const theme = useTheme();
     const fullScreen = useMediaQuery( theme.breakpoints.down('md') );
-    const dialog: any = useSelector( ( state: any ) => state.dialogSlice );
+    const dialog: any = useAppSelector( ( state: any ) => state.dialog );
 
     const handleClose = ( event: any, reason: string ) => {
         if ( reason !== 'backdropClick' ) {

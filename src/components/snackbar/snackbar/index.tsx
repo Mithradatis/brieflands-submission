@@ -1,11 +1,11 @@
-import { useDispatch, useSelector } from 'react-redux'
+import { useAppDispatch, useAppSelector } from '@/app/store'
 import { Alert } from '@mui/material'
 import Snackbar from '@mui/material/Snackbar'
-import { handleSnackbarClose } from '@/lib/features/snackbar/snackbarSlice'
+import { handleSnackbarClose } from '@features/snackbar/snackbarSlice'
 
 const FlashMessage = ( prop: any ) => {
-    const dispatch: any = useDispatch();
-    const snackbar = useSelector( ( state: any ) => state.snackbarSlice );
+    const dispatch: any = useAppDispatch();
+    const snackbar = useAppSelector( ( state: any ) => state.snackbar );
 
     return (
         <Snackbar

@@ -1,55 +1,56 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Alert, Skeleton } from '@mui/material'
+import { useAppDispatch, useAppSelector } from '@/app/store'
+import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl, FormHelperText } from '@mui/joy'
-import { formValidator, handleIsVerified } from '@/lib/features/wizard/wizardSlice'
-import { handleInput, handleLoading } from '@/lib/features/submission/steps/region/regionSlice'
+import { formValidator, handleIsVerified } from '@features/wizard/wizardSlice'
+import { handleLoading } from '@features/submission/steps/region/regionSlice'
+import { useGetRegionsQuery } from '@/app/services/steps/region' 
 import { 
-    getRegions, 
-    getRegionStepData, 
-    getRegionStepGuide, 
-    updateRegionStepData 
-} from '@/lib/api/steps/region'
+    useGetStepDataQuery, 
+    useGetStepGuideQuery, 
+    useUpdateStepDataMutation 
+} from '@/app/services/apiSlice'
 
-const RegionStep = forwardRef( ( prop, ref ) => {
-    const dispatch: any = useDispatch();
-    const formState = useSelector( ( state: any ) => state.regionSlice );
-    const regionsList = formState.regionsList;
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const [ isValid, setIsValid ] = useState({
-        id: true
+const RegionStep = forwardRef(
+    ( 
+        props: { 
+            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
+            details: string 
+        }, 
+        ref 
+    ) => {
+    const dispatch = useAppDispatch();
+    const isVerified = useAppSelector( ( state: any ) => state.wizard.isVerified );
+    const [ formData, setFormData ] = useState({
+        id: ''
     });
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
-    const getAllEditorsFromApi = `${ process.env.API_URL }/journal/${ wizard.formStep }`;
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${wizard.formStep}`;
-    useEffect(() => {
-        if ( wizard.formStep === 'region' ) {
-            dispatch( getRegions( getAllEditorsFromApi ) );
-            dispatch( getRegionStepData( getStepDataFromApi ) );
-            dispatch( getRegionStepGuide( getDictionaryFromApi ) );
-        }
-    }, []);
-    useEffect(() => {
-        const formIsValid = Object.values( formState.value ).every(value => value !== '');
-        dispatch( formValidator( formIsValid ) );
-    }, [wizard.formStep, formState.value]);
+    const { data: regions, isLoading: regionsIsLoading } = useGetRegionsQuery();
+    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
+    const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
+    const isLoading: boolean = ( regionsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
+    const [ updateStepDataTrigger ] = useUpdateStepDataMutation();
     useEffect( () => {
-        if ( wizard.isVerified ) {
-            setIsValid(prevState => ({
-                ...prevState,
-                id: formState.value?.id
-            }));
+        if ( stepData ) {
+            setFormData( { id: stepData } );
         }
-    }, [formState.value, wizard.isVerified]);
+    }, [stepData]);
+    useEffect( () => {
+        const formIsValid = formData?.id !== null && formData?.id !== '';
+        dispatch( formValidator( formIsValid ) );
+    }, [formData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
           dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
-            await dispatch( updateRegionStepData( getStepDataFromApi ) );
+            await updateStepDataTrigger( 
+                { 
+                    url: props.apiUrls.stepDataApiUrl, 
+                    data: formData 
+                } 
+            );
             
             isAllowed = true;
           } catch (error) {
@@ -61,74 +62,88 @@ const RegionStep = forwardRef( ( prop, ref ) => {
     }));
 
     return (
-        <>
-            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-            </div>
-            <div id="region" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Region</h3>
-                {
-                    ( details !== undefined && details !== '' ) &&
-                        <Alert severity="error" className="mb-4">
-                            { ReactHtmlParser( details ) }
-                        </Alert>
-                }
-                {
-                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.stepGuide ) }
-                        </Alert>
-                    )
-                }
-                <FormControl className="mb-3" error= { wizard.isVerified && formState.value?.id === '' && !isValid.id }>
-                    <FormLabel className="fw-bold mb-1">
-                        Region
-                    </FormLabel>
-                    { regionsList ? (
-                        <Autocomplete
-                            color="neutral"
-                            size="md"
-                            variant="soft"
-                            placeholder="Choose one…"
-                            disabled={false}
-                            name="region"
-                            id="region"
-                            options={ 
-                                Array.isArray( regionsList ) 
-                                ? regionsList.map( 
-                                    ( item: any ) => {
-                                        return item.attributes?.title || '' 
-                                    }
-                                   ) : []
-                            }
-                            value={
-                                ( formState.value?.id !== '' && regionsList.length > 0 )
-                                  ? regionsList
-                                      .find( ( item: any ) => formState.value?.id === item.id )?.attributes?.title
-                                  : null
-                            }
-                            onChange={(event, value) => {
-                                !wizard.isVerified && dispatch( handleIsVerified() );
-                                dispatch( handleInput({ 
-                                        name: 'id',
-                                        value: regionsList.find( 
-                                            ( item: any ) => item.attributes.title === value )?.id || '' } 
-                                            ) 
-                                        )
-                            }}
-                        />
-                        ) : (
-                        <div>Loading regions...</div>
-                    )}
+        isLoading
+            ? <StepPlaceholder/>
+            :
+                <div id="region" className="tab">
+                    <h3 className="mb-4 text-shadow-white">Region</h3>
                     {
-                        ( wizard.isVerified && formState.value?.id === '' && !isValid.id ) 
-                        && <FormHelperText className="fs-7 text-danger mt-1">Please select a region</FormHelperText> 
+                        ( 
+                            props.details !== undefined && 
+                            props.details !== '' 
+                        ) &&
+                            <Alert severity="error" className="mb-4">
+                                { ReactHtmlParser( props.details ) }
+                            </Alert>
                     }
-                </FormControl>
-            </div>
-        </>
+                    {
+                        ( 
+                            typeof stepGuide === 'string' && 
+                            stepGuide.trim() !== '' 
+                        ) && (
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( stepGuide ) }
+                            </Alert>
+                        )
+                    }
+                    <FormControl 
+                        className="mb-3" 
+                        error= { 
+                            isVerified && 
+                            formData?.id === ''
+                        }
+                    >
+                        <FormLabel className="fw-bold mb-1">
+                            Region
+                        </FormLabel>
+                        { regions ? (
+                            <Autocomplete
+                                color="neutral"
+                                size="md"
+                                variant="soft"
+                                placeholder="Choose one…"
+                                disabled={false}
+                                name="region"
+                                id="region"
+                                options={ 
+                                    Array.isArray( regions ) 
+                                    ? regions.map( 
+                                        ( item: any ) => {
+                                            return item.attributes?.title || '' 
+                                        }
+                                    ) : []
+                                }
+                                value={
+                                    ( formData?.id !== '' && regions.length > 0 )
+                                    ? regions
+                                        .find( 
+                                            ( item: any ) => formData?.id === item.id )?.attributes?.title
+                                    : null
+                                }
+                                onChange={(event, value) => {
+                                    isVerified && dispatch( handleIsVerified() );
+                                    setFormData(
+                                        { 
+                                            id: regions.find( 
+                                                ( item: any ) => item.attributes.title === value )?.id || '' 
+                                        } 
+                                    ) 
+                                }}
+                            />
+                            ) : (
+                            <div>Loading regions...</div>
+                        )}
+                        {
+                            ( 
+                                isVerified && 
+                                formData?.id === ''
+                            ) && 
+                                <FormHelperText className="fs-7 text-danger mt-1">
+                                    Please select a region
+                                </FormHelperText> 
+                        }
+                    </FormControl>
+                </div>
     );
 });
 

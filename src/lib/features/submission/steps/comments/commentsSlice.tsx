@@ -1,16 +1,24 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getCommentsStepGuide, getCommentsStepData } from '@/lib/api/steps/comments'
 
-export const commentSlice = createSlice({
-  name: 'comment',
-  initialState: {
-    isLoading: false,
-    isVisited: false,
-    stepGuide: {},
-    value: {
-        text: ''
-    }
-  },
+type Value = {
+  text: string;
+}
+
+export type Comments = {
+  isLoading: boolean;
+  stepGuide: object | string;
+  value: Value
+}
+
+const initialState: Comments = {
+  isLoading: false,
+  stepGuide: {},
+  value: {} as Value
+}
+
+export const commentsSlice = createSlice({
+  name: 'comments',
+  initialState: initialState,
   reducers: {
     handleInput: ( state, action ) => {
       return {
@@ -23,33 +31,23 @@ export const commentSlice = createSlice({
     },
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
+    },
+    setStepData: ( state, action ) => {
+      state.value = action.payload.data.step_data;
+    },
+    setStepGuide: ( state, action ) => {
+      if ( Object.keys(action.payload).length > 0 ) {
+        state.stepGuide = action.payload.data.value;
+      }
     }
-  },
-  extraReducers( builder ) {
-    builder
-      .addCase( getCommentsStepGuide.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase( getCommentsStepGuide.fulfilled, ( state, action: any ) => {
-        state.isLoading = false;
-        if ( Object.keys(action.payload).length > 0 ) {
-          state.stepGuide = action.payload.data.value;
-        }
-      })
-      .addCase(getCommentsStepData.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(getCommentsStepData.fulfilled, (state, action: any) => {
-        const { data } = action.payload;
-        return {
-          ...state,
-          isLoading: false,
-          value: data.step_data,
-        };
-      });
-  },
+  }
 });
 
-export const { handleInput, handleLoading } = commentSlice.actions;
+export const { 
+  handleInput, 
+  handleLoading,
+  setStepData,
+  setStepGuide 
+} = commentsSlice.actions;
 
-export default commentSlice.reducer;
+export default commentsSlice.reducer;

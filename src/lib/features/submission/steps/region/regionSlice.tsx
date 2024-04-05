@@ -1,20 +1,36 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { 
-  getRegionStepGuide, 
-  getRegions, 
-  getRegionStepData 
-} from '@/lib/api/steps/region'
+import { getRegions } from '@api/steps/region'
+
+type Value = {
+  id: string;
+}
+
+type RegionsListItem = {
+  id: string;
+  type: string;
+  attributes: {
+    journal_id: number;
+    title: string;
+  }
+}
+
+export type Region = {
+  isLoading: boolean,
+  stepGuide: object | string,
+  regionsList: RegionsListItem[],
+  value: Value;
+}
+
+const initialState: Region = {
+  isLoading: false,
+  stepGuide: {},
+  regionsList: [],
+  value: {} as Value
+}
 
 export const regionSlice = createSlice({
   name: 'region',
-  initialState: {
-    isLoading: false,
-    stepGuide: {},
-    regionsList: [{}],
-    value: {
-      id: ''
-    }
-  },
+  initialState: initialState,
   reducers: {
     handleInput: ( state, action ) => {
       return {
@@ -27,35 +43,25 @@ export const regionSlice = createSlice({
     },
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
-    }
-  },
-  extraReducers( builder ) {
-    builder
-    .addCase(getRegionStepGuide.pending, (state) => {
-      state.isLoading = true;
-    })
-    .addCase(getRegionStepGuide.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.stepGuide = action.payload.data.value;
-    })
-    .addCase(getRegions.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getRegions.fulfilled, ( state, action: any ) => {
-      state.isLoading = false;
+    },
+    setRegions: ( state, action ) => {
       state.regionsList = action.payload.data;
-    })
-    .addCase(getRegionStepData.pending, (state) => {
-      state.isLoading = true;
-    })
-    .addCase(getRegionStepData.fulfilled, ( state, action ) => {
-      state.isLoading = false;
-      const stepData = action.payload.data.step_data;
-      state.value.id = stepData;
-    });
-  },
+    },
+    setStepData: ( state, action ) => {
+      state.value.id = action.payload.data.step_data;
+    },
+    setStepGuide: ( state, action ) => {
+      state.stepGuide = action.payload.data.value;
+    }
+  }
 });
 
-export const { handleInput, handleLoading } = regionSlice.actions;
+export const { 
+  handleInput, 
+  handleLoading,
+  setRegions,
+  setStepData,
+  setStepGuide 
+} = regionSlice.actions;
 
 export default regionSlice.reducer;

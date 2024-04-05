@@ -1,18 +1,17 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { handleDialogClose } from '@/lib/features/dialog/dialogSlice'
-import { getWorkflow, getSubmissionSteps } from '@/lib/api/client'
-import { updateTypesStepData } from '@/lib/api/steps/types'
-import { deleteAuthor } from '@/lib/api/steps/authors'
-import { deleteReviewer } from '@/lib/api/steps/reviewers'
-import { deleteFile, reuseFile } from '@/lib/api/steps/files'
-import { finishSubmission } from './client'
-import { nextStep, setFormStep } from '@/lib/features/wizard/wizardSlice'
+import { handleDialogClose } from '@features/dialog/dialogSlice'
+import { getWorkflow, getSubmissionSteps, updateStepData } from '@api/client'
+import { deleteAuthor } from '@api/steps/authors'
+import { deleteReviewer } from '@api/steps/reviewers'
+import { deleteFile, reuseFile } from '@api/steps/files'
+import { finishSubmission } from '@api/client'
+import { nextStep, setFormStep } from '@features/wizard/wizardSlice'
 
 export const handleOperation = createAsyncThunk(
     'dialog/handleOperation', 
     async ( operation: any, { getState, dispatch } ) => {
         const state: any = getState();
-        const dialog = state.dialogSlice;
+        const dialog = state.dialog;
         switch ( operation ) {
             case 'delete-author': 
                 dispatch( deleteAuthor( { url: dialog.actions.deleteAuthor, author: dialog.data } ) );
@@ -33,16 +32,18 @@ export const handleOperation = createAsyncThunk(
             case 'proceed-submission':
                 dispatch( handleDialogClose() );
                 (async () => {
-                    await dispatch(updateTypesStepData( dialog.actions.updateTypesStepData ));
+                    await dispatch(updateStepData( { url: dialog.actions.updateTypesStepData, step: 'types' } ));
                     await dispatch(getWorkflow( dialog.actions.getWorkflow ));
                     await dispatch(getSubmissionSteps( dialog.actions.getSubmissionSteps ));
                     await dispatch( setFormStep( 'types' ) );
                     dispatch( nextStep( dialog.actions.currentFormStep ) );
                 })();
             break;
-            case 'finish-submission': 
-                dispatch( finishSubmission( dialog.actions.finishWorkflow ) );
-                dispatch( handleDialogClose() );
+            case 'finish-submission':
+                (async () => {
+                    await dispatch( finishSubmission( dialog.actions.finishWorkflow ) );
+                    await dispatch( handleDialogClose() );
+                })();
             break;
         }
 

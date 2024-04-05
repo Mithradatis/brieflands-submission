@@ -1,8 +1,9 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { formValidator, handleIsVerified } from '@/lib/features/wizard/wizardSlice'
-import { Alert, Skeleton } from '@mui/material'
+import { useAppDispatch, useAppSelector } from '@/app/store'
+import { Alert } from '@mui/material'
+import { formValidator, handleIsVerified } from '@features/wizard/wizardSlice'
 import { 
     Autocomplete,
     FormControl, 
@@ -11,74 +12,75 @@ import {
     createFilterOptions, 
     CircularProgress 
 } from '@mui/joy'
+import { handleLoading } from '@features/submission/steps/keywords/keywordsSlice'
 import { 
-    handleInput, 
-    handleKeywordsList, 
-    handleLoading, 
-    emptyKeywordsList, 
-    resetKeywordsBuffer 
-} from '@/lib/features/submission/steps/keywords/keywordsSlice'
-import { 
-    getKeywordsList, 
-    getKeywordsStepData, 
-    getKeywordsStepGuide, 
-    updateKeywordsStepData, 
-    addNewKeyword, 
-    getKeywords, 
-    findKeywords 
-} from '@/lib/api/steps/keywords'
-
-const KeywordsStep = forwardRef( ( prop, ref ) => {
-    const dispatch: any = useDispatch();
-    const formState = useSelector( ( state: any ) => state.keywordsSlice );
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const [ isValid, setIsValid ] = useState({
-        ids: true,
+    useGetStepDataQuery, 
+    useGetStepGuideQuery, 
+    useUpdateStepDataMutation 
+} from '@/app/services/apiSlice'
+import {
+    useLazyFindKeywordsQuery,
+    useLazyGetKeywordsQuery,
+    useGetKeywordsListQuery,
+    useAddNewKeywordMutation
+} from '@/app/services/steps/keywords'
+const KeywordsStep = forwardRef(
+    ( 
+        props: { 
+            apiUrls: { 
+                stepDataApiUrl: string, 
+                stepGuideApiUrl: string 
+            },
+            details: string,
+            workflowId: string
+        }, 
+        ref 
+    ) => {
+    const dispatch = useAppDispatch();
+    const isVerified = useAppSelector( ( state: any ) => state.wizard.isVerified );
+    const [ isSearching, setIsSearching ] = useState<boolean>( false );
+    const [ keywordsBuffer, setKeywordsBuffer ] = useState<object[]>([]);
+    const [ keywordsList, setKeywordsList ] = useState<object[]>([]);
+    const [ formData, setFormData ] = useState<any>({
+        ids: [],
     });
+    const getAllKeywordsFromApi = 'journal/keyword';
+    const { data: allKeywords, isLoading: allKeywordsIsLoading } = useGetKeywordsListQuery( getAllKeywordsFromApi );
+    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
+    const { data: stepData, isLoading: stepDataIsLoading } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
+    const isLoading: boolean = ( allKeywordsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
+    const [ getKeywordsTrigger ] = useLazyGetKeywordsQuery();
+    const [ findKeywordsTrigger ] = useLazyFindKeywordsQuery();
+    const [ addNewKeywordTrigger ] = useAddNewKeywordMutation();
+    const [ updateStepDataTrigger ] = useUpdateStepDataMutation();
     const filter = createFilterOptions();
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
-    const getAllKeywordsFromApi = `${ process.env.API_URL }/journal/keyword`;
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${wizard.formStep}`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${wizard.formStep}`;
-    const searching = formState.isSearching;
-    useEffect( () => {
-        if ( wizard.formStep === 'keywords' ) {
-            dispatch( getKeywordsList( getAllKeywordsFromApi ) );
-            dispatch( getKeywordsStepData( getStepDataFromApi ) );
-            dispatch( getKeywordsStepGuide( getDictionaryFromApi ) );
-        }
-    }, []);
     useEffect(() => {
-        const formIsValid = Object.values( formState.value ).every(value => value !== '');
-        dispatch( formValidator( formIsValid ) );
-    }, [wizard.formStep, formState.value]);
-    useEffect(() => {
-        if (wizard.isVerified) {
-            setIsValid((prevState) => ({
-                ...prevState,
-                ids: formState.value?.ids.length > 0,
-            }));
-        }
-    }, [formState.value, wizard.isVerified]);
-    useEffect( () => {
-        if ( formState.value?.ids.length > 0 ) {
-            formState.value?.ids.map( ( item: any ) => {
+        if ( stepData ) {
+            setFormData( ( prevState: any ) => ({ ...prevState, ids: [...prevState.ids, stepData ] }) );
+            stepData.map( ( item: any ) => {
                 const findKeywordInApi = `${ getAllKeywordsFromApi }/${ item }`;
-                dispatch( getKeywords( findKeywordInApi ) );
+                getKeywordsTrigger( findKeywordInApi ).then( ( response: any ) => {
+                    setKeywordsList( prevState => [ ...prevState, response.data ] );
+                });
             });
         }
-    }, [formState.isInitialized]);
+    }, [stepData]);
+    useEffect(() => {
+        const formIsValid = Object.values( formData ).every( ( value: any ) => value.length > 0 );
+        dispatch( formValidator( formIsValid ) );
+    }, [formData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
           dispatch( handleLoading( true ) );  
           let isAllowed = false;   
           try {
-            await dispatch( updateKeywordsStepData( getStepDataFromApi ) );
-            
+            await updateStepDataTrigger({
+                url: props.apiUrls.stepDataApiUrl,
+                data: formData 
+            });
             isAllowed = true;
-          } catch (error) {
-            console.error("Error while submitting form:", error);
+          } catch ( error ) {
+            console.error( "Error while submitting form:", error );
           }  
           
           return isAllowed;
@@ -86,125 +88,178 @@ const KeywordsStep = forwardRef( ( prop, ref ) => {
     }));
 
     return (
-        <>
-            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-            </div>
-            <div id="keywords" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Keywords</h3>
-                {
-                    ( details !== undefined && details !== '' ) &&
-                        <Alert severity="error" className="mb-4">
-                            { ReactHtmlParser( details ) }
-                        </Alert>
-                }
-                {
-                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.stepGuide ) }
-                        </Alert>
-                    )
-                }
-                <FormControl className="mb-3" error={ wizard.isVerified && formState.ids === '' && !isValid.ids }>
-                    <FormLabel className="fw-bold mb-2">
-                        Please Choose
-                    </FormLabel>
-                    <Autocomplete
-                        multiple
-                        required
-                        freeSolo
-                        color="neutral"
-                        size="md"
-                        variant="soft"
-                        placeholder="Choose one…"
-                        disabled={false}
-                        name="documentKeywords"
-                        id="documentKeywords"
-                        loading={ searching }
-                        endDecorator={
-                            searching ? (
-                              <CircularProgress size="sm" sx={{ bgcolor: 'background.surface' }} />
-                            ) : null
-                        }
-                        options={ formState.keywordsBuffer.length > 0 
-                            ? formState.keywordsBuffer.map( ( item: any ) => item.attributes?.title )
-                            : []
-                        }
-                        value={ formState.keywordsList.length > 0 
-                            ? formState.keywordsList.map( ( item: any ) => item?.attributes?.title )
-                            : [] 
-                        }
-                        onInputChange={ async ( event, value ) =>  {
-                            if ( value.length > 0 ) {
-                                const findKeywordInApi = `${ getAllKeywordsFromApi }?filter[title]=${ value }`;
-                                await dispatch( findKeywords( findKeywordInApi ) )
-                            }
-                        }}
-                        onChange={ ( event, value, reason ) => {
-                            !wizard.isVerified && dispatch(handleIsVerified());
-                            const selectedIds: any = [];
-                            const handleKeywordSelection = async ( keyword: any ) => {
-                              if ( value.length > 0 ) {
-                                const findKeywordInApi = `${getAllKeywordsFromApi}?filter[title]=${ keyword }`;
-                                await dispatch( findKeywords( findKeywordInApi ) );
-                                let isNewKeyword = true;
-                                isNewKeyword = !formState.keywordsBuffer.some( ( item: any ) => item.attributes.title === value );
-                                if ( isNewKeyword ) {
-                                  await dispatch( addNewKeyword( { url: getAllKeywordsFromApi, keyword: keyword } ) );
-                                } else {
-                                  const selectedOptions: any = [];
-                                  value.forEach( ( keyword ) => {
-                                    const selectedOption = formState.keywordsBuffer.find( ( item: any ) => item.attributes.title === keyword);
-                                    selectedOptions.push( selectedOption?.id );
-                                    dispatch( handleKeywordsList( selectedOption ) );
-                                  });
-                                  await dispatch( handleInput( { name: 'ids', value: selectedOptions } ) );
-                                }
-                              }  
-                            };
-                            if (reason === 'selectOption') {
-                              handleKeywordSelection( value[value.length - 1 ] );
-                            }
-                            if (reason === 'removeOption') {
-                              dispatch(emptyKeywordsList());
-                              value.forEach((title) => {
-                                const selectedOption = formState.keywordsList.find( ( item: any ) => item.attributes.title === title);
-                                dispatch( handleKeywordsList( selectedOption ) );
-                                selectedIds.push( selectedOption?.id );
-                              });
-                              dispatch( handleInput( { name: 'ids', value: selectedIds } ) );
-                            }
-                            dispatch( resetKeywordsBuffer() );
-                        }}
-                        filterOptions={ ( options, params ) => {
-                            if ( formState.isSearching ) {
-                                return ['Please wait...'];
-                            }
-                            const filtered = filter(options, params);
-                            const { inputValue } = params;
-                            const isExisting = options.some((option) =>
-                                inputValue === option
-                            );
-                            if (inputValue !== '' && !isExisting) {
-                                filtered.push( inputValue );
-                            }
-                        
-                            return filtered;
-                        }}
-                        getOptionDisabled={ ( option: any ) =>
-                            option === 'Please wait...'
-                        }
-
-                    />
+        isLoading
+            ? <StepPlaceholder/>
+            :
+                <div id="keywords" className="tab">
+                    <h3 className="mb-4 text-shadow-white">Keywords</h3>
                     {
-                        ( wizard.isVerified && formState.ids === '' && !isValid.ids ) 
-                        && <FormHelperText className="fs-7 text-danger mt-1">You should enter at least one keyword</FormHelperText> 
+                        ( 
+                            props.details !== undefined && 
+                            props.details !== '' 
+                        ) &&
+                            <Alert severity="error" className="mb-4">
+                                { ReactHtmlParser( props.details ) }
+                            </Alert>
                     }
-                </FormControl>
-            </div>
-        </>
+                    {
+                        ( 
+                            typeof stepGuide === 'string' && 
+                            stepGuide.trim() !== '' 
+                        ) && (
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( stepGuide ) }
+                            </Alert>
+                        )
+                    }
+                    <FormControl 
+                        className="mb-3" 
+                        error={ 
+                            isVerified && 
+                            formData?.ids?.length > 0
+                        }>
+                        <FormLabel className="fw-bold mb-2">
+                            Please Choose
+                        </FormLabel>
+                        <Autocomplete
+                            multiple
+                            required
+                            freeSolo
+                            color="neutral"
+                            size="md"
+                            variant="soft"
+                            placeholder="Choose one…"
+                            disabled={false}
+                            name="documentKeywords"
+                            id="documentKeywords"
+                            loading={ isSearching }
+                            endDecorator={
+                                isSearching ? (
+                                    <CircularProgress 
+                                        size="sm" 
+                                        sx={{ bgcolor: 'background.surface' }} 
+                                    />
+                                ) : null
+                            }
+                            options={ keywordsBuffer?.length > 0 
+                                ? keywordsBuffer.map( ( item: any ) => item.attributes?.title )
+                                : []
+                            }
+                            value={ keywordsList?.length > 0 
+                                ? keywordsList.map( ( item: any ) => item?.attributes?.title )
+                                : [] 
+                            }
+                            onInputChange={ async ( event, value ) =>  {
+                                if ( value.length > 0 ) {
+                                    const findKeywordInApi = 
+                                        `${ getAllKeywordsFromApi }?filter[title]=${ value }`;
+                                    setIsSearching( true );
+                                    const foundedKeywords = await findKeywordsTrigger( findKeywordInApi );
+                                    await setKeywordsBuffer( foundedKeywords.data );
+                                    setIsSearching( false );
+                                } else {
+                                    setKeywordsBuffer([]);
+                                }
+                            }}
+                            onChange={ ( event, value, reason ) => {
+                                !isVerified && dispatch(handleIsVerified());
+                                const selectedIds: any = [];
+                                const handleKeywordSelection = async ( keyword: any ) => {
+                                    if ( value.length > 0 ) {
+                                        const findKeywordInApi = 
+                                            `${getAllKeywordsFromApi}?filter[title]=${ keyword }`;
+                                        setIsSearching( true );    
+                                        const foundedKeywords = await findKeywordsTrigger( findKeywordInApi );
+                                        await setKeywordsBuffer( foundedKeywords.data );
+                                        setIsSearching( false );    
+                                        let isNewKeyword = true;
+                                        isNewKeyword = !keywordsBuffer.some( 
+                                            ( item: any ) => item.attributes.title === keyword 
+                                        );
+                                        if ( isNewKeyword ) {
+                                            const newKeyword = {
+                                                "title": keyword,
+                                                "show_in_cloud": true
+                                            }                                        
+                                            const newAddedKeyword = await addNewKeywordTrigger(
+                                                { 
+                                                    url: getAllKeywordsFromApi, 
+                                                    data: newKeyword 
+                                                } 
+                                            );
+                                            setFormData((prevState: { ids: object[] }) => ({
+                                                ...prevState,
+                                                ids: [...prevState.ids, newAddedKeyword.id],
+                                            }));
+                                        } else {
+                                            const selectedOptions: any = [];
+                                            const selectedOption: any = keywordsBuffer.find( 
+                                                ( item: any ) => item.attributes.title.trim() === keyword
+                                            );
+                                            const isDuplicate = keywordsList.some(
+                                                ( item: any ) => ( 
+                                                    selectedOption && item.id === selectedOption.id 
+                                                ) 
+                                            );
+                                            if ( !isDuplicate ) {
+                                                selectedOptions.push( selectedOption?.id );
+                                                keywordsList.push( selectedOption );
+                                                setFormData((prevState: { ids: object[] }) => ({
+                                                    ...prevState,
+                                                    ids: [...prevState.ids, selectedOption.id],
+                                                }));
+                                            }
+                                        }
+                                    }  
+                                };
+                                if ( reason === 'selectOption' ) {
+                                    handleKeywordSelection( value[value.length - 1 ] );
+                                }
+                                if ( reason === 'removeOption' ) {
+                                    setKeywordsList([]);
+                                    value.forEach( ( title: string ) => {
+                                        const selectedOption: any = keywordsList.find( 
+                                            ( item: any ) => item.attributes?.title.trim() === title
+                                        );
+                                        if ( selectedOption ) {
+                                            setKeywordsList( prevState => [...prevState, selectedOption] );
+                                            selectedIds.push( selectedOption?.id );
+                                        }
+                                    });
+                                    setFormData( { ids: selectedIds } );
+                                }
+                                setKeywordsBuffer([]);
+                            }}
+                            filterOptions={ ( options, params ) => {
+                                if ( isSearching ) {
+                                    return ['Please wait...'];
+                                }
+                                const filtered = filter(options, params);
+                                const { inputValue } = params;
+                                const isExisting = options.some((option) =>
+                                    inputValue === option
+                                );
+                                if ( inputValue !== '' && !isExisting ) {
+                                    filtered.push( inputValue );
+                                }
+                            
+                                return filtered;
+                            }}
+                            getOptionDisabled={ ( option: any ) =>
+                                option === 'Please wait...'
+                            }
+                        />
+                        {
+                            ( 
+                                isVerified && 
+                                formData?.ids?.length === 0
+                            ) 
+                            && <FormHelperText className="fs-7 text-danger mt-1">
+                                    You should enter at least one keyword
+                               </FormHelperText> 
+                        }
+                    </FormControl>
+                </div>
     );
 });
 

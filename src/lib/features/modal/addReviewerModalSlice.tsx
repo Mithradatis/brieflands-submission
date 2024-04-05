@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { handleCloseReviewersModal } from '@/lib/api/steps/reviewers'
-import { getClassificationsList } from '@/lib/api/steps/classifications'
+import { handleCloseReviewersModal } from '@api/steps/reviewers'
+import { getClassificationsList } from '@api/steps/classifications'
 
 const suggestOrOpposeList = [ 
   { id: 1 , title: 'Suggest Reviewer' }, 

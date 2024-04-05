@@ -1,16 +1,26 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getTwitterStepGuide, getTwitterStepData } from '@/lib/api/steps/twitter'
+
+type Value = {
+  text: string;
+}
+
+export type Twitter = {
+  isLoading: boolean;
+  isVisited: boolean;
+  stepGuide: object | string,
+  value: Value
+}
+
+const initialState = {
+  isLoading: false,
+  isVisited: false,
+  stepGuide: {},
+  value: {} as Value
+}
 
 export const twitterSlice = createSlice({
   name: 'twitter',
-  initialState: {
-    isLoading: false,
-    isVisited: false,
-    stepGuide: {},
-    value: {
-        text: ''
-    }
-  },
+  initialState: initialState,
   reducers: {
     handleInput: ( state, action ) => {
       return {
@@ -23,33 +33,23 @@ export const twitterSlice = createSlice({
     },
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
+    },
+    setStepData: ( state, action ) => {
+      state.value = action.payload.data.step_data;
+    },
+    setStepGuide: ( state, action ) => {
+      if ( Object.keys(action.payload).length > 0 ) {
+        state.stepGuide = action.payload.data.value;
+      }
     }
-  },
-  extraReducers( builder ) {
-    builder
-      .addCase( getTwitterStepGuide.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase( getTwitterStepGuide.fulfilled, ( state, action: any ) => {
-        state.isLoading = false;
-        if ( Object.keys(action.payload).length > 0 ) {
-          state.stepGuide = action.payload.data.value;
-        }
-      })
-      .addCase(getTwitterStepData.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(getTwitterStepData.fulfilled, (state, action: any) => {
-        const { data } = action.payload;
-        return {
-          ...state,
-          isLoading: false,
-          value: data.step_data,
-        };
-      });
-  },
+  }
 });
 
-export const { handleInput, handleLoading } = twitterSlice.actions;
+export const { 
+  handleInput, 
+  handleLoading,
+  setStepData,
+  setStepGuide 
+} = twitterSlice.actions;
 
 export default twitterSlice.reducer;

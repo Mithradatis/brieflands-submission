@@ -2,18 +2,18 @@ import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { List, ListItem, ListItemText } from '@mui/material'
 import { Autocomplete, Input, FormControl, FormLabel, FormHelperText, Textarea, Button, Divider, createFilterOptions } from '@mui/joy'
-import { handleNestedOpen, handleNestedClose } from '@/lib/features/modal/modalSlice'
-import { handleInput, handleClassifications } from '@/lib/features/modal/addReviewerModalSlice' 
-import { getClassificationsList } from '@/lib/api/steps/classifications'
+import { handleNestedOpen, handleNestedClose } from '@features/modal/modalSlice'
+import { handleInput, handleClassifications } from '@features/modal/addReviewerModalSlice' 
+import { getClassificationsList } from '@api/steps/classifications'
 import { Modal, ModalDialog } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
 
 const AddReviewerModal = () => {
     const filter = createFilterOptions();
     const dispatch: any = useDispatch();
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const modalData = useSelector( ( state: any ) => state.modalSlice );
-    const addReviewerFormData = useSelector( ( state: any ) => state.addReviewerModalSlice );
+    const wizard = useSelector( ( state: any ) => state.wizard );
+    const modalData = useSelector( ( state: any ) => state.modal );
+    const addReviewerFormData = useSelector( ( state: any ) => state.addReviewerModal );
     const [ selectedClassifications , setSelectedClassifications ] = useState<{ classification: string }[]>([]);
     const [ disabledClassifications, setDisabledClassifications ] = useState<{ [key: string]: boolean }>({});
     const formIsValid = modalData.isFormValid;

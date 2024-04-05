@@ -1,46 +1,52 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
-import { useMemo, useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Box, Button, Alert, Skeleton } from '@mui/material'
+import { useMemo, useEffect, forwardRef, useImperativeHandle, useState } from 'react'
+import { useAppDispatch, useAppSelector } from '@/app/store'
+import { Box, Button, Alert } from '@mui/material'
 import { Scrollbars } from 'react-custom-scrollbars'
-import { formValidator } from '@/lib/features/wizard/wizardSlice'
-import { handleLoading } from '@/lib/features/submission/steps/authors/authorsSlice'
-import { handleOpen } from '@/lib/features/modal/modalSlice'
-import { handleDialogOpen } from '@/lib/features/dialog/dialogSlice'
+import { formValidator } from '@features/wizard/wizardSlice'
+import { handleOpen } from '@features/modal/modalSlice'
+import { handleDialogOpen } from '@features/dialog/dialogSlice'
 import { MaterialReactTable, type MRT_ColumnDef, type MRT_Row } from 'material-react-table'
+import { AuthorsListItem, handleLoading } from '@features/submission/steps/authors/authorsSlice'
+import { useGetStepDataQuery, useGetStepGuideQuery } from '@/app/services/apiSlice'
 import {
-  getAuthorStepData, 
-  getAuthorStepGuide, 
+  useGetAuthorsAffiliationsQuery, 
+  createAuthorsTable,
   loadEditAuthorForm, 
-  updateAuthorsOrder, 
-  getAllCountries, 
-  getAuthorsAffiliations, 
+  updateAuthorsOrder,
   handleCloseAuthorModal 
-} from '@/lib/api/steps/authors'
+} from '@/app/services/steps/authors'
 
-const AuthorsStep = forwardRef( ( prop, ref ) => {
-    const dispatch: any = useDispatch();
-    const formState = useSelector( ( state: any ) => state.authorsSlice );
-    const filteredItems = formState.authorsList;
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const modal = useSelector( ( state: any ) => state.modalSlice );
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/authors`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${wizard.formStep}`;
-    const getAllCountriesUrl = `${ process.env.API_URL }/journal/country?page[size]=1000`;
-    const getAuthorsAffiliationsFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/authors/affiliations`;
+const AuthorsStep = forwardRef(
+  ( 
+      props: { 
+          apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
+          details: string,
+          workflowId: string
+      }, 
+      ref 
+  ) => {
+    const [ formData, setFormData ] = useState<AuthorsListItem[]>();
+    const [ filteredItems, setFilteredItems ] = useState<object[]>();
+    const dispatch = useAppDispatch();
+    const isRevision = useAppSelector( ( state: any ) => state.wizard.isRevision );
+    const formStep = useAppSelector( ( state: any ) => state.wizard.formStep );
+    const modal = useAppSelector( ( state: any ) => state.modal );
+    const { data: authorsAffiliations, isLoading: authorsAffiliationsIsLoading } = useGetAuthorsAffiliationsQuery( props.workflowId );
+    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
+    const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
+    const isLoading: boolean = ( authorsAffiliationsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
+    const getAuthorsAffiliationsFromApi = `${ process.env.SUBMISSION_API_URL }/${ props.workflowId }/authors/affiliations`;
     useEffect(() => {
-      if ( wizard.formStep === 'authors' ) {
-        dispatch( getAuthorStepData( getStepDataFromApi ) );
-        dispatch( getAuthorStepGuide( getDictionaryFromApi ) );
-        dispatch( getAllCountries( getAllCountriesUrl ) );
-        dispatch( formValidator( true ) );
+      if ( stepData ) {
+        setFormData( stepData );
+        setFilteredItems( createAuthorsTable( stepData ) );
       }
+    }, [stepData]);
+    useEffect(() => {
+        dispatch( formValidator( true ) );
     }, []);
-    useEffect( () => {
-      dispatch( getAuthorsAffiliations( getAuthorsAffiliationsFromApi ) );
-    }, [formState.authorsList]);
     useEffect( () => {
       if ( !modal.modalOpen ) {
         dispatch( handleCloseAuthorModal() );
@@ -54,8 +60,6 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
         return isAllowed;
       }
     }));
-    const deleteAuthorUrl = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }/remove`;
-    const updateAuthorsOrderUrl = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }/change_order`;
     type Author = {
       email: string;
       firstname: string;
@@ -103,7 +107,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                 <i className="fa-duotone fa-edit"></i>
               </Button>
               {
-                !wizard.isRevision &&
+                !isRevision &&
                   <Button 
                     key="delete"
                     className="py-2"
@@ -113,7 +117,7 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
                     sx={{ minWidth: 0 }}
                     onClick={() => dispatch( handleDialogOpen( 
                     { 
-                        actions: { deleteAuthor: deleteAuthorUrl }, 
+                        actions: { deleteAuthor: `${ props.apiUrls.stepDataApiUrl }/remove` },
                         data: row.original.email,
                         dialogTitle: 'Delete Author', 
                         dialogContent: { content: 'Are you sure?' }, 
@@ -129,123 +133,124 @@ const AuthorsStep = forwardRef( ( prop, ref ) => {
     ], []);
 
     return (
-        <>
-          <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-              <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-              <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-              <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-          </div>
-          <div id="authors" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-              <h3 className="mb-4 text-shadow-white">Authors</h3>
-              {
-                  ( details !== undefined && details !== '' ) &&
-                      <Alert severity="error" className="mb-4">
-                          { ReactHtmlParser( details ) }
-                      </Alert>
-              }
-              <Scrollbars
-                  className="mb-2"
-                  style={{ width: 100 + '%', minHeight: 150 }}
-                  universal={true}
-                  autoHide
-                  autoHideTimeout={500}
-                  autoHideDuration={200}>
-                  {
-                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' &&
-                      <Alert severity="info" className="mb-4">
-                          { ReactHtmlParser( formState.stepGuide ) }
-                      </Alert>
-                  }
-              </Scrollbars>
-              {
-                !wizard.isRevision && 
-                  <Button className="btn btn-primary btn-lg mb-0" onClick={() => {
-                    dispatch( handleOpen( { title: 'Add an Author', parent: wizard.formStep } ) )}
-                  }>
-                    Add Author
-                  </Button>
-              }
-              {
-                formState.authorsList.length > 0 &&
-                  <div className="datatable-container">
-                      <MaterialReactTable
-                        autoResetPageIndex={false}
-                        enableSorting={true}
-                        columns={columns}
-                        data={filteredItems}
-                        enableRowNumbers
-                        enableDensityToggle={false}
-                        enableColumnFilters={false}
-                        enableFullScreenToggle={false}
-                        enableHiding={false}
-                        enableRowOrdering
-                        muiTableBodyRowDragHandleProps={({ table }) => ({
-                          onDragEnd: () => {
-                            const { draggingRow, hoveredRow } = table.getState();
-                            if ( hoveredRow && draggingRow ) {
-                              const itemsCopy = filteredItems.slice();
-                              itemsCopy.splice(
-                                hoveredRow.id,
-                                0,
-                                itemsCopy.splice(draggingRow.index, 1)[0]
-                              );
-                              dispatch(updateAuthorsOrder({ url: updateAuthorsOrderUrl, authors: itemsCopy }));
-                            }
-                          },
-                        })}
-                      />
-                  </div>
-              }
-              {
-                ( formState.authorsAffiliations !== undefined && Object.keys( formState.authorsAffiliations ).length > 0 ) &&
-                  <div id="affiliations">
-                    <div id="authors-list">
-                      {
-                        formState.authorsAffiliations.names.map( ( item: any, index: number ) => (
-                          <span key={ `author-${ index }` } className="me-2">
-                            <span className="fw-bold text-muted">
-                              { `${ item.first_name } ${ item.middle_name || '' } ${ item.last_name }` }
+      isLoading
+          ? <StepPlaceholder/>
+          : 
+            <div id="authors" className="tab">
+                <h3 className="mb-4 text-shadow-white">Authors</h3>
+                {
+                    ( props.details !== undefined && props.details !== '' ) &&
+                        <Alert severity="error" className="mb-4">
+                            { ReactHtmlParser( props.details ) }
+                        </Alert>
+                }
+                <Scrollbars
+                    className="mb-2"
+                    style={{ width: 100 + '%', minHeight: 150 }}
+                    universal={true}
+                    autoHide
+                    autoHideTimeout={500}
+                    autoHideDuration={200}>
+                    {
+                      typeof stepGuide === 'string' && stepGuide.trim() !== '' &&
+                        <Alert severity="info" className="mb-4">
+                            { ReactHtmlParser( stepGuide ) }
+                        </Alert>
+                    }
+                </Scrollbars>
+                {
+                  !isRevision && 
+                    <Button className="btn btn-primary btn-lg mb-0" onClick={() => {
+                      dispatch( handleOpen( { title: 'Add an Author', parent: formStep } ) )}
+                    }>
+                      Add Author
+                    </Button>
+                }
+                {
+                  filteredItems && filteredItems?.length > 0 &&
+                    <div className="datatable-container">
+                        <MaterialReactTable
+                          autoResetPageIndex={false}
+                          enableSorting={true}
+                          columns={columns}
+                          data={ filteredItems }
+                          enableRowNumbers
+                          enableDensityToggle={false}
+                          enableColumnFilters={false}
+                          enableFullScreenToggle={false}
+                          enableHiding={false}
+                          enableRowOrdering
+                          muiTableBodyRowDragHandleProps={({ table }) => ({
+                            onDragEnd: () => {
+                              const { draggingRow, hoveredRow }: { draggingRow: any, hoveredRow: any } = table.getState();
+                              if ( hoveredRow && draggingRow ) {
+                                const itemsCopy = filteredItems.slice();
+                                itemsCopy.splice(
+                                  hoveredRow.id,
+                                  0,
+                                  itemsCopy.splice(draggingRow.index, 1)[0]
+                                );
+                                dispatch( updateAuthorsOrder(
+                                  { 
+                                    url: `${ props.apiUrls.stepDataApiUrl }/change_order`, 
+                                    authors: itemsCopy 
+                                  }
+                                ) );
+                              }
+                            },
+                          })}
+                        />
+                    </div>
+                }
+                {
+                  ( authorsAffiliations !== undefined && Object.keys( authorsAffiliations ).length > 0 ) &&
+                    <div id="affiliations">
+                      <div id="authors-list">
+                        {
+                          authorsAffiliations.names.map( ( item: any, index: number ) => (
+                            <span key={ `author-${ index }` } className="me-2">
+                              <span className="fw-bold text-muted">
+                                { `${ item.first_name } ${ item.middle_name || '' } ${ item.last_name }` }
+                              </span>
+                              { item['orcid-id']
+                                ? <a href={ `https://orcid.org/${ item['orcid-id'] }` }>
+                                      <img 
+                                        className="ms-1" 
+                                        src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
+                                        width="15" 
+                                        height="15" title="ORCID" alt="ORCID"
+                                      />
+                                  </a>
+                                  : '' 
+                              }
+                              <sup className="ms-1">
+                                { `${ item.affiliations.map( ( affiliation: number ) => affiliation ) } ${ item.cor || '' }` }
+                              </sup>
                             </span>
-                            { item['orcid-id']
-                              ? <a href={ `https://orcid.org/${ item['orcid-id'] }` }>
-                                    <img 
-                                      className="ms-1" 
-                                      src="https://orcid.org/sites/default/files/images/orcid_16x16.png" 
-                                      width="15" 
-                                      height="15" title="ORCID" alt="ORCID"
-                                    />
-                                </a>
-                                : '' 
-                            }
-                            <sup className="ms-1">
-                              { `${ item.affiliations.map( ( affiliation: number ) => affiliation ) } ${ item.cor || '' }` }
-                            </sup>
-                          </span>
-                        ))
-                      }
+                          ))
+                        }
+                      </div>
+                      <div id="authors-affiliations" className="fs-7">
+                        {
+                          authorsAffiliations.affiliations.map( ( item: any, index: number ) => (
+                            <div key={ `affiliation-${ index }` }>
+                                { `${ index + 1 } ${ item }` }
+                            </div>
+                          ))
+                        }
+                      </div>
+                      <div id="authors-affiliations" className="fs-7">
+                        {
+                          Object.entries( authorsAffiliations.correspondings ).map( ([ key, value ]) => (
+                            <span key={ `corresponding-${ key }` }>
+                                { `${ key } ${ value }` }
+                            </span>
+                          ))
+                        }
+                      </div>
                     </div>
-                    <div id="authors-affiliations" className="fs-7">
-                      {
-                        formState.authorsAffiliations.affiliations.map( ( item: any, index: number ) => (
-                          <div key={ `affiliation-${ index }` }>
-                              { `${ index + 1 } ${ item }` }
-                          </div>
-                        ))
-                      }
-                    </div>
-                    <div id="authors-affiliations" className="fs-7">
-                      {
-                        Object.entries( formState.authorsAffiliations.correspondings ).map( ([ key, value ]) => (
-                          <span key={ `corresponding-${ key }` }>
-                              { `${ key } ${ value }` }
-                          </span>
-                        ))
-                      }
-                    </div>
-                  </div>
-              }
-          </div>
-        </>
+                }
+            </div>
     );
 });
 

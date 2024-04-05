@@ -1,16 +1,31 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getEditorStepGuide, getEditors, getEditorStepData } from '@/lib/api/steps/editor'
+
+type Value = {
+  id: string;
+}
+
+export type EditorsListItem = {
+  id: string;
+  name: string;
+}
+
+export type Editor = {
+  isLoading: boolean;
+  stepGuide: object | string;
+  editorsList: EditorsListItem[];
+  value: Value;
+}
+
+const initialState: Editor = {
+  isLoading: false,
+  stepGuide: {},
+  editorsList: [],
+  value: {} as Value
+}
 
 export const editorSlice = createSlice({
   name: 'editor',
-  initialState: {
-    isLoading: false,
-    stepGuide: {},
-    editorsList: [{}],
-    value: {
-      id: ''
-    }
-  },
+  initialState: initialState,
   reducers: {
     handleInput: ( state, action ) => {
       return {
@@ -23,22 +38,8 @@ export const editorSlice = createSlice({
     },
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
-    }
-  },
-  extraReducers( builder ) {
-    builder
-    .addCase(getEditorStepGuide.pending, (state) => {
-      state.isLoading = true;
-    })
-    .addCase(getEditorStepGuide.fulfilled, (state, action) => {
-      state.isLoading = false;
-      state.stepGuide = action.payload.data.value;
-    })
-    .addCase(getEditors.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getEditors.fulfilled, ( state, action: any ) => {
-      state.isLoading = false;
+    },
+    setEditors: ( state, action ) => {
       const editors = action.payload.data;
       if ( Object.keys( editors ).length > 0 ) {
         state.editorsList = [];
@@ -47,23 +48,32 @@ export const editorSlice = createSlice({
           state.editorsList.push(
             {
               id: editor.id,
-              name: `${ editor.attributes.first_name } ${ editor.attributes.middle_name } ${ editor.attributes.last_name }`
+              name: `${ 
+                editor.attributes.first_name 
+              } ${ 
+                editor.attributes.middle_name 
+              } ${ editor.attributes.last_name }`
             }
           );
         }
       }
-    })
-    .addCase(getEditorStepData.pending, (state) => {
-      state.isLoading = true;
-    })
-    .addCase(getEditorStepData.fulfilled, ( state, action ) => {
-      state.isLoading = false;
+    },
+    setStepData: ( state, action ) => {
       const stepData = action.payload.data.step_data;
       state.value.id = stepData.length > 0 ? stepData : '';
-    });
-  },
+    },
+    setStepGuide: ( state, action ) => {
+      state.stepGuide = action.payload.data.value;
+    }
+  }
 });
 
-export const { handleInput, handleLoading } = editorSlice.actions;
+export const { 
+  handleInput, 
+  handleLoading,
+  setEditors,
+  setStepData,
+  setStepGuide
+} = editorSlice.actions;
 
 export default editorSlice.reducer;

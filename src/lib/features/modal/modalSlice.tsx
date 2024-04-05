@@ -1,21 +1,38 @@
 import { createSlice } from '@reduxjs/toolkit'
 
+export type Modal = {
+  mode: string;
+  modalTitle: string;
+  modalOpen: boolean;
+  modalForm: any;
+  modalActionButton: {
+    action: string;
+    caption: string;
+  };
+  modalFormData: object;
+  nestedModalOpen: boolean;
+  nestedModalFormData: object;
+  isFormValid: boolean;
+}
+
+const initialState: Modal = {
+  mode: 'new',
+  modalTitle: '',
+  modalOpen: false,
+  modalForm: null,
+  modalActionButton: {
+    action: 'add',
+    caption: 'add'
+  },
+  modalFormData: {},
+  nestedModalOpen: false,
+  nestedModalFormData: {},
+  isFormValid: true,
+}
+
 export const modalSlice = createSlice({
   name: 'modal',
-  initialState: {
-    mode: 'new',
-    modalTitle: '',
-    modalOpen: false,
-    modalForm: null,
-    modalActionButton: {
-      action: 'add',
-      caption: 'add'
-    },
-    modalFormData: {},
-    nestedModalOpen: false,
-    nestedModalFormData: {},
-    isFormValid: true,
-  },
+  initialState: initialState,
   reducers: {
     handleOpen: ( state, action ) => {
       return {
@@ -86,7 +103,6 @@ export const modalSlice = createSlice({
     }
   },
 });
-
 
 export const {
   handleOpen, 

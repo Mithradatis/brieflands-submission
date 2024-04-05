@@ -1,19 +1,25 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { 
-  getFinancialDisclosureStepGuide, 
-  getFinancialDisclosureStepData 
-} from '@/lib/api/steps/financial-disclosure'
 
+type Value = {
+  text: string;
+}
+
+export type FinancialDisclosure = {
+  isLoading: boolean;
+  isVisited: boolean;
+  stepGuide: object | string;
+  value: Value;
+}
+
+const initialState: FinancialDisclosure = {
+  isLoading: false,
+  isVisited: false,
+  stepGuide: {},
+  value: {} as Value
+}
 export const financialDisclosureSlice = createSlice({
   name: 'financial-disclosure',
-  initialState: {
-    isLoading: false,
-    isVisited: false,
-    stepGuide: {},
-    value: {
-        text: ''
-    }
-  },
+  initialState: initialState,
   reducers: {
     handleInput: ( state, action ) => {
       return {
@@ -26,33 +32,23 @@ export const financialDisclosureSlice = createSlice({
     },
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
+    },
+    setStepData: ( state, action ) => {
+      state.value = action.payload.data.step_data
+    },
+    setStepGuide: ( state, action ) => {
+      if ( Object.keys(action.payload).length > 0 ) {
+        state.stepGuide = action.payload.data.value;
+      }
     }
-  },
-  extraReducers( builder ) {
-    builder
-      .addCase( getFinancialDisclosureStepGuide.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase( getFinancialDisclosureStepGuide.fulfilled, ( state, action: any ) => {
-        state.isLoading = false;
-        if ( Object.keys(action.payload).length > 0 ) {
-          state.stepGuide = action.payload.data.value;
-        }
-      })
-      .addCase(getFinancialDisclosureStepData.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(getFinancialDisclosureStepData.fulfilled, (state, action: any) => {
-        const { data } = action.payload;
-        return {
-          ...state,
-          isLoading: false,
-          value: data.step_data,
-        };
-      });
-  },
+  }
 });
 
-export const { handleInput, handleLoading } = financialDisclosureSlice.actions;
+export const { 
+  handleInput, 
+  handleLoading,
+  setStepData,
+  setStepGuide 
+} = financialDisclosureSlice.actions;
 
 export default financialDisclosureSlice.reducer;

@@ -1,28 +1,30 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import DataTable, { TableColumn } from 'react-data-table-component'
 import { useState, useEffect, forwardRef, useImperativeHandle, useMemo } from 'react'
-import { Alert, Button, Skeleton } from '@mui/material'
-import { useDispatch, useSelector } from 'react-redux'
+import { Alert, Button } from '@mui/material'
+import { useAppDispatch } from '@/app/store'
 import {  Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@mui/joy'
 import { useDropzone } from 'react-dropzone'
-import { formValidator } from '@/lib/features/wizard/wizardSlice'
-import { handleDialogOpen } from '@/lib/features/dialog/dialogSlice'
+import { formValidator } from '@features/wizard/wizardSlice'
+import { handleDialogOpen } from '@features/dialog/dialogSlice'
+import messageHandler from '@/app/services/messages'
+import { File, handleLoading } from '@features/submission/steps/files/filesSlice'
+import { useGetStepDataQuery, useGetStepGuideQuery } from '@/app/services/apiSlice'
 import { 
-    handleFileType, 
-    handleInput, 
-    handleDropzoneStatus, 
-    handleLoading 
-} from '@/lib/features/submission/steps/files/filesSlice'
-import { 
-    getFileTypes, 
-    getFilesStepData, 
-    getFilesStepGuide, 
-    addFile 
-} from '@/lib/api/steps/files'
-
-
-
-const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string, onFilter: (event: React.ChangeEvent<HTMLInputElement>) => void, onClear: () => void }) => (
+    useGetFileTypesQuery, 
+    useAddFileMutation,
+    useDeleteFileMutation,
+    useReuseFileMutation, 
+    createFileTable 
+} from '@/app/services/steps/files'
+import useMessageHandler from '@/app/services/messages'
+const FilterComponent = (
+    { filterText, onFilter, onClear }: { 
+        filterText: string, 
+        onFilter: (event: React.ChangeEvent<HTMLInputElement>) => void, 
+        onClear: () => void 
+    }) => (
     <>
         <Input
             variant="soft"
@@ -38,39 +40,64 @@ const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string
     </>
 );
 
-const FilesStep = forwardRef( ( prop, ref ) => {
-    const dispatch: any = useDispatch();
-    const formState: any = useSelector( ( state: any ) => state.filesSlice );
-    const fileTypes: any = formState.fileTypesList;
-    const wizard: any = useSelector( ( state: any ) => state.wizardSlice );
-    const [newFilteredItems, setNewFilteredItems] = useState([]);
-    const [oldFilteredItems, setOldFilteredItems] = useState([]);
-    const getFileTypesFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/files/get_file_types`;
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/files`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${wizard.formStep}`;
-    const [filterText, setFilterText] = useState('');
-    const [ isValid, setIsValid ] = useState({
+const FilesStep = forwardRef(
+    ( 
+        props: { 
+            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
+            details: string,
+            workflowId: string 
+        }, 
+        ref 
+    ) => {
+    const { messageHandler } = useMessageHandler();
+    const dispatch = useAppDispatch();
+    const [newFilteredItems, setNewFilteredItems] = useState<File[]>();
+    const [oldFilteredItems, setOldFilteredItems] = useState<File[]>();
+    const [filterText, setFilterText] = useState<string>('');
+    const [ caption, setCaption ] = useState({
         caption: true
     });
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
+    const [ formData, setFormData ] = useState({
+        caption: '',
+        captionRequired: false,
+        file_type_id: '',
+        formStatus: {
+            isDisabled: true,
+            fileTypeId: true
+        },
+        oldFiles: [],
+        newFiles: []
+    });
+    const getFileTypesFromApi = 
+                `${ process.env.SUBMISSION_API_URL }/${ props.workflowId }/files/get_file_types`;
+    const { data: fileTypes, isLoading: fileTypesIsLoading } = useGetFileTypesQuery( getFileTypesFromApi );
+    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
+    const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
+    const [ addFileTrigger ] = useAddFileMutation();
+    const isLoading: boolean = ( fileTypesIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
     useEffect(() => {
-        setIsValid( prevState => ({
+        setCaption( prevState => ({
             ...prevState,
-            caption: formState.value?.caption !== undefined && formState.value?.caption !== '',
+            caption: formData?.caption !== undefined && formData?.caption !== '',
         }));
-    }, [formState.value]);
+    }, [formData]);
     const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
     useEffect(() => {
-        if ( wizard.formStep === 'files' ) {
-            dispatch( getFileTypes( getFileTypesFromApi ) );
-            dispatch( getFilesStepData( getStepDataFromApi ) );
-            dispatch( getFilesStepGuide( getDictionaryFromApi ) );
-            dispatch( formValidator( true ) );
-        }
+        dispatch( formValidator( true ) );
     }, []);
+    let filesTable: any;
+    useEffect( () => {
+        if ( stepData ) {
+            filesTable = createFileTable( stepData.old_files, stepData.new_files );
+            setFormData( prevState => ({
+                ...prevState,
+                oldFiles: filesTable.oldFiles,
+                newFiles: filesTable.newFiles
+            }));
+        }
+    }, [stepData]);
     useEffect(() => {
-        const newfilteredData = formState.newFilesList.filter( ( item: any ) => {
+        const newfilteredData = formData.newFiles?.filter( ( item: any ) => {
             const rowValues = Object.values( item );
             return rowValues.some((value) => {
                 if (typeof value === 'string') {
@@ -82,9 +109,9 @@ const FilesStep = forwardRef( ( prop, ref ) => {
             });
         });
         setNewFilteredItems( newfilteredData );
-    }, [formState.newFilesList, filterText, wizard.formStep]);
+    }, [formData.newFiles, filterText]);
     useEffect(() => {
-        const oldfilteredData = formState.oldFilesList.filter( ( item: any ) => {
+        const oldfilteredData = formData.oldFiles?.filter( ( item: any ) => {
             const rowValues = Object.values( item );
             return rowValues.some((value) => {
                 if (typeof value === 'string') {
@@ -96,17 +123,19 @@ const FilesStep = forwardRef( ( prop, ref ) => {
             });
         });
         setOldFilteredItems( oldfilteredData );
-    }, [formState.oldFilesList, filterText, wizard.formStep]);
+    }, [formData.oldFiles, filterText]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
-          dispatch( handleLoading( true ) );  
-          let isAllowed = true;  
+          await dispatch( handleLoading( true ) );  
+          let isAllowed = true;
 
           return isAllowed;
         }
     }));
-    const deleteFileUrl = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }/remove`;
-    const newColumns: TableColumn<{ 
+    const deleteFileUrl = 
+        `${ process.env.SUBMISSION_API_URL }/${ props.workflowId }/files/remove`;
+    const newColumns: TableColumn<{
+        id: number,
         fileName: string, 
         fileType: string, 
         caption: string,
@@ -114,6 +143,7 @@ const FilesStep = forwardRef( ( prop, ref ) => {
         wordCount: string,
         uploadDate: string,
         uuid: string,
+        reuse: boolean,
         downloadLink: string 
         actions: any }>[] = [  
         {
@@ -198,7 +228,8 @@ const FilesStep = forwardRef( ( prop, ref ) => {
             ),
         },
     ];
-    const reuseFileUrl = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }/reuse`;
+    const reuseFileUrl = 
+        `${ process.env.SUBMISSION_API_URL }/${ props.workflowId }/files/reuse`;
     const oldColumns: TableColumn<{ 
         fileName: string, 
         fileType: string, 
@@ -306,8 +337,8 @@ const FilesStep = forwardRef( ( prop, ref ) => {
 
       return (
         <FilterComponent   
-            filterText={filterText}
-            onFilter={ event => setFilterText(event.target.value)}
+            filterText={ filterText }
+            onFilter={ event => setFilterText( event.target.value ) }
             onClear={ handleClear }
         />
       );
@@ -315,155 +346,233 @@ const FilesStep = forwardRef( ( prop, ref ) => {
     const [isDragActive, setIsDragActive] = useState(false);
     const [ selectedFileType, setSelectedFileType ] = useState('');
     useEffect( () => {
-        const selectedType = formState.fileTypesList?.find( ( item: any ) =>  (
-            parseInt ( item.id ) ===  parseInt( formState.value?.file_type_id )
+        const selectedType = fileTypes?.find( ( item: any ) =>  (
+            parseInt ( item.id ) ===  parseInt( formData?.file_type_id )
         ));
-        setSelectedFileType( selectedType?.attributes?.title );
-    }, [formState.value?.file_type_id]);
+        setSelectedFileType( selectedType?.attributes?.title || '' );
+    }, [formData?.file_type_id]);
     const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
         multiple: false,
-        disabled: formState.formStatus.isDisabled,
+        disabled: formData.formStatus.isDisabled || 
+            ( 
+                formData.captionRequired && 
+                formData.caption === '' 
+            ),
         onDragEnter: () => setIsDragActive( true ),
-        onDragLeave: () => { 
-            dispatch( handleDropzoneStatus( formState.value?.file_type_id !== undefined && formState.value?.file_type_id !== '' ) ); 
+        onDragLeave: () => {
+            setFormData( ( prevState: any ) => ({
+                ...prevState,
+                formStatus: {
+                    isDisabled: formData?.file_type_id === undefined || formData?.file_type_id === '',
+                    fileTypeId: formData?.file_type_id !== undefined && formData?.file_type_id !== ''
+                }
+            }));
             setIsDragActive( false )
         },
         onDropAccepted: ( droppedFiles ) => {
             droppedFiles.forEach( ( file ) => {
-                dispatch( addFile( file ) );
+                addFileTrigger( { 
+                    workflowId: props.workflowId, 
+                    data: {
+                        file_type_id: formData.file_type_id,
+                        caption: formData.caption,
+                        file: file
+                    }
+                }).then( ( response: any ) => {
+                    messageHandler( 
+                        response, { 
+                            errorMessage: 'Failed to add file', 
+                            successMessage: 'File uploaded successfuly' 
+                        } 
+                    );
+                });
             });
         },
     });
 
     return (
-        <>
-            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-            </div>
-            <div id="files" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Files</h3>
-                {
-                    ( details !== undefined && details !== '' ) &&
-                        <Alert severity="error" className="mb-4">
-                            { ReactHtmlParser( details ) }
-                        </Alert>
-                }
-                {
-                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.stepGuide ) }
-                        </Alert>
-                    )
-                }
-                <FormControl className="mb-3 required" error={ !formState.formStatus.fileTypeId && formState.formStatus.isDisabled }>
-                    <FormLabel className="fw-bold mb-1">
-                        File Type
-                    </FormLabel>
-                    { fileTypes ? (
-                        <Autocomplete
-                            required
-                            color="neutral"
-                            size="md"
-                            variant="soft"
-                            placeholder="Choose one…"
-                            disabled={false}
-                            name="fileType"
-                            id="fileType"
-                            options={
-                                Array.isArray( fileTypes ) 
-                                ? fileTypes.map( 
-                                    item => {
-                                        return `${ item.attributes?.title}${ item.attributes.minimum_requirement > 0 ? ' *' : ''}` || ''
-                                    }
-                                   ) : []
-                            }
-                            value={ selectedFileType }
-                            onChange={(event, value) => {
-                                if ( value === '' ) {
-                                    dispatch( handleDropzoneStatus( false ) );
-                                }
-                                dispatch( handleFileType({
-                                    name: 'file_type_id',
-                                    captionRequired: fileTypes.find( 
-                                        ( item: any ) => item.attributes.title === value || `${ item.attributes.title } *` === value )?.attributes.require_caption || '',
-                                    value: fileTypes.find( 
-                                        ( item: any ) => item.attributes.title === value || `${ item.attributes.title } *` === value )?.id || '' } 
+        isLoading
+            ? <StepPlaceholder/>
+            : 
+                <div id="files" className="tab">
+                    <h3 className="mb-4 text-shadow-white">Files</h3>
+                    {
+                        ( props.details !== undefined && props.details !== '' ) &&
+                            <Alert severity="error" className="mb-4">
+                                { ReactHtmlParser( props.details ) }
+                            </Alert>
+                    }
+                    {
+                        typeof stepGuide === 'string' && stepGuide.trim() !== '' && (
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( stepGuide ) }
+                            </Alert>
+                        )
+                    }
+                    <FormControl
+                        className="mb-3 required" 
+                        error={ 
+                            !formData.formStatus.fileTypeId && 
+                            formData.formStatus.isDisabled 
+                        }
+                    >
+                        <FormLabel className="fw-bold mb-1">
+                            File Type
+                        </FormLabel>
+                        { fileTypes ? (
+                            <Autocomplete
+                                required
+                                color="neutral"
+                                size="md"
+                                variant="soft"
+                                placeholder="Choose one…"
+                                disabled={false}
+                                name="fileType"
+                                id="fileType"
+                                options={
+                                    ( 
+                                        fileTypes && 
+                                        Array.isArray( fileTypes ) 
+                                    ) 
+                                        ? fileTypes.map( 
+                                            item => {
+                                                return `${ 
+                                                    item.attributes?.title
+                                                }${ 
+                                                    item.attributes?.minimum_requirement > 0 ? ' *' : ''
+                                                }` || ''
+                                            }
                                         ) 
-                                    )
-                            }}
+                                        : []
+                                }
+                                value={ selectedFileType || '' }
+                                onChange={ ( event, value ) => {
+                                    setSelectedFileType( value || '' );
+                                    setFormData( ( prevState: any ) =>  ({
+                                        ...prevState,
+                                        captionRequired: fileTypes.find( 
+                                            ( item: any ) => 
+                                                item.attributes.title === value 
+                                                    || `${ 
+                                                            item.attributes.title 
+                                                        } *` === value )?.attributes.require_caption 
+                                                    || '',
+                                        file_type_id: fileTypes.find( 
+                                            ( item: any ) => 
+                                                item.attributes.title === value 
+                                                || `${ item.attributes.title } *` === value 
+                                        )?.id || '',       
+                                        formStatus: {
+                                            isDisabled: value === '',
+                                            fileTypeId: value !== ''
+                                        }         
+                                    }))
+                                }}
+                            />
+                            ) : (
+                            <div className="text-danger">
+                                You have to choose a document type first!
+                            </div>
+                        )}
+                        {
+                            ( 
+                                !formData.formStatus.fileTypeId && 
+                                formData.formStatus.isDisabled 
+                            )
+                            && <FormHelperText className="fs-7 text-danger mt-1">
+                                    Please select the file type first
+                                </FormHelperText>
+                        }
+                    </FormControl>
+                    <FormControl 
+                        className={`required mb-3 ${ formData.captionRequired ? ' d-block' : ' d-none' }`} 
+                        error={ formData.captionRequired && !caption['caption'] }
+                    >
+                        <FormLabel className="fw-bold mb-1">
+                            Caption
+                        </FormLabel>
+                        <Input
+                            required={ formData.captionRequired }
+                            variant="soft"
+                            name="fileCaption"
+                            id="fileCaption"
+                            placeholder="Write a caption"
+                            value={ formData?.caption || '' }
+                            onChange={ event =>
+                                setFormData( ( prevState: any ) => ({
+                                    ...prevState,
+                                    caption: event.target.value || ''
+                                }))
+                            }
                         />
-                        ) : (
-                        <div className="text-danger">You have to choose a document type first!</div>
-                    )}
-                    {
-                        ( !formState.formStatus.fileTypeId && formState.formStatus.isDisabled )
-                        && <FormHelperText className="fs-7 text-danger mt-1">Please select the file type first</FormHelperText> 
-                    }
-                </FormControl>
-                <FormControl className={`required mb-3 ${ formState.captionRequired ? ' d-block' : ' d-none' }`} error={ formState.captionRequired && !isValid['caption'] }>
-                    <FormLabel className="fw-bold mb-1">
-                        Caption
-                    </FormLabel>
-                    <Input
-                        required={ formState.captionRequired }
-                        variant="soft"
-                        name="fileCaption"
-                        id="fileCaption"
-                        placeholder="Write a caption"
-                        value={ formState.value?.caption }
-                        onChange={ event => dispatch( handleInput( { name: 'caption', value: event.target.value } ) ) }
-                    />
-                    {
-                        ( formState.captionRequired && !isValid['caption'] ) 
-                        && <FormHelperText className="fs-7 text-danger mt-1">Caption is required</FormHelperText> 
-                    }
-                </FormControl>
-                <div className={`dropzone d-flex align-items-center justify-content-center p-4 mb-4 ${ isDragActive ? 'drag-active' : ''}`}
-                    { ...getRootProps() }>
-                    <input { ...getInputProps() } />
-                    <div className="d-flex flex-column align-items-center justify-content-center">
-                        <i className='d-block fa-duotone fa-file-text text-warning'></i>
-                        <p className="fs-7 text-muted mb-2">Drag and Drop your Your File Here</p>
-                        <Button variant="contained" color="primary" 
-                            onClick={ () => {
-                                dispatch( handleDropzoneStatus( formState.value?.file_type_id !== undefined && formState.value?.file_type_id !== '' ) ); 
-                            }}>
-                            Select File
-                        </Button>
+                        {
+                            ( 
+                                formData.captionRequired && 
+                                formData.caption === '' 
+                            ) 
+                            && <FormHelperText className="fs-7 text-danger mt-1">
+                                    Caption is required
+                               </FormHelperText> 
+                        }
+                    </FormControl>
+                    <div 
+                        className={`dropzone d-flex align-items-center justify-content-center p-4 mb-4 ${ 
+                            isDragActive 
+                                ? 'drag-active' 
+                                : ''
+                            }`
+                        }
+                        { ...getRootProps() }
+                    >
+                        <input { ...getInputProps() } />
+                        <div className="d-flex flex-column align-items-center justify-content-center">
+                            <i className='d-block fa-duotone fa-file-text text-warning'></i>
+                            <p className="fs-7 text-muted mb-2">
+                                Drag and Drop your Your File Here
+                            </p>
+                            <Button variant="contained" color="primary" 
+                                onClick={ () => {
+                                    setFormData( ( prevState: any ) => ({
+                                        ...prevState,
+                                        formStatus: {
+                                            isDisabled: formData?.file_type_id === undefined || formData?.file_type_id === '',
+                                            fileTypeId: formData?.file_type_id !== undefined && formData?.file_type_id !== ''
+                                        }
+                                    }))
+                                }}>
+                                Select File
+                            </Button>
+                        </div>
                     </div>
-                </div>
-                <div className="datatable-container">
-                    <DataTable
-                        className="datatable"
-                        title={ <h4 className="fs-6 mb-0 px-0">Files</h4> }
-                        subHeader
-                        subHeaderComponent={ subHeaderComponentMemo }
-                        persistTableHead
-                        pagination
-                        columns={ newColumns }
-                        data={ newFilteredItems }
-                    />
-                </div>
-                <hr/> 
-                {
-                    formState.oldFilesList.length > 0 &&
                     <div className="datatable-container">
                         <DataTable
-                        className="datatable"
-                            title={ <h4 className="fs-6 mb-0 px-0">Old Files</h4> }
+                            className="datatable"
+                            title={ <h4 className="fs-6 mb-0 px-0">Files</h4> }
                             subHeader
                             subHeaderComponent={ subHeaderComponentMemo }
                             persistTableHead
                             pagination
-                            columns={ oldColumns }
-                            data={ oldFilteredItems }
+                            columns={ newColumns }
+                            data={ newFilteredItems || [] }
                         />
-                    </div> 
-                }
-            </div>
-        </>
+                    </div>
+                    <hr/> 
+                    {
+                        formData.oldFiles?.length > 0 &&
+                            <div className="datatable-container">
+                                <DataTable
+                                    className="datatable"
+                                    title={ <h4 className="fs-6 mb-0 px-0">Old Files</h4> }
+                                    subHeader
+                                    subHeaderComponent={ subHeaderComponentMemo }
+                                    persistTableHead
+                                    pagination
+                                    columns={ oldColumns }
+                                    data={ oldFilteredItems || [] }
+                                />
+                            </div> 
+                    }
+                </div>
     );
 });
 

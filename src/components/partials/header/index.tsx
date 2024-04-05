@@ -1,9 +1,21 @@
 import Image from 'next/image'
-import { useSelector } from 'react-redux'
+import { useEffect, useState } from 'react'
+import { useAppSelector } from '@/app/store'
 import Logo from '@/assets/images/brieflands-logo.png'
+import { useLazyGetUserQuery } from '@/app/services/apiSlice'
+import { Journal, User } from '@/app/services/types'
 
 const Header = () => {
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
+    const journal: Journal = useAppSelector( ( state: any ) => state.wizard.journal );
+    const [ user, setUser ] = useState<User>();
+    const [getUserTrigger]= useLazyGetUserQuery();
+    useEffect(() => {
+        const user = getUserTrigger( 'journal/profile' ).then( 
+            ( response: any ) => { 
+                setUser( response.data ); 
+            } 
+        );
+    }, []);
 
     return (
         <div id="logo" className="d-flex align-items-center justify-content-between">
@@ -17,30 +29,42 @@ const Header = () => {
                             height={25}
                         />
                     </div>
-                    <h1 className="fw-bold ms-3 mb-0 fs-3">Brieflands</h1>
+                    <h1 className="fw-bold ms-3 mb-0 fs-3">
+                        Brieflands
+                    </h1>
                     {
-                        ( wizard.journal !== undefined && Object.keys( wizard.journal ).length > 0 ) &&
+                        ( 
+                            journal !== undefined && 
+                            Object.keys( journal ).length > 0 
+                        ) &&
                             <span className="ms-2 d-none d-md-block fw-bold text-shadow-light">
-                                { `| ${ wizard.journal?.attributes?.title }` }
+                                { 
+                                    journal?.attributes?.title 
+                                        ? `| ${ journal?.attributes?.title }` 
+                                        : '' 
+                                }
                             </span>
                     }
                 </div>
             </div>
             {
-                ( wizard.user !== undefined && Object.keys( wizard.user ).length > 0 ) &&
+                ( 
+                    user !== undefined && 
+                    Object.keys( user ).length > 0 
+                ) &&
                     <div className="logo px-3 d-flex align-items-center">
-                        <span className="me-2 d-none d-md-block text-nowrap fs-7 fw-bold text-blue-light text-shadow-dark">
-                            { wizard.user.attributes?.full_name }
+                        <span 
+                            className="me-2 d-none d-md-block text-nowrap fs-7 fw-bold text-blue-light text-shadow-dark">
+                            { user.attributes?.full_name }
                         </span>
                         <img 
                             className="img-circle img-tiny box-shadow" 
-                            src={ wizard.user?.attributes?.avatar } 
-                            alt={ wizard.user?.attributes?.full_name } 
-                            title={ wizard.user?.attributes?.full_name } 
+                            src={ user?.attributes?.avatar } 
+                            alt={ user?.attributes?.full_name } 
+                            title={ user?.attributes?.full_name } 
                         />
                     </div>
-            }
-            
+            }  
         </div>
     )
 }

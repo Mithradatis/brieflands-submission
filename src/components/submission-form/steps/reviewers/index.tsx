@@ -1,59 +1,93 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import DataTable, { TableColumn } from 'react-data-table-component'
+import { ThunkDispatch } from '@reduxjs/toolkit'
+import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Button, Alert, Skeleton } from '@mui/material'
+import { Button, Alert } from '@mui/material'
 import { Input } from '@mui/joy'
 import { Scrollbars } from 'react-custom-scrollbars'
-import { handleOpen } from '@/lib/features/modal/modalSlice'
-import { formValidator } from '@/lib/features/wizard/wizardSlice'
-import { handleLoading } from '@/lib/features/submission/steps/reviewers/reviewersSlice'
-import { handleDialogOpen } from '@/lib/features/dialog/dialogSlice'
+import { getStepData, getStepGuide } from '@api/client'
+import { loadEditReviewerForm, handleCloseReviewersModal } from '@api/steps/reviewers'
+import { formValidator, Wizard } from '@features/wizard/wizardSlice'
+import { handleOpen, Modal } from '@features/modal/modalSlice'
+import { handleDialogOpen } from '@features/dialog/dialogSlice'
 import { 
-    getReviewersStepGuide, 
-    getReviewersStepData, 
-    loadEditReviewerForm, 
-    handleCloseReviewersModal 
-} from '@/lib/api/steps/reviewers'
+    handleLoading, 
+    setStepData, 
+    setStepGuide 
+} from '@features/submission/steps/reviewers/reviewersSlice'
 
-const FilterComponent = ({ filterText, onFilter, onClear }: { filterText: string, onFilter: (event: React.ChangeEvent<HTMLInputElement>) => void, onClear: () => void }) => (
-    <>
-        <Input
-            variant="soft"
-            size="sm"
-            id="search"
-            type="text"
-            placeholder="Filter By Name"
-            aria-label="Search Input"
-            autoComplete="off"
-            onChange={onFilter}
-            endDecorator={<i className="fa-duotone fa-remove" onClick={onClear}></i>}
-        />
-    </>
+const FilterComponent = (
+    { 
+        filterText, 
+        onFilter,
+        onClear 
+    }: { 
+        filterText: string, 
+        onFilter: ( event: React.ChangeEvent<HTMLInputElement> ) => void, 
+        onClear: () => void }) => (
+            <>
+                <Input
+                    variant="soft"
+                    size="sm"
+                    id="search"
+                    type="text"
+                    placeholder="Filter By Name"
+                    aria-label="Search Input"
+                    autoComplete="off"
+                    onChange={onFilter}
+                    endDecorator={<i className="fa-duotone fa-remove" onClick={onClear}></i>}
+                />
+            </>
 );
 
-const ReviewersStep = forwardRef( ( prop, ref) => {
-    const dispatch: any = useDispatch();
-    const formState = useSelector( ( state: any ) => state.reviewersSlice );
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const modal = useSelector( ( state: any ) => state.modalSlice );
+const ReviewersStep = forwardRef(
+    ( 
+        props: { 
+            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
+            details: string 
+        }, 
+        ref 
+    ) => {
+    const dispatch: ThunkDispatch<any, void, any> = useDispatch();
+    const formState = useSelector( ( state: any ) => state.reviewers );
+    const wizard: Wizard = useSelector( ( state: any ) => state.wizard );
+    const modal: Modal = useSelector( ( state: any ) => state.modal );
     const [filteredItems, setFilteredItems] = useState([]);
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        if ( wizard.formStep === 'reviewers' ) {
-            dispatch( getReviewersStepData( getStepDataFromApi ) );
-            dispatch( getReviewersStepGuide( getDictionaryFromApi ) );
-            dispatch( formValidator( true ) );
-        }
+        dispatch( formValidator( true ) );
     }, []);
     useEffect( () => {
         if ( !modal.modalOpen ) {
-          dispatch( handleCloseReviewersModal() );
+            dispatch( handleCloseReviewersModal() );
         }
-      }, [modal.modalOpen]);
+    }, [modal.modalOpen]);
+    useQuery({
+        queryKey: ['reviewersStepGuide'],
+        queryFn: async () => {
+            const response = await dispatch( getStepGuide( props.apiUrls.stepGuideApiUrl ) );
+            const payload = response.payload;
+            dispatch( setStepGuide( payload ) );
+
+            return payload;
+        },
+        enabled: typeof wizard.workflowId === 'string',
+        gcTime: wizard.cacheDuration
+    });
+    useQuery({
+        queryKey: ['reviewersStepGuide'],
+        queryFn: async () => {
+            const response = await dispatch( getStepData( props.apiUrls.stepDataApiUrl ) );
+            const payload = response.payload;
+            dispatch( setStepData( payload ) );
+
+            return payload;
+        },
+        enabled: typeof wizard.workflowId === 'string',
+        gcTime: wizard.cacheDuration
+    });
     useImperativeHandle(ref, () => ({
         async submitForm () {
             dispatch( handleLoading( true ) );
@@ -62,8 +96,16 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
             return isAllowed;
         }
     }));
-    const deleteReviewerUrl = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }/remove`;
-    const columns: TableColumn<{ email: string, firstname: string, lastname: string, suggested_opposed: string, actions: any }>[] = [
+    const deleteReviewerUrl = 
+        `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${ wizard.formStep }/remove`;
+    const columns: TableColumn<
+        { 
+            email: string, 
+            firstname: string, 
+            lastname: string, 
+            suggested_opposed: string, 
+            actions: any 
+        }>[] = [
         {
           name: 'Email',
           selector: row => row.email,
@@ -124,7 +166,7 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
             ),
         },
     ];
-    const [filterText, setFilterText] = useState('');
+    const [filterText, setFilterText] = useState<string>();
 	const [resetPaginationToggle, setResetPaginationToggle] = useState(false);
     const subHeaderComponentMemo = useMemo(() => {
 		const handleClear = () => {
@@ -136,7 +178,7 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
 
 		return (
 			<FilterComponent   
-                filterText={filterText}
+                filterText={filterText || ''}
                 onFilter={ event => setFilterText(event.target.value)}
                 onClear={ handleClear }
             />
@@ -146,10 +188,11 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
         const filteredData = formState.reviewersList.filter( ( item: any ) => {
             const rowValues = Object.values( item );
             return rowValues.some((value) => {
-                if (typeof value === 'string') {
-                const formattedValue = value.replace(/\s/g, '').toLowerCase();
-                const formattedFilterText = filterText.replace(/\s/g, '').toLowerCase().trim();
-                return formattedValue.includes(formattedFilterText);
+                if ( typeof value === 'string' ) {
+                    const formattedValue = value.replace(/\s/g, '').toLowerCase();
+                    const formattedFilterText = filterText?.replace(/\s/g, '').toLowerCase().trim() || '';
+                    
+                    return formattedValue.includes(formattedFilterText);
                 }
                 return false;
             });
@@ -159,17 +202,23 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
 
     return (
         <>
-            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-            </div>
-            <div id="reviewers" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Reviewers</h3>
+            <StepPlaceholder visibility={ formState.isLoading || typeof formState.stepGuide !== 'string' } />
+            <div 
+                id="reviewers" 
+                className={ `tab ${ 
+                    ( formState.isLoading || typeof formState.stepGuide !== 'string' ) 
+                        ? ' d-none' 
+                        : ' d-block' 
+                    }` 
+                }
+            >
+                <h3 className="mb-4 text-shadow-white">
+                    Reviewers
+                </h3>
                 {
-                    ( details !== undefined && details !== '' ) &&
+                    ( props.details !== undefined && props.details !== '' ) &&
                         <Alert severity="error" className="mb-4">
-                            { ReactHtmlParser( details ) }
+                            { ReactHtmlParser( props.details ) }
                         </Alert>
                 }
                 {   
@@ -188,7 +237,19 @@ const ReviewersStep = forwardRef( ( prop, ref) => {
                             }
                         </Scrollbars>
                 }
-                <Button className="btn btn-primary btn-lg mb-4" onClick={ () => dispatch( handleOpen( { title: 'Add an Reviewer', parent: wizard.formStep } ) ) }>
+                <Button 
+                    className="btn btn-primary btn-lg mb-4" 
+                    onClick={ 
+                        () => dispatch( 
+                            handleOpen( 
+                                { 
+                                    title: 'Add an Reviewer', 
+                                    parent: wizard.formStep 
+                                } 
+                            ) 
+                        ) 
+                    }
+                >
                     Add Reviewer
                 </Button>
                 {

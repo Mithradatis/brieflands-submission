@@ -1,12 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { 
-  getFilesStepGuide, 
-  getFilesStepData, 
-  deleteFile, 
-  addFile, 
-  getFileTypes, 
-  reuseFile 
-} from '@/lib/api/steps/files'
+import { addFile, deleteFile, reuseFile } from '@api/steps/files'
 
 interface Value {
   old_files: string,
@@ -15,43 +8,76 @@ interface Value {
   caption: string
 }
 
-interface File {
-  id: number,
-  fileName: string,
-  fileType: string,
-  caption: string,
-  fileSize: string,
-  wordCount: string,
-  uploadDate: string,
-  uuid: string,
-  reuse: boolean
+export type File = {
+  id: number;
+  fileName: string;
+  fileType: string;
+  caption: string;
+  fileSize: string;
+  wordCount: string;
+  uploadDate: string;
+  uuid: string;
+  reuse: boolean;
+  downloadLink: string;
+  actions: any;
+}
+
+export type Files = {
+  isLoading: boolean;
+  captionRequired: boolean,
+  formStatus: {
+    isDisabled: boolean,
+    fileTypeId: boolean,
+  },
+  stepGuide: object | string,
+  fileTypesList: FileTypesListItem[],
+  oldFilesList: File[],
+  newFilesList: File[],
+  value: Value
+}
+
+type FileTypesListItem = {
+  id: number | string;
+  type: string;
+  attributes: {
+    add_line_number: boolean;
+    calculate_word_count: boolean;
+    check_plagiarism: boolean;
+    data: {
+      allowed_extentions: string[];
+    };
+    description: string;
+    included_in_fee: boolean;
+    maximum_requirement: number;
+    minimum_requirement: number;
+    order_in_pdf: number;
+    require_caption: boolean;
+    reusable: boolean;
+    slug: string;
+    title: string;
+    use_in: number;
+    visible_to_reviewers: boolean;
+  }
+}
+
+const initialState: Files = {
+  isLoading: false,
+  captionRequired: false,
+  formStatus: {
+    isDisabled: true,
+    fileTypeId: true,
+  },
+  stepGuide: {},
+  fileTypesList: [] as FileTypesListItem[],
+  oldFilesList: [] as File[],
+  newFilesList: [] as File[],
+  value: {} as Value
 }
 
 export const filesSlice = createSlice({
   name: 'files',
-  initialState: {
-    isLoading: false,
-    captionRequired: false,
-    formStatus: {
-      isDisabled: true,
-      fileTypeId: true,
-    },
-    stepGuide: {},
-    fileTypesList: [],
-    oldFilesList: [] as File[],
-    newFilesList: [] as File[],
-    value: {} as Value
-  },
+  initialState: initialState,
   reducers: {
-    handleDropzoneStatus: ( state, action ) => {
-      return {
-        ...state,
-        formStatus: {
-          isDisabled: !action.payload,
-          fileTypeId: state.value?.file_type_id !== undefined && state.value?.file_type_id !== ''
-        }
-      }
-    },
     handleFileType: ( state, action ) => {
       return {
         ...state,
@@ -78,251 +104,44 @@ export const filesSlice = createSlice({
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
     },
+    setFileTypes: ( state, action ) => {
+      state.fileTypesList = action.payload.data;
+    },
     setLoading: ( state, action ) => {
       state.isLoading = action.payload;
     }
   },
   extraReducers( builder ) {
     builder
-    .addCase(getFilesStepGuide.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getFilesStepGuide.fulfilled, ( state, action ) => {
-      state.isLoading = false;
-      state.stepGuide = action.payload.data.value;
-    })
-    .addCase(getFileTypes.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getFileTypes.fulfilled, ( state, action ) => {
-      state.isLoading = false;
-      state.fileTypesList = action.payload.data;
-    })
-    .addCase(getFilesStepData.pending, ( state ) => {
-      state.isLoading = true;
-    })
-    .addCase(getFilesStepData.fulfilled, ( state, action ) => {
-      state.isLoading = false;
-      state.oldFilesList = [];
-      state.newFilesList = [];
-      const oldFiles = action.payload.data.step_data.old_files || {};
-      const oldKeys = Object.keys( oldFiles );
-      if ( oldKeys.length > 0 ) {
-        for (let index = 0; index < oldKeys.length; index++) {
-          const key: any = oldKeys[index];
-          const value: any = oldFiles[key];
-          state.oldFilesList.push(
-            {
-              id: ( index + 1 ),
-              fileName: value.name || '', 
-              fileType: value.type || value.type || '',
-              caption: value.caption || value.caption || '',
-              fileSize: value.size || value.size || '',
-              wordCount: value.word_count || value.word_count || '',
-              uploadDate: value.createdAt || value.createdAt || '',
-              uuid: value.uuid || value.uuid || '',
-              reuse: value.reuse || value.reuse || ''
-            }
-          );
-        }
-      }
-      const newFiles = action.payload.data.step_data.new_files;
-      const newKeys = Object.keys( newFiles );
-      if ( newKeys.length > 0 ) {
-        for (let index = 0; index < newKeys.length; index++) {
-          const key: any = newKeys[index];
-          const value: any = newFiles[key];
-          state.newFilesList.push(
-            {
-              id: ( index + 1 ),
-              fileName: value.name || '', 
-              fileType: value.type || value.type || '',
-              caption: value.caption || value.caption || '',
-              fileSize: value.size || value.size || '',
-              wordCount: value.word_count || value.word_count || '',
-              uploadDate: value.createdAt || value.createdAt || '',
-              uuid: value.uuid || value.uuid || '',
-              reuse: false
-            }
-          );
-        }
-      }
-      state.value.old_files = oldFiles;
-      state.value.new_files = newFiles;
-      state.value.caption = '';
-      state.value.file_type_id = '';
-    }).addCase(deleteFile.pending, ( state ) => {
+    .addCase(deleteFile.pending, ( state ) => {
       state.isLoading = true;
     })
     .addCase(deleteFile.fulfilled, ( state, action ) => {
       state.isLoading = false;
-      state.oldFilesList = [];
-      state.newFilesList = [];
       const oldFiles = action.payload.data.step_data.old_files;
-      const oldKeys = Object.keys( oldFiles );
-      if ( oldKeys.length > 0 ) {
-        for (let index = 0; index < oldKeys.length; index++) {
-          const key: any = oldKeys[index];
-          const value: any = oldFiles[key];
-          state.oldFilesList.push(
-            {
-              id: ( index + 1 ),
-              fileName: value.name || '', 
-              fileType: value.type || value.type || '',
-              caption: value.caption || value.caption || '',
-              fileSize: value.size || value.size || '',
-              wordCount: value.word_count || value.word_count || '',
-              uploadDate: value.createdAt || value.createdAt || '',
-              uuid: value.uuid || value.uuid || '',
-              reuse: value.reuse || value.reuse || ''
-            }
-          );
-        }
-      }
       const newFiles = action.payload.data.step_data.new_files;
-      const newKeys = Object.keys( newFiles );
-      if ( newKeys.length > 0 ) {
-        for (let index = 0; index < newKeys.length; index++) {
-          const key: any = newKeys[index];
-          const value: any = newFiles[key];
-          state.newFilesList.push(
-            {
-              id: ( index + 1 ),
-              fileName: value.name || '', 
-              fileType: value.type || value.type || '',
-              caption: value.caption || value.caption || '',
-              fileSize: value.size || value.size || '',
-              wordCount: value.word_count || value.word_count || '',
-              uploadDate: value.createdAt || value.createdAt || '',
-              uuid: value.uuid || value.uuid || '',
-              reuse: false
-            }
-          );
-        }
-      }
-      state.value.old_files = oldFiles;
-      state.value.new_files = newFiles;
-      state.value.caption = '';
-      state.value.file_type_id = '';
+      createFileTable( state, oldFiles, newFiles );
     }).addCase(addFile.pending, ( state ) => {
       state.isLoading = true;
     })
-    .addCase(addFile.fulfilled, ( state, action: any ) => {
-      state.isLoading = false;
-      state.value.file_type_id = '';
-      state.captionRequired = false;
-      state.value.caption = '';
-      state.oldFilesList = [];
-      state.newFilesList = [];
-      const oldFiles = action.payload.data.step_data.old_files;
-      const oldKeys = Object.keys( oldFiles );
-      if ( oldKeys.length > 0 ) {
-        for (let index = 0; index < oldKeys.length; index++) {
-          const key: any = oldKeys[index];
-          const value: any = oldFiles[key];
-          state.oldFilesList.push(
-            {
-              id: ( index + 1 ),
-              fileName: value.name || '', 
-              fileType: value.type || value.type || '',
-              caption: value.caption || value.caption || '',
-              fileSize: value.size || value.size || '',
-              wordCount: value.word_count || value.word_count || '',
-              uploadDate: value.createdAt || value.createdAt || '',
-              uuid: value.uuid || value.uuid || '',
-              reuse: value.reuse || value.reuse || ''
-            }
-          );
-        }
-      }
-      const newFiles = action.payload.data.step_data.new_files;
-      const newKeys = Object.keys( newFiles );
-      if ( newKeys.length > 0 ) {
-        for (let index = 0; index < newKeys.length; index++) {
-          const key: any = newKeys[index];
-          const value: any = newFiles[key];
-          state.newFilesList.push(
-            {
-              id: ( index + 1 ),
-              fileName: value.name || '', 
-              fileType: value.type || value.type || '',
-              caption: value.caption || value.caption || '',
-              fileSize: value.size || value.size || '',
-              wordCount: value.word_count || value.word_count || '',
-              uploadDate: value.createdAt || value.createdAt || '',
-              uuid: value.uuid || value.uuid || '',
-              reuse: false
-            }
-          );
-        }
-      }
-      state.value.old_files = oldFiles;
-      state.value.new_files = newFiles;
-      state.value.caption = '';
-      state.value.file_type_id = '';
-    }).addCase(reuseFile.pending, ( state ) => {
+    .addCase(reuseFile.pending, ( state ) => {
       state.isLoading = true;
     })
-    .addCase(reuseFile.fulfilled, ( state, action: any ) => {
+    .addCase(reuseFile.fulfilled, ( state, action ) => {
       state.isLoading = false;
-      state.oldFilesList = [];
-      state.newFilesList = [];
       const oldFiles = action.payload.data.step_data.old_files;
-      const oldKeys = Object.keys( oldFiles );
-      if ( oldKeys.length > 0 ) {
-        for (let index = 0; index < oldKeys.length; index++) {
-          const key: any = oldKeys[index];
-          const value: any = oldFiles[key];
-          state.oldFilesList.push(
-            {
-              id: ( index + 1 ),
-              fileName: value.name || '', 
-              fileType: value.type || value.type || '',
-              caption: value.caption || value.caption || '',
-              fileSize: value.size || value.size || '',
-              wordCount: value.word_count || value.word_count || '',
-              uploadDate: value.createdAt || value.createdAt || '',
-              uuid: value.uuid || value.uuid || '',
-              reuse: value.reuse || value.reuse || ''
-            }
-          );
-        }
-      }
       const newFiles = action.payload.data.step_data.new_files;
-      const newKeys = Object.keys( newFiles );
-      if ( newKeys.length > 0 ) {
-        for (let index = 0; index < newKeys.length; index++) {
-          const key: any = newKeys[index];
-          const value: any = newFiles[key];
-          state.newFilesList.push(
-            {
-              id: ( index + 1 ),
-              fileName: value.name || '', 
-              fileType: value.type || value.type || '',
-              caption: value.caption || value.caption || '',
-              fileSize: value.size || value.size || '',
-              wordCount: value.word_count || value.word_count || '',
-              uploadDate: value.createdAt || value.createdAt || '',
-              uuid: value.uuid || value.uuid || '',
-              reuse: false
-            }
-          );
-        }
-      }
-      state.value.old_files = oldFiles;
-      state.value.new_files = newFiles;
-      state.value.caption = '';
-      state.value.file_type_id = '';
+      createFileTable( state, oldFiles, newFiles );
     });
   },
 });
 
 export const { 
   handleFileType, 
-  handleInput, 
-  handleDropzoneStatus, 
-  handleLoading, 
-  setLoading 
+  handleInput,  
+  handleLoading,
+  setFileTypes,
+  setLoading
 } = filesSlice.actions;
 
 export default filesSlice.reducer;

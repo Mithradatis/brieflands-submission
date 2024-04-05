@@ -1,11 +1,13 @@
+'use client'
+
 import { useState, useEffect } from 'react'
 import { Button } from '@mui/material'
-import { useDispatch, useSelector } from 'react-redux'
-import { saveModal } from '@/lib/features/modal/modalSlice'
-import { saveAuthorModal, resetAddAuthorForm } from '@/lib/features/modal/addAuthorModalSlice'
-import { saveReviewerModal, resetAddReviewerForm } from '@/lib/features/modal/addReviewerModalSlice'
-import { handleAuthorOperation, handleCloseAuthorModal } from '@/lib/api/steps/authors'
-import { handleReviewerOperation } from '@/lib/api/steps/reviewers'
+import { useAppDispatch, useAppSelector } from '@/app/store'
+import { saveModal } from '@features/modal/modalSlice'
+import { saveAuthorModal, resetAddAuthorForm } from '@features/modal/addAuthorModalSlice'
+import { saveReviewerModal, resetAddReviewerForm } from '@features/modal/addReviewerModalSlice'
+import { handleAuthorOperation, handleCloseAuthorModal } from '@/app/services/steps/authors'
+import { handleReviewerOperation } from '@api/steps/reviewers'
 import { Scrollbars } from 'react-custom-scrollbars-2'
 import AddAuthorModal from '@/components/modal/forms/add-author'
 import AddReviewerModal from '@/components/modal/forms/add-reviewer'
@@ -15,9 +17,10 @@ import ModalFlashMessage from '@/components/snackbar/snackbar-modal'
 const ModalContent = () => {
     const [renderedComponent, setRenderedComponent] = useState<React.ReactNode | null>(null);
     const [ action, setAction ] = useState<React.ReactNode | null>( null );
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
-    const modalData = useSelector( ( state: any ) => state.modalSlice );
-    const dispatch: any = useDispatch();
+    const wizard = useAppSelector( ( state: any ) => state.wizard );
+    const modalData = useAppSelector( ( state: any ) => state.modal );
+    const modalFormData = useAppSelector( ( state: any ) => state.addAuthorModal );
+    const dispatch = useAppDispatch();
     useEffect(() => {
         switch ( modalData.modalForm ) {
           case 'authors':
@@ -42,7 +45,7 @@ const ModalContent = () => {
             case 'authors':
                 setAction(
                     <Button className="btn btn-primary" 
-                        onClick={ () => { 
+                        onClick={ () => {
                             dispatch( handleAuthorOperation() );
                           } 
                         }>

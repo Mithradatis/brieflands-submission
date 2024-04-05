@@ -1,41 +1,52 @@
+import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
-import { useEffect, forwardRef, useImperativeHandle } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { Alert, Skeleton } from '@mui/material'
+import { useEffect, forwardRef, useImperativeHandle, useState } from 'react'
+import { useAppDispatch, useAppSelector } from '@/app/store'
+import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, createFilterOptions } from '@mui/joy'
-import { formValidator } from '@/lib/features/wizard/wizardSlice'
-import { handleInput, handleLoading } from '@/lib/features/submission/steps/classifications/classificationsSlice'
-import { 
-    getClassificationsList, 
-    getClassificationsStepData, 
-    getClassificationsStepGuide, 
-    updateClassificationsStepData 
-} from '@/lib/api/steps/classifications'
+import { formValidator } from '@features/wizard/wizardSlice'
+import {  handleLoading } from '@features/submission/steps/classifications/classificationsSlice'
+import { useGetStepDataQuery, useGetStepGuideQuery, useUpdateStepDataMutation } from '@/app/services/apiSlice'
+import { useGetClassificationsQuery } from '@/app/services/steps/classifications' 
 
-const ClassificationsStep = forwardRef( ( prop, ref ) => {
-    const dispatch: any = useDispatch();
-    const formState = useSelector( ( state: any ) => state.classificationsSlice );
-    const wizard = useSelector( ( state: any ) => state.wizardSlice );
+const ClassificationsStep = forwardRef(
+    ( 
+        props: { 
+            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
+            details: string 
+        }, 
+        ref 
+    ) => {
+    const [ formData, setFormData ] = useState<any>({
+        ids: []
+    });
+    const dispatch = useAppDispatch();
+    const isVerified = useAppSelector( ( state: any ) => state.wizard.isVerified );
+    const { data: classifications, isLoading: classificationsIsLoading } = useGetClassificationsQuery();
+    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
+    const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
+    const isLoading: boolean = ( classificationsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
+    const [ updateStepDataTrigger ] = useUpdateStepDataMutation();
     const filter = createFilterOptions();
-    const details = wizard.screeningDetails?.find( ( item: any ) => 
-        ( item.attributes?.step_slug === wizard.formStep && item.attributes?.status === 'invalid' ) )?.attributes?.detail || '';
-    const getAllClassificationsFromApi = `${ process.env.API_URL }/journal/classification`;
-    const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/${wizard.formStep}`;
-    const getDictionaryFromApi = `${ process.env.DICTIONARY_API_URL }/journal.submission.step.${wizard.formStep}`;
     useEffect(() => {
-        if ( wizard.formStep === 'classifications' ) {
-            dispatch( getClassificationsList( getAllClassificationsFromApi ) );
-            dispatch( getClassificationsStepData( getStepDataFromApi ) );
-            dispatch( getClassificationsStepGuide( getDictionaryFromApi ) );
-            dispatch( formValidator( true ) );
+        if ( stepData ) {
+            setFormData( { ids: stepData } );
         }
+    }, [stepData]);
+    useEffect(() => {
+        dispatch( formValidator( true ) );
     }, []);
     useImperativeHandle(ref, () => ({
         async submitForm () {
           dispatch( handleLoading( true ) );
           let isAllowed = false;   
           try {
-            await dispatch( updateClassificationsStepData( getStepDataFromApi ) );
+            await updateStepDataTrigger( 
+                { 
+                    url: props.apiUrls.stepDataApiUrl, 
+                    data: formData 
+                } 
+            );
             isAllowed = true;
           } catch (error) {
             console.error("Error while submitting form:", error);
@@ -46,82 +57,87 @@ const ClassificationsStep = forwardRef( ( prop, ref ) => {
     }));
 
     return (
-        <>
-            <div className={ `step-loader ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-block' : ' d-none' }` }>
-                <Skeleton variant="rectangular" height={200} className="w-100 rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded mb-3"></Skeleton>
-                <Skeleton variant="rectangular" width="100" height={35} className="rounded"></Skeleton>
-            </div>
-            <div id="classifications" className={ `tab ${ ( formState.isLoading || typeof formState.stepGuide !== 'string' ) ? ' d-none' : ' d-block' }` }>
-                <h3 className="mb-4 text-shadow-white">Classifications</h3>
-                {
-                    ( details !== undefined && details !== '' ) &&
-                        <Alert severity="error" className="mb-4">
-                            { ReactHtmlParser( details ) }
-                        </Alert>
-                }
-                {
-                    typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
-                        <Alert severity="info" className="mb-4">
-                            { ReactHtmlParser( formState.stepGuide ) }
-                        </Alert>
-                    )
-                }
-                <FormControl className="mb-3">
-                    <FormLabel className="fw-bold mb-2">
-                        Please Choose
-                    </FormLabel>
-                    <Autocomplete
-                        multiple
-                        required
-                        color="neutral"
-                        size="md"
-                        variant="soft"
-                        placeholder="Choose one…"
-                        disabled={false}
-                        name="ids"
-                        id="ids"
-                        options={ 
-                            Array.isArray( formState.classificationsList ) 
-                            ? formState.classificationsList.map( 
-                                ( item: any ) => {
-                                    return item.attributes?.title || '' 
-                                }
-                               ) : []
-                        }
-                        value={
-                            Array.isArray( formState.classificationsList ) && formState.value?.ids.length > 0
-                              ? formState.classificationsList
-                                  .filter( ( item: any ) => formState.value?.ids.includes( item.id ) )
-                                  .map( ( item: any ) => item.attributes.title )
-                              : []
-                        }
-                        onChange={(event, value) => {
-                            const selectedIds = value.map((selectedItem) => {
-                              const selectedOption = formState.classificationsList.find(
-                                ( item: any ) => item.attributes.title === selectedItem
-                              );
-                              return selectedOption ? selectedOption.id : '';
-                            });
-                            dispatch(handleInput({ name: 'ids', value: selectedIds }));
-                        }}
-                        filterOptions={(options, params) => {
-                            const filtered = filter(options, params);
-                            const { inputValue } = params;
-                            const isExisting = options.some((option) => inputValue === option);
-                    
-                            if (inputValue !== '' && !isExisting) {
-                                filtered.push('Nothing found');
+        isLoading
+            ? <StepPlaceholder />
+            :
+                <div id="classifications" className="tab">
+                    <h3 className="mb-4 text-shadow-white">Classifications</h3>
+                    {
+                        ( props.details !== undefined && props.details !== '' ) &&
+                            <Alert severity="error" className="mb-4">
+                                { ReactHtmlParser( props.details ) }
+                            </Alert>
+                    }
+                    {
+                        ( 
+                            stepGuide === 'string' && 
+                            stepGuide.trim() !== '' 
+                        ) && (
+                            <Alert severity="info" className="mb-4">
+                                { ReactHtmlParser( stepGuide ) }
+                            </Alert>
+                        )
+                    }
+                    <FormControl className="mb-3">
+                        <FormLabel className="fw-bold mb-2">
+                            Please Choose
+                        </FormLabel>
+                        <Autocomplete
+                            multiple
+                            required
+                            color="neutral"
+                            size="md"
+                            variant="soft"
+                            placeholder="Choose one…"
+                            disabled={false}
+                            name="ids"
+                            id="ids"
+                            options={ 
+                                Array.isArray( classifications ) 
+                                ? classifications.map( 
+                                    ( item: any ) => {
+                                        return item.attributes?.title || '' 
+                                    }
+                                ) : []
                             }
-                    
-                            return filtered.filter( ( option: any ) => {
-                                return option !== 'Nothing found' || isExisting;
-                            });
-                        }}
-                    />
-                </FormControl>
-            </div>
-        </>
+                            value={
+                                ( 
+                                    Array.isArray( classifications ) && 
+                                    formData?.ids?.length > 0 
+                                )
+                                ? classifications
+                                    .filter ( 
+                                        ( item: any ) => formData?.ids.includes( item.id )
+                                    )
+                                    .map( ( item: any ) => item.attributes.title )
+                                : []
+                            }
+                            onChange={ ( event, value ) => {
+                                const selectedIds = value.map( ( selectedItem ) => {
+                                    const selectedOption = classifications.find(
+                                        ( item: any ) => item.attributes.title === selectedItem
+                                    );
+
+                                    return selectedOption ? selectedOption.id : '';
+                                });
+                                setFormData({ ids: selectedIds });
+                            }}
+                            filterOptions={(options, params) => {
+                                const filtered = filter(options, params);
+                                const { inputValue } = params;
+                                const isExisting = options.some((option) => inputValue === option);
+                        
+                                if (inputValue !== '' && !isExisting) {
+                                    filtered.push('Nothing found');
+                                }
+                        
+                                return filtered.filter( ( option: any ) => {
+                                    return option !== 'Nothing found' || isExisting;
+                                });
+                            }}
+                        />
+                    </FormControl>
+                </div>
     );
 });
 

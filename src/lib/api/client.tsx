@@ -1,43 +1,66 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { handleSnackbarOpen } from '@/lib/features/snackbar/snackbarSlice'
+import { handleSnackbarOpen } from '@features/snackbar/snackbarSlice'
 
-const cacheDuration: number = parseInt( process.env.CACHE_DURATION ?? '0' );
-const cache: any = {};
-
-export const fetchDataFromApi = async ( url: string, cacheKey: string = '' ): Promise<any> => {
+export const fetchDataFromApi = async ( url: string ) => {
   try {
-    const now = Date.now();
-    if ( cache.hasOwnProperty( cacheKey ) ) {
-      if ( cache[cacheKey].data && now - cache[cacheKey].timestamp < cacheDuration ) {
-        return cache[cacheKey]['data'];
-      }
-    }
     const response = await fetch(url, {
       method: 'GET',
       credentials: 'include',
       redirect: 'follow',
     });
-
     if ( !response.ok ) {
       throw new Error('Something went wrong!');
     }
 
-    const data = await response.json();
-    if ( !cache[cacheKey] ) {
-      cache[cacheKey] = {};
-    }
-    cache[cacheKey]['data'] = data;
-    cache[cacheKey]['timestamp'] = now;
-
-    return data;
+    return response.json();
   } catch ( error ) {
     throw error;
   }
 };
 
-export const deleteCache = ( cacheKey: string ) => {
-  delete cache[cacheKey];
-}
+export const getStepData = createAsyncThunk(
+  'submission/getStepData',
+  async ( url: string ) => {
+    return await fetchDataFromApi( url );
+  }
+)
+
+export const getStepGuide = createAsyncThunk(
+  'submission/getStepGuide',
+  async ( url: string ) => {
+    return await fetchDataFromApi( url );
+  }
+)
+
+export const updateStepData = createAsyncThunk(
+  'submission/updateStepData',
+  async ( payload: { url: string; step: string; data?: any }, { getState } ) => {
+    try {
+      let { url, step, data } = payload;
+      const state: any = getState();
+      if ( data === undefined ) {
+        data = state[`${ step }Slice`].value;
+      }
+      const response = await fetch( url, {
+        method: 'POST',
+        credentials: 'include',
+        redirect: 'follow',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify( data ),
+      });
+      if ( !response.ok ) {
+        throw new Error(`Failed to update ${ step.replace(/_/g, ' ') } step`);
+      }
+      const jsonData = await response.json();
+
+      return jsonData;
+    } catch (error) {
+      throw error;
+    }
+  }
+);
 
 export const getSubmissionSteps = createAsyncThunk(
   'submission/getSubmissionSteps',
@@ -59,6 +82,7 @@ export const getSubmissionSteps = createAsyncThunk(
       }
 
       const data = await response.json();
+
       return data;
     } catch (error) {
       return error;
@@ -75,7 +99,6 @@ export const getJournal = createAsyncThunk(
         credentials: 'include',
         redirect: 'follow'
       });
-
       const data = await response.json();
       
       return data;
@@ -94,7 +117,6 @@ export const getUser = createAsyncThunk(
         credentials: 'include',
         redirect: 'follow'
       });
-
       const data = await response.json();
       
       return data;
@@ -113,7 +135,6 @@ export const getScreening = createAsyncThunk(
         credentials: 'include',
         redirect: 'follow'
       });
-
       if ( !response.ok ) {
         if ( response.status === 403 ) {
           const errorData = await response.json();
@@ -122,7 +143,6 @@ export const getScreening = createAsyncThunk(
         
         return false;
       }
-
       const data = await response.json();
       
       return data;

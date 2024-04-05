@@ -1,20 +1,30 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { 
-  getClassificationsStepGuide, 
-  getClassificationsList, 
-  getClassificationsStepData } from '@/lib/api/steps/classifications'
 
+type Value = {
+  ids: string[]
+}
+  
+type Classification = {
+  id: string;
+}
+
+export type Classifications = {
+  isLoading: boolean,
+  stepGuide: object | string,
+  classificationsList: Classification[],
+  value: Value
+}
+
+const initialState: Classifications = {
+  isLoading: false,
+  stepGuide: {},
+  classificationsList: [],
+  value: {} as Value
+}
+  
 export const classificationsSlice = createSlice({
   name: 'classifications',
-  initialState: {
-    isLoading: false,
-    isVisited: false,
-    stepGuide: {},
-    classificationsList: [{}],
-    value: {
-      ids: []
-    }
-  },
+  initialState: initialState,
   reducers: {
     handleInput: ( state, action ) => {
       return {
@@ -27,43 +37,27 @@ export const classificationsSlice = createSlice({
     },
     handleLoading: ( state, action ) => {
       state.isLoading = action.payload;
+    },
+    setClassificationsList: ( state, action ) => {
+      state.classificationsList = action.payload.data;
+    },
+    setStepData: ( state, action ) => {
+      state.value.ids = action.payload.data.step_data || state.value?.ids;
+    },
+    setStepGuide: ( state, action ) => {
+      if ( Object.keys(action.payload).length > 0 ) {
+        state.stepGuide = action.payload.data.value;
+      }
     }
-  },
-  extraReducers( builder ) {
-    builder
-      .addCase( getClassificationsStepGuide.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase( getClassificationsStepGuide.fulfilled, ( state, action: any ) => {
-        state.isLoading = false;
-        if ( Object.keys(action.payload).length > 0 ) {
-          state.stepGuide = action.payload.data.value;
-        }
-      })
-      .addCase(getClassificationsList.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(getClassificationsList.fulfilled, ( state, action: any ) => {
-        state.isLoading = false;
-        state.classificationsList = action.payload.data;
-      })
-      .addCase(getClassificationsStepData.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(getClassificationsStepData.fulfilled, (state, action: any) => {
-        const { data } = action.payload;
-        return {
-          ...state,
-          isLoading: false,
-          value: {
-            ...state.value,
-            ids: data.step_data || state.value?.ids,
-          },
-        };
-      });
   },
 });
 
-export const { handleInput, handleLoading } = classificationsSlice.actions;
+export const { 
+  handleInput, 
+  handleLoading,
+  setClassificationsList,
+  setStepData,
+  setStepGuide
+} = classificationsSlice.actions;
 
 export default classificationsSlice.reducer;

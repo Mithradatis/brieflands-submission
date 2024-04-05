@@ -1,5 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { searchPeople, getAllCountries, loadEditAuthorForm, handleCloseAuthorModal } from '@/lib/api/steps/authors'
+import { 
+  searchPeople, 
+  loadEditAuthorForm, 
+  handleCloseAuthorModal 
+} from '@api/steps/authors'
 
 interface AuthorModalState {
   isVerified: boolean;
@@ -95,18 +99,6 @@ export const addAuthorModalSlice = createSlice({
         disabledInputs: action.payload
       }
     },
-    saveAuthorModal : ( state ) => {
-      return {
-        ...state,
-        value: {}
-      };
-    },
-    setModalData: ( state, action ) => {
-      return {
-        ...state,
-        value: action.payload
-      };
-    },
     resetAddAuthorForm: ( state ) => {
       return {
         ...state,
@@ -120,7 +112,19 @@ export const addAuthorModalSlice = createSlice({
         },
         value: {}
       };
-    }
+    },
+    saveAuthorModal : ( state ) => {
+      return {
+        ...state,
+        value: {}
+      };
+    },
+    setModalData: ( state, action ) => {
+      return {
+        ...state,
+        value: action.payload
+      };
+    },
   },
   extraReducers: ( builder ) => {
     builder
@@ -178,21 +182,8 @@ export const addAuthorModalSlice = createSlice({
           state.inputStatus.middleName = true;
           state.inputStatus.lastName = true;
         }
-      }).addCase(getAllCountries.pending, ( state ) => {
-        state.isLoading = true;
-      }).addCase(getAllCountries.fulfilled, ( state, action ) => {
-        state.isLoading = false;
-        const countriesList: any = [];
-        const countriesPhoneList: any = [];
-        if ( action.payload.data !== undefined && action.payload.data.length > 0 ) {
-          action.payload.data.forEach( ( country: any ) => {
-            countriesList.push({ id: parseInt( country.id ), label: country.attributes.title });
-            countriesPhoneList.push({ id: parseInt( country.id ), label: country.attributes.title });
-          });
-          state.countriesList = countriesList;
-          state.countriesPhoneList = countriesList;
-        }
-      }).addCase(loadEditAuthorForm.pending, ( state ) => {
+      })
+      .addCase(loadEditAuthorForm.pending, ( state ) => {
         state.isLoading = true;
       }).addCase(loadEditAuthorForm.fulfilled, ( state ) => {
         state.isLoading = false;
