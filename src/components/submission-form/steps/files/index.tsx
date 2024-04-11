@@ -1,5 +1,6 @@
 import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
+import useMessageHandler from '@/app/services/messages'
 import DataTable, { TableColumn } from 'react-data-table-component'
 import { useState, useEffect, forwardRef, useImperativeHandle, useMemo } from 'react'
 import { Alert, Button } from '@mui/material'
@@ -8,17 +9,13 @@ import {  Autocomplete, FormHelperText, Input, FormLabel, FormControl } from '@m
 import { useDropzone } from 'react-dropzone'
 import { formValidator } from '@features/wizard/wizardSlice'
 import { handleDialogOpen } from '@features/dialog/dialogSlice'
-import messageHandler from '@/app/services/messages'
-import { File, handleLoading } from '@features/submission/steps/files/filesSlice'
+import { type File } from '@/app/services/types/file'
 import { useGetStepDataQuery, useGetStepGuideQuery } from '@/app/services/apiSlice'
 import { 
     useGetFileTypesQuery, 
     useAddFileMutation,
-    useDeleteFileMutation,
-    useReuseFileMutation, 
     createFileTable 
 } from '@/app/services/steps/files'
-import useMessageHandler from '@/app/services/messages'
 const FilterComponent = (
     { filterText, onFilter, onClear }: { 
         filterText: string, 
@@ -125,8 +122,7 @@ const FilesStep = forwardRef(
         setOldFilteredItems( oldfilteredData );
     }, [formData.oldFiles, filterText]);
     useImperativeHandle(ref, () => ({
-        async submitForm () {
-          await dispatch( handleLoading( true ) );  
+        async submitForm () { 
           let isAllowed = true;
 
           return isAllowed;
@@ -512,7 +508,7 @@ const FilesStep = forwardRef(
                             ) 
                             && <FormHelperText className="fs-7 text-danger mt-1">
                                     Caption is required
-                               </FormHelperText> 
+                               </FormHelperText>
                         }
                     </FormControl>
                     <div 

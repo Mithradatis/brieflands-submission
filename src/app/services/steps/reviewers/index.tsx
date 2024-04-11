@@ -1,29 +1,33 @@
+import { submissionApi } from '@/app/services/apiSlice'
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { handleOpen, setModalActionButton, saveModal, setFormIsValid, setFormIsInvalid } from '@features/modal/modalSlice'
 import { saveReviewerModal, setModalData } from '@features/modal/addReviewerModalSlice'
 import { handleSnackbarOpen } from '@features/snackbar/snackbarSlice'
-import { fetchDataFromApi } from '@api/client'
 
-export const getReviewersStepGuide = createAsyncThunk(
-  'submission/getReviewersStepGuide',
-  async ( url: string ) => {
-    return fetchDataFromApi( url );
-  }
-);
+export const reviewersApi = submissionApi.injectEndpoints({
+  endpoints: ( build: any ) => ({
+    getReviewers: build.query({
+      query: ( workflowId: string ) => `${ process.env.API_URL }/${ process.env.SUBMISSION_API_URL }/${ workflowId }/`,
+      transformResponse: ( response: { data: { affiliations: object[] } } ) => response.data.affiliations
+    }),
+    deleteReviewer: build.mutation({
+      query: ( data: string) => ({
+        url: ``,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify( data ),
+      }),
+      transformResponse: ( response: any ) => response.data.attributes.storage.authors
+    })
+  })
+})
 
-export const getReviewers = createAsyncThunk(
-  'submission/getReviewers',
-  async ( url: string ) => {
-    return fetchDataFromApi( url );
-  }
-);
-
-export const getReviewersStepData = createAsyncThunk(
-  'submission/getReviewersStepData',
-  async (url: string) => {
-    return fetchDataFromApi( url );
-  }
-);
+export const { 
+  useGetReviewersQuery,
+  useDeleteReviewerMutation
+} = reviewersApi
 
 export const addReviewer = createAsyncThunk(
   'addReviewerModal/addReviewer',

@@ -5,7 +5,6 @@ import { useAppDispatch, useAppSelector } from '@/app/store'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea, FormHelperText } from '@mui/joy'
 import { formValidator } from '@features/wizard/wizardSlice'
-import { handleLoading } from '@features/submission/steps/ethical-statements/ethicalStatementsSlice'
 import { 
     useGetStepDataQuery, 
     useGetStepGuideQuery, 
@@ -210,7 +209,6 @@ const EthicalStatementsStep = forwardRef(
     }, [formData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
-            dispatch( handleLoading( true ) );
             let isAllowed = false;
             try {
                 await updateStepDataTrigger( 

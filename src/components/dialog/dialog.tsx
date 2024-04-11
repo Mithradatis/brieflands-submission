@@ -2,7 +2,7 @@ import ReactHtmlParser from 'react-html-parser'
 import { useAppDispatch, useAppSelector } from '@/app/store'
 import { useTheme } from '@mui/material/styles'
 import { handleDialogClose } from '@features/dialog/dialogSlice'
-import { handleOperation } from '@api/dialog'
+import useHandleOperation from '@api/dialog'
 import { 
     Button, 
     Dialog, 
@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 
 const DialogComponent = () => {
+    const { handleOperation } = useHandleOperation();
     const dispatch: any = useAppDispatch();
     const theme = useTheme();
     const fullScreen = useMediaQuery( theme.breakpoints.down('md') );
@@ -47,7 +48,7 @@ const DialogComponent = () => {
                 </Button>
                 <Button
                     className="btn btn-primary" 
-                    onClick={ () => dispatch( handleOperation( dialog.dialogAction ) ) } 
+                    onClick={ () => handleOperation( dialog.dialogAction ) } 
                     autoFocus>
                     { dialog.approvePhrase || 'Yes' }
                 </Button>

@@ -2,7 +2,6 @@ import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import DataTable, { TableColumn } from 'react-data-table-component'
 import { ThunkDispatch } from '@reduxjs/toolkit'
-import { useQuery } from '@tanstack/react-query'
 import { useState, useEffect, useMemo, forwardRef, useImperativeHandle } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { Button, Alert } from '@mui/material'
@@ -13,11 +12,7 @@ import { loadEditReviewerForm, handleCloseReviewersModal } from '@api/steps/revi
 import { formValidator, Wizard } from '@features/wizard/wizardSlice'
 import { handleOpen, Modal } from '@features/modal/modalSlice'
 import { handleDialogOpen } from '@features/dialog/dialogSlice'
-import { 
-    handleLoading, 
-    setStepData, 
-    setStepGuide 
-} from '@features/submission/steps/reviewers/reviewersSlice'
+import { handleLoading } from '@features/submission/steps/reviewers/reviewersSlice'
 
 const FilterComponent = (
     { 
@@ -59,35 +54,6 @@ const ReviewersStep = forwardRef(
     useEffect(() => {
         dispatch( formValidator( true ) );
     }, []);
-    useEffect( () => {
-        if ( !modal.modalOpen ) {
-            dispatch( handleCloseReviewersModal() );
-        }
-    }, [modal.modalOpen]);
-    useQuery({
-        queryKey: ['reviewersStepGuide'],
-        queryFn: async () => {
-            const response = await dispatch( getStepGuide( props.apiUrls.stepGuideApiUrl ) );
-            const payload = response.payload;
-            dispatch( setStepGuide( payload ) );
-
-            return payload;
-        },
-        enabled: typeof wizard.workflowId === 'string',
-        gcTime: wizard.cacheDuration
-    });
-    useQuery({
-        queryKey: ['reviewersStepGuide'],
-        queryFn: async () => {
-            const response = await dispatch( getStepData( props.apiUrls.stepDataApiUrl ) );
-            const payload = response.payload;
-            dispatch( setStepData( payload ) );
-
-            return payload;
-        },
-        enabled: typeof wizard.workflowId === 'string',
-        gcTime: wizard.cacheDuration
-    });
     useImperativeHandle(ref, () => ({
         async submitForm () {
             dispatch( handleLoading( true ) );
@@ -202,7 +168,7 @@ const ReviewersStep = forwardRef(
 
     return (
         <>
-            <StepPlaceholder visibility={ formState.isLoading || typeof formState.stepGuide !== 'string' } />
+            <StepPlaceholder/>
             <div 
                 id="reviewers" 
                 className={ `tab ${ 

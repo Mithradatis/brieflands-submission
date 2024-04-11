@@ -1,0 +1,3 @@
+type Classification = {
+    id: string;
+}

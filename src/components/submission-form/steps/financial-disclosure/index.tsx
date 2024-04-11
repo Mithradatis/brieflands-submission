@@ -5,7 +5,6 @@ import { useAppDispatch } from '@/app/store'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { formValidator } from '@features/wizard/wizardSlice'
-import { handleLoading } from '@features/submission/steps/financial-disclosure/financialDisclosureSlice'
 import { 
     useGetStepDataQuery, 
     useGetStepGuideQuery, 
@@ -37,8 +36,7 @@ const FinancialDisclosureStep = forwardRef(
         }
     }, [stepData]);
     useImperativeHandle(ref, () => ({
-        async submitForm () {
-          dispatch( handleLoading( true ) );  
+        async submitForm () { 
           let isAllowed = false;   
           try {
             await updateStepDataTrigger( 

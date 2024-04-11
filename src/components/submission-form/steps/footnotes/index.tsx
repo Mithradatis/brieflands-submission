@@ -5,7 +5,6 @@ import { useAppDispatch, useAppSelector } from '@/app/store'
 import { formValidator } from '@features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea, FormHelperText } from '@mui/joy'
-import { handleLoading } from '@features/submission/steps/footnotes/footnotesSlice'
 import {
     useGetStepDataQuery, 
     useGetStepGuideQuery, 
@@ -170,7 +169,6 @@ const FootnotesStep = forwardRef(
     }, [formData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
-          dispatch( handleLoading( true ) );
           let isAllowed = false;
           try {   
             await updateStepDataTrigger( 

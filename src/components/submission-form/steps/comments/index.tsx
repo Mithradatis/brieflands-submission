@@ -5,7 +5,6 @@ import { useAppDispatch } from '@/app/store'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { formValidator } from '@features/wizard/wizardSlice'
-import { handleLoading } from '@features/submission/steps/comments/commentsSlice'
 import { 
     useGetStepDataQuery, 
     useGetStepGuideQuery, 
@@ -38,7 +37,6 @@ const CommentStep = forwardRef(
     }, [stepData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
-          dispatch( handleLoading( true ) ); 
           let isAllowed = false;   
           try {
             await updateStepDataTrigger( 

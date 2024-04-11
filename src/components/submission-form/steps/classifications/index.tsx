@@ -5,7 +5,6 @@ import { useAppDispatch, useAppSelector } from '@/app/store'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, createFilterOptions } from '@mui/joy'
 import { formValidator } from '@features/wizard/wizardSlice'
-import {  handleLoading } from '@features/submission/steps/classifications/classificationsSlice'
 import { useGetStepDataQuery, useGetStepGuideQuery, useUpdateStepDataMutation } from '@/app/services/apiSlice'
 import { useGetClassificationsQuery } from '@/app/services/steps/classifications' 
 
@@ -38,7 +37,6 @@ const ClassificationsStep = forwardRef(
     }, []);
     useImperativeHandle(ref, () => ({
         async submitForm () {
-          dispatch( handleLoading( true ) );
           let isAllowed = false;   
           try {
             await updateStepDataTrigger( 

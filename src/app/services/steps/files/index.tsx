@@ -25,26 +25,28 @@ export const filesApi = submissionApi.injectEndpoints({
       invalidatesTags: ['StepData']
     }),
     deleteFile: build.mutation({
-      query: ( { url , data } : { url: string, data: object } ) => ({
-        url: url,
+      query: ( data: { url: string, uuid: string } ) => ({
+        url: data.url,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify( data ),
+        body: JSON.stringify( { uuid: data.uuid } ),
       }),
-      transformResponse: ( response: any ) => response.data
+      transformResponse: ( response: any ) => response.data,
+      invalidatesTags: ['StepData']
     }),
     reuseFile: build.mutation({
-      query: ( { url , data } : { url: string, data: object } ) => ({
-        url: url,
+      query: ( data: { url: string, uuid: string } ) => ({
+        url: data.url,
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify( data ),
+        body: JSON.stringify( { uuid: data.uuid } ),
       }),
-      transformResponse: ( response: any ) => response.data
+      transformResponse: ( response: any ) => response.data,
+      invalidatesTags: ['StepData']
     })
   })
 })

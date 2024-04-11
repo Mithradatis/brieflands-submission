@@ -5,6 +5,14 @@ import {
   handleCloseAuthorModal 
 } from '@api/steps/authors'
 
+type InputStatus = {
+  email: boolean;
+  firstName: boolean;
+  middleName: boolean;
+  lastName: boolean;
+  isCorresponding: boolean;
+}
+
 interface AuthorModalState {
   isVerified: boolean;
   isLoading: boolean;
@@ -12,13 +20,8 @@ interface AuthorModalState {
   countriesList: any[];
   countriesPhoneList: any[];
   datatableRows: any[];
-  inputStatus: {
-    email: boolean;
-    firstName: boolean;
-    middleName: boolean;
-    lastName: boolean;
-    isCorresponding: boolean;
-  };
+  inputStatusDefault: InputStatus;
+  inputStatus: InputStatus;
   value: {
     email?: string;
     'first-name'?: string;
@@ -44,6 +47,13 @@ export const addAuthorModalSlice = createSlice({
     countriesList: [],
     countriesPhoneList: [],
     datatableRows: [],
+    inputStatusDefault: {
+      email: true,
+      firstName: false,
+      middleName: false,
+      lastName: false,
+      isCorresponding: false
+    },
     inputStatus: {
       email: true,
       firstName: false,
@@ -211,10 +221,9 @@ export const addAuthorModalSlice = createSlice({
       }).addCase(handleCloseAuthorModal.fulfilled, ( state ) => {
         state.isLoading = false;
         state.isEditing = false;
-        state.inputStatus.email = true;
-        state.inputStatus.firstName = false;
-        state.inputStatus.middleName = false;
-        state.inputStatus.lastName = false;
+        Object.entries( state.inputStatus ).forEach(([key, value]) => {
+          state.inputStatus[key as keyof InputStatus] = state.inputStatusDefault[key as keyof InputStatus]
+        });
       });
   },
 });

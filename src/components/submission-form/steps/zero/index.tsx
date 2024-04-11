@@ -1,18 +1,11 @@
 import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import { ThunkDispatch } from '@reduxjs/toolkit'
-import { useQuery } from '@tanstack/react-query'
 import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { formValidator, Wizard } from '@features/wizard/wizardSlice'
 import { Alert } from '@mui/material'
-import { getStepData, getStepGuide } from '@api/client'
-import { 
-    handleLoading, 
-    setStepData, 
-    setStepGuide, 
-    Zero 
-} from '@features/submission/steps/zero/zeroSlice'
+import { handleLoading, Zero } from '@features/submission/steps/zero/zeroSlice'
 
 const ZeroStep = forwardRef(
     ( 
@@ -28,30 +21,6 @@ const ZeroStep = forwardRef(
     useEffect( () => {
         dispatch( formValidator( true ) );
     }, []);
-    useQuery({
-        queryKey: ['zeroStepGuide'],
-        queryFn: async () => {
-            const response = await dispatch( getStepGuide( props.apiUrls.stepGuideApiUrl ) );
-            const payload = response.payload;
-            dispatch( setStepGuide( payload ) );
-
-            return payload;
-        },
-        enabled: typeof wizard.workflowId === 'string',
-        gcTime: wizard.cacheDuration
-    });
-    useQuery({
-        queryKey: ['zeroStepData'],
-        queryFn: async () => {
-            const response = await dispatch( getStepData( props.apiUrls.stepDataApiUrl ) );
-            const payload = response.payload;
-            dispatch( setStepData( payload ) );
-
-            return payload;
-        },
-        enabled: typeof wizard.workflowId === 'string',
-        gcTime: wizard.cacheDuration
-    });
     useImperativeHandle(ref, () => ({
         async submitForm () {
           dispatch( handleLoading( true ) );  
@@ -63,7 +32,7 @@ const ZeroStep = forwardRef(
 
     return (
         <>
-            <StepPlaceholder visibility={ formState.isLoading || typeof formState.stepGuide !== 'string' } />
+            <StepPlaceholder/>
             <div 
                 id="zero" 
                 className={ `tab ${ 

@@ -5,7 +5,6 @@ import { useAppDispatch, useAppSelector } from '@/app/store'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl, FormHelperText } from '@mui/joy'
 import { formValidator, handleIsVerified } from '@features/wizard/wizardSlice'
-import { handleLoading } from '@features/submission/steps/region/regionSlice'
 import { useGetRegionsQuery } from '@/app/services/steps/region' 
 import { 
     useGetStepDataQuery, 
@@ -41,8 +40,7 @@ const RegionStep = forwardRef(
         dispatch( formValidator( formIsValid ) );
     }, [formData]);
     useImperativeHandle(ref, () => ({
-        async submitForm () {
-          dispatch( handleLoading( true ) );  
+        async submitForm () {  
           let isAllowed = false;   
           try {
             await updateStepDataTrigger( 

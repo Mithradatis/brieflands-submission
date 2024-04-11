@@ -17,8 +17,8 @@ export const modalSnackbarSlice = createSlice({
         isOpen: true,
         severity: action.payload.severity,
         message: action.payload.message,
-        vertical: action.payload.vertical,
-        horizontal: action.payload.horizontal
+        vertical: action.payload.vertical || 'top',
+        horizontal: action.payload.horizontal || 'center'
       }
     },
     handleModalSnackbarClose: ( state ) => {
@@ -33,6 +33,9 @@ export const modalSnackbarSlice = createSlice({
   },
 });
 
-export const { handleModalSnackbarOpen, handleModalSnackbarClose } = modalSnackbarSlice.actions;
+export const { 
+  handleModalSnackbarOpen, 
+  handleModalSnackbarClose 
+} = modalSnackbarSlice.actions;
 
 export default modalSnackbarSlice.reducer;

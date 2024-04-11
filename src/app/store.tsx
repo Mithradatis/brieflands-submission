@@ -3,12 +3,9 @@ import { configureStore, ConfigureStoreOptions } from '@reduxjs/toolkit'
 import { submissionApi } from '@/app/services/apiSlice'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import wizard from '@features/wizard/wizardSlice'
-import modal from '@features/modal/modalSlice'
 import dialog from '@features/dialog/dialogSlice'
 import snackbar from '@features/snackbar/snackbarSlice'
 import modalSnackbar from '@features/snackbar/modalSnackbarSlice'
-import addAuthorModal from '@features/modal/addAuthorModalSlice'
-import addReviewerModal from '@features/modal/addReviewerModalSlice'
 
 export const createStore = (
   options?: ConfigureStoreOptions['preloadedState'] | undefined,
@@ -17,9 +14,6 @@ export const createStore = (
     reducer: {
       [submissionApi.reducerPath]: submissionApi.reducer,
       wizard,
-      modal,
-      addAuthorModal,
-      addReviewerModal,
       dialog,
       snackbar,
       modalSnackbar

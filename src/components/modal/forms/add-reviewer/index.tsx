@@ -16,7 +16,7 @@ const AddReviewerModal = () => {
     const addReviewerFormData = useSelector( ( state: any ) => state.addReviewerModal );
     const [ selectedClassifications , setSelectedClassifications ] = useState<{ classification: string }[]>([]);
     const [ disabledClassifications, setDisabledClassifications ] = useState<{ [key: string]: boolean }>({});
-    const formIsValid = modalData.isFormValid;
+    const formIsValid = true;
     const [ reviewerSuggestedOrOpposed, setReviewerSuggestedOrOpposed ]: any = useState({});
     const [ reviewerAcademicDegree, setReviewerAcademicDegree ]: any = useState({});
     const [ reviewerClassifications, setReviewerClassifications ]: any = useState([]);

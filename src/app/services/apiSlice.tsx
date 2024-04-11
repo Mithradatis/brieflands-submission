@@ -1,3 +1,4 @@
+import { finishSubmission } from '@/lib/api/client';
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
 import { error } from 'console';
 
@@ -34,6 +35,7 @@ export const submissionApi: any = createApi({
    * for any tags that would be provided by injected endpoints
    */
   tagTypes: [
+    'Affiliations',
     'Countries',
     'Workflow', 
     'User', 
@@ -133,11 +135,23 @@ export const enhancedApi = submissionApi.injectEndpoints({
       }),
       invalidatesTags: ['StepData'],
     }),
+    finishSubmission: builder.mutation({
+      query: ({ url, data }: { url: string, data: any }) => ({
+        url: `${process.env.SUBMISSION_API_URL}/${url}`,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify( data ),
+      }),
+      invalidatesTags: ['StepData'],
+    }),
   })
 });
 
 export const { 
   useBuildNewWorkflowMutation,
+  useFinishSubmissionMutation,
   useGetCountriesQuery,
   useGetScreeningQuery,
   useGetStepDataQuery, 

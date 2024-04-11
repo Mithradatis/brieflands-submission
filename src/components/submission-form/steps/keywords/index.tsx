@@ -12,7 +12,6 @@ import {
     createFilterOptions, 
     CircularProgress 
 } from '@mui/joy'
-import { handleLoading } from '@features/submission/steps/keywords/keywordsSlice'
 import { 
     useGetStepDataQuery, 
     useGetStepGuideQuery, 
@@ -70,8 +69,7 @@ const KeywordsStep = forwardRef(
         dispatch( formValidator( formIsValid ) );
     }, [formData]);
     useImperativeHandle(ref, () => ({
-        async submitForm () {
-          dispatch( handleLoading( true ) );  
+        async submitForm () { 
           let isAllowed = false;   
           try {
             await updateStepDataTrigger({

@@ -6,10 +6,7 @@ import { Alert } from '@mui/material'
 import { Autocomplete, FormControl, FormLabel, FormHelperText } from '@mui/joy'
 import { formValidator, handleIsVerified } from '@features/wizard/wizardSlice'
 import { useGetSectionsQuery } from '@/app/services/steps/section'
-import { 
-    handleLoading,
-    sectionsListItem
-} from '@features/submission/steps/section/sectionSlice'
+import { type sectionsListItem } from '@/app/services/types/section'
 import {
     useGetStepDataQuery, 
     useGetStepGuideQuery, 
@@ -47,7 +44,6 @@ const SectionStep = forwardRef(
     }, [formData]);
     useImperativeHandle(ref, () => ({
         async submitForm () {
-          dispatch( handleLoading( true ) );
           let isAllowed = false;   
           try {
             await updateStepDataTrigger( 

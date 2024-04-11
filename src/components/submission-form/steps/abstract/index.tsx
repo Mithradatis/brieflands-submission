@@ -6,7 +6,6 @@ import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { handleSnackbarOpen } from '@features/snackbar/snackbarSlice'
 import { formValidator } from '@features/wizard/wizardSlice'
-import { handleLoading } from '@features/submission/steps/abstract/abstractSlice'
 import { 
     useGetStepDataQuery, 
     useGetStepGuideQuery, 
@@ -40,8 +39,7 @@ const AbstractStep = forwardRef(
         dispatch( formValidator( true ) );
     }, []);
     useImperativeHandle(ref, () => ({
-        async submitForm () {
-          dispatch( handleLoading( true ) );  
+        async submitForm () { 
           let isAllowed = false;   
           try {
             await updateStepDataTrigger( 

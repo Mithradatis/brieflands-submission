@@ -1,41 +1,76 @@
-import { useState, useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux'
 import Button from '@mui/material/Button'
-import { Autocomplete, Checkbox, Input, FormControl, FormLabel, FormHelperText, CircularProgress } from '@mui/joy'
+import { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
+import { useAppDispatch } from '@/app/store'
 import { useGetCountriesQuery } from '@/app/services/apiSlice'
-import { searchPeople } from '@/app/services/steps/authors'
+import { useLazySearchPeopleQuery, useHandleAuthorOperationMutation } from '@/app/services/steps/authors'
+import { InputStatus } from '@/app/services/types/author'
+import { handleModalSnackbarOpen } from '@/lib/features/snackbar/modalSnackbarSlice'
+import { Author } from '@/app/services/types/author'
+import useMessageHandler from '@/app/services/messages'
 import { 
-    handleInput, 
-    handleInputAsArray, 
-    handleInputArray, 
-    handleCheckbox 
-} from '@features/modal/addAuthorModalSlice'
+    Autocomplete, 
+    Checkbox, 
+    Input, 
+    FormControl, 
+    FormLabel, 
+    FormHelperText, 
+    CircularProgress 
+} from '@mui/joy'
 
-const AddAuthorModal = () => {
-    const dispatch: any = useDispatch();
-    const modalData = useSelector( ( state: any ) => state.modal );
-    const addAuthorModalData: any = useSelector( ( state: any ) => state.addAuthorModal );
-    const formIsValid = modalData.isFormValid;
+const AddAuthorModal = forwardRef( 
+    ( 
+        props: { 
+            isEditing: boolean, 
+            workflowId: string, 
+            modalFormData: Author 
+        }, 
+        ref 
+    ) => {
+    const { messageHandler } = useMessageHandler();    
+    const dispatch: any = useAppDispatch();
+    const [ formData, setFormData ] = useState<Author>({
+        email: '',
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        orcId: '',
+        country: '',
+        phoneType: '',
+        countryPhone: '',
+        phoneNumber: '',
+        affiliations: [],
+        isCorresponding: 'off',
+        correspondAffiliation: ''
+    });
+    const [ formIsValid, setFormIsValid ] = useState<boolean>( true );
+    const [ emailIsValid, setEmailIsValid ] = useState<boolean>( true );
+    const [ inputStatus, setInputStatus ] = useState<InputStatus>({
+        email: true,
+        firstName: false,
+        middleName: false,
+        lastName: false,
+        isCorresponding: false
+    });
     const phoneTypes = [
         { id: 1, label: 'Mobile', value: 'mobile' },
         { id: 2, label: 'Home', value: 'home' },
         { id: 3, label: 'Work', value: 'work' },
         { id: 4, label: 'Fax', value: 'fax' }
     ];
-    const [ authorEmailInputValue, setAuthorEmailInputValue ] = useState('');
-    const [ authorCountryInputValue, setAuthorCountryInputValue ]: any = useState({});
-    const [ authorPhoneTypeInputValue, setAuthorPhoneTypeInputValue ]: any = useState({});
-    const [ authorPhoneCountryInputValue, setAuthorPhoneCountryInputValue ]: any = useState({});
+    const [ authorEmailInputValue, setAuthorEmailInputValue ] = useState<string>('');
+    const [ authorCountryInputValue, setAuthorCountryInputValue ] = useState<any>(null);
+    const [ authorPhoneTypeInputValue, setAuthorPhoneTypeInputValue ] = useState<any>(null);
+    const [ authorPhoneCountryInputValue, setAuthorPhoneCountryInputValue ] = useState<any>(null);
     const [ countries, setCountries ] = useState<object[]>([]);
     const [ phoneState, setPhoneState ] = useState({
         phoneType: '',
         countryPhone: '',
         phoneNumber: ''
     });
-    const [affiliations, setAffiliations] = useState( () => {
+    const [ affiliations, setAffiliations ] = useState( () => {
         const affiliationsInput: any = [];
-        if ( addAuthorModalData.value['affiliations']?.length > 0 ) {
-            addAuthorModalData.value['affiliations'].map( ( affiliation: any, index: number ) => {
+        if ( formData['affiliations']?.length > 0 ) {
+            formData['affiliations'].map( ( affiliation: any, index: number ) => {
                 affiliationsInput.push({
                     id: index + 1,
                     value: affiliation,
@@ -51,20 +86,62 @@ const AddAuthorModal = () => {
         }
         
         return affiliationsInput;
-    }     
-    );
-    const [ isValid, setIsValid ] = useState({
-        'email': false,
-        'first-name': false,
-        'last-name': false,
-        'phone-type': false,
-        'country-phone': false,
-        'phone-number': false,
-        'affiliations': false,
-        'correspond_affiliation': false
     });
     const getAllCountriesUrl = 'journal/country?page[size]=1000';
-    const { data: allCountriesList, isLoading: allCountriesIsLoading } = useGetCountriesQuery( getAllCountriesUrl );
+    const { 
+        data: allCountriesList, 
+        isLoading: allCountriesIsLoading 
+    } = useGetCountriesQuery( getAllCountriesUrl );
+    const [ handleAuthorOperationTrigger ] = useHandleAuthorOperationMutation();
+    const [ searchPeopleTrigger ] = useLazySearchPeopleQuery();
+    useEffect(() => {
+        if ( countries?.length > 0 && props.modalFormData.email !== '' ) {
+            setFormData( props.modalFormData );
+            const country = countries.find( 
+                ( item: any ) => item.id === parseInt( props.modalFormData.country ) 
+            );
+            const phoneType = phoneTypes.find( 
+                ( item: any ) => item.value === props.modalFormData.phoneType 
+            );
+            const countryPhone = countries.find( 
+                ( item: any ) => item.id === parseInt( props.modalFormData.countryPhone ) 
+            );
+            setAuthorCountryInputValue( ( prevState: any ) => country || prevState );
+            setAuthorPhoneTypeInputValue( ( prevState: any ) => phoneType || prevState );
+            setAuthorPhoneCountryInputValue( ( prevState: any ) => countryPhone || prevState );
+            setPhoneState({
+                phoneType: props.modalFormData.phoneType,
+                countryPhone: props.modalFormData.countryPhone,
+                phoneNumber: props.modalFormData.phoneNumber
+            });
+            setAffiliations(
+                () => {
+                    const affiliationsInput: any = [];
+                    if ( props.modalFormData.affiliations?.length > 0 ) {
+                        props.modalFormData.affiliations.map( ( affiliation: any, index: number ) => {
+                            affiliationsInput.push({
+                                id: index + 1,
+                                value: affiliation,
+                                required: index === 0
+                            });
+                        });
+                    } else {
+                        affiliationsInput.push({
+                            id: 1,
+                            value: '',
+                            required: true
+                        });
+                    }
+                    
+                    return affiliationsInput;
+                }
+            );
+            setInputStatus( ( prevState: any ) => ({
+                ...prevState,
+                email: false
+            }));
+        }
+    }, [props.modalFormData, countries]);
     useEffect(() => {
         if ( allCountriesList ) {
             const countriesList: any = [];
@@ -74,38 +151,100 @@ const AddAuthorModal = () => {
             setCountries( countriesList );
         }
     }, [allCountriesList]);
-    useEffect( () => {
-        setIsValid( prevIsValid => ({
-            ...prevIsValid,
-            'email': addAuthorModalData.value['email'] !== undefined && addAuthorModalData.value['email'] !== '',
-            'first-name': addAuthorModalData.value['first-name'] !== undefined && addAuthorModalData.value['first-name'] !== '',
-            'last-name': addAuthorModalData.value['last-name'] !== undefined && addAuthorModalData.value['last-name'] !== '',
-            'phone-type': addAuthorModalData.value['phone_type'] !== undefined && addAuthorModalData.value['phone_type'].length > 0,
-            'country-phone': addAuthorModalData.value['country_phone'] !== undefined && addAuthorModalData.value['country_phone'].length > 0,
-            'phone-number': addAuthorModalData.value['phone_number'] !== undefined && addAuthorModalData.value['phone_number'].length > 0,
-            'affiliations': addAuthorModalData.value['affiliations'] !== undefined && addAuthorModalData.value['affiliations'].length !== 0,
-            'correspond_affiliation': addAuthorModalData.value['is_corresponding'] === undefined 
-                || ( 
-                    addAuthorModalData.value['is_corresponding'] === 'on' 
-                    && ( 
-                        addAuthorModalData.value['correspond_affiliation'] !== undefined && 
-                        addAuthorModalData.value['correspond_affiliation'] !== '' 
-                    ) 
+    useImperativeHandle(ref, () => ({
+        resetForm () {
+            setFormData({
+                email: '',
+                firstName: '',
+                middleName: '',
+                lastName: '',
+                orcId: '',
+                country: '',
+                phoneType: '',
+                countryPhone: '',
+                phoneNumber: '',
+                affiliations: [],
+                isCorresponding: '',
+                correspondAffiliation: ''
+            });
+        },
+        addAuthor () {
+            if (
+                formData?.email !== ''
+                && formData?.firstName !== ''
+                && formData?.lastName !== ''
+                && formData?.phoneType !== ''
+                && formData?.countryPhone !== ''
+                && formData?.phoneNumber !== ''
+                && formData?.affiliations.length > 0
+                && (
+                  ( formData?.isCorresponding === 'off' ) || 
+                  (  
+                    formData?.isCorresponding === 'on'
+                    && formData?.correspondAffiliation !== ''
+                  )
                 )
-        }));
-        const foundCountry = countries.find( 
-            ( item: any ) => item.id === parseInt( addAuthorModalData.value['country'] ) 
-        );
-        const foundPhoneType = phoneTypes.find( 
-            ( item: any ) => item.value === addAuthorModalData.value['phone_type']?.[0] 
-        );
-        const foundCountryPhone = countries.find( 
-            ( item: any ) => item.id === parseInt( addAuthorModalData.value['country_phone']?.[0] ) 
-        );
-        setAuthorCountryInputValue( foundCountry ? foundCountry : '' );
-        setAuthorPhoneTypeInputValue( foundPhoneType ? foundPhoneType : '' );
-        setAuthorPhoneCountryInputValue( foundCountryPhone ? foundCountryPhone : '' );
-    }, [addAuthorModalData.value]);
+            ) {
+                setFormIsValid( true );
+                try {
+                    handleAuthorOperationTrigger( 
+                        { 
+                            workflowId: props.workflowId,
+                            action: props.isEditing ? 'edit' : 'add',
+                            data: formData 
+                        }
+                    ).then( ( response: any ) => {
+                        if ( response.error ) {
+                            messageHandler( 
+                                response, 
+                                { 
+                                    errorMessage: `Failed to ${ props.isEditing ? 'edit' : 'add' } author`, 
+                                    successMessage: `author ${ props.isEditing ? 'edited' : 'added' } successfuly` 
+                                },
+                                true
+                            );
+
+                            return false;
+                        } else {
+                            messageHandler( 
+                                response, 
+                                { 
+                                    errorMessage: `Failed to ${ props.isEditing ? 'edit' : 'add' } author`, 
+                                    successMessage: `author ${ props.isEditing ? 'edited' : 'added' } successfuly` 
+                                },
+                                false
+                            );
+                            return true;
+                        }
+                    });
+                    
+                    return true;
+                } catch ( error ) {
+                  console.error('Error in addAuthor:', error);
+                  
+                  return false;
+                }
+            } else {
+                setFormIsValid( false );
+                dispatch( handleModalSnackbarOpen( 
+                    { 
+                        severity: 'error', 
+                        message: 'Please scroll down and check all invalid fields.', 
+                        vertical: 'top', 
+                        horizontal: 'center' 
+                    } 
+                ));
+        
+                return false;
+            }
+        }
+    }));
+    const handleFormInput = ( inputName: string, value: string ) => {
+        setFormData( ( prevState: any ) => ({
+            ...prevState,
+            [inputName]: value
+        })) 
+    };
     const repeatField = () => {
         const newAffiliation = {
           id: affiliations.length + 1,
@@ -123,21 +262,90 @@ const AddAuthorModal = () => {
                 ? item.value[0] 
                 : item.value 
         );
-        dispatch( 
-            handleInputArray( 
-                { 
-                    name: 'affiliations', 
-                    value: updatedAffiliations[index].value !== '' 
-                        ? affiliationValues 
-                        : '' 
-                } 
-            ) 
+        handleFormInput(
+            'affiliations', 
+            updatedAffiliations[index].value !== '' 
+                ? affiliationValues 
+                : []
         );
+    }
+    const handleSearchPeople = ( authorEmailInputValue: string ) => {
+        if ( authorEmailInputValue !== '' ) {
+            searchPeopleTrigger( 
+                { 
+                    workflowId: props.workflowId, 
+                    email: authorEmailInputValue 
+                }
+            ).then( ( response: any ) => {
+                const foundedAuthor = response.data || []; 
+                if (
+                    !Array.isArray( foundedAuthor ) && 
+                    Object.keys( foundedAuthor ).length > 0 
+                ) {
+                    setFormData( ( prevState: any ) => (
+                        {
+                            ...prevState,
+                            email: authorEmailInputValue,
+                            firstName: foundedAuthor.first_name,
+                            middleName: foundedAuthor.middle_name,
+                            lastName: foundedAuthor.last_name,
+                            orcId: foundedAuthor.orcid_id,
+                            country: foundedAuthor.country,
+                            phoneType: foundedAuthor.phones.type,
+                            countryPhone: foundedAuthor.phones.country_phone,
+                            phoneNumber: foundedAuthor.phones.number
+                        }
+                    ));
+                    const foundCountry = countries.find( 
+                        ( item: any ) => item.id === parseInt( foundedAuthor.country ) 
+                    );
+                    const foundPhoneType = phoneTypes.find( 
+                        ( item: any ) => item.value === foundedAuthor.phones?.type 
+                    );
+                    const foundCountryPhone = countries.find( 
+                        ( item: any ) => item.id === parseInt( foundedAuthor.phones?.country_phone ) 
+                    );
+                    setAuthorCountryInputValue( ( prevState: any ) => foundCountry || prevState );
+                    setAuthorPhoneTypeInputValue( ( prevState: any ) => foundPhoneType || prevState );
+                    setAuthorPhoneCountryInputValue( ( prevState: any ) => foundCountryPhone || prevState );
+                    setPhoneState({
+                        phoneType: foundedAuthor.phones.type,
+                        countryPhone: foundedAuthor.phones?.country_phone,
+                        phoneNumber: foundedAuthor.phones.number
+                    });
+                    setInputStatus( ( prevState: any ) => ({
+                        ...prevState,
+                        email: false,
+                        firstName: false,
+                        middleName: false,
+                        lastName: false,
+                        isCorresponding: false
+                    }));
+                } else {
+                    setInputStatus( ( prevState: any ) => ({
+                        ...prevState,
+                        email: false,
+                        firstName: true,
+                        middleName: true,
+                        lastName: true,
+                        isCorresponding: true
+                    }));
+                }
+            });
+        } else {
+            setEmailIsValid( false );
+        }
     }
 
     return (
         <>
-            <FormControl className="mb-3 required" error={ !isValid['email'] && !formIsValid }>
+            <FormControl 
+                className="mb-3 required" 
+                error={ 
+                    !emailIsValid || 
+                    formData.email === '' && 
+                    !formIsValid }
+                >
                 <FormLabel className="fw-bold mb-1">
                     Email
                 </FormLabel>
@@ -145,130 +353,107 @@ const AddAuthorModal = () => {
                     <Input
                         required
                         autoComplete="off"
-                        readOnly={ !addAuthorModalData.inputStatus.email }
+                        readOnly={ !inputStatus.email }
                         variant="soft"
                         className="flex-fill"
                         name="authorEmail"
                         id="authorEmail"
                         placeholder="Author's Email"
-                        defaultValue={ addAuthorModalData.value['email'] }
+                        defaultValue={ formData['email'] }
                         onChange={ event => {
                             setAuthorEmailInputValue( event.target.value ); 
-                            dispatch( handleInput( { name: 'email', value: event.target.value } ) ) } 
-                        }
+                            handleFormInput( 'email', event.target.value );
+                            setEmailIsValid( event.target.value !== '' );
+                        }}
                     />
                     {
-                        !addAuthorModalData.isEditing &&
+                        !props.isEditing &&
                             <Button 
                                 className="btn btn-primary ms-2" 
-                                onClick={ () => dispatch( searchPeople( authorEmailInputValue ) ) }>
+                                onClick={ () => handleSearchPeople( authorEmailInputValue ) }>
                                 <i className="fa-duotone fa-search me-1"></i>
                                 <span>Search</span>
                             </Button>
                     }
                 </div>
                 {
-                    ( !isValid['email'] && !formIsValid ) 
+                    ( !emailIsValid || formData.email === '' && !formIsValid ) 
                     && <FormHelperText className="fs-7 text-danger mt-1">
                             You should enter the author email
                         </FormHelperText> 
                 }
             </FormControl>
             <FormControl className={`mb-3 required ${ 
-                    !addAuthorModalData.inputStatus.firstName 
+                    !inputStatus.firstName 
                         ? 'read-only' 
                         : '' 
                 }`} 
-                error={ !isValid['first-name'] && !formIsValid }
+                error={ formData.firstName === '' && !formIsValid }
             >
                 <FormLabel className="fw-bold mb-1">
                     First Name
                 </FormLabel>
                 <Input
                     required
-                    readOnly={ !addAuthorModalData.inputStatus.firstName }
+                    readOnly={ !inputStatus.firstName }
                     variant="soft"
                     name="authorFirstName"
                     id="authorFirstName"
                     placeholder="First Name"
-                    defaultValue={ addAuthorModalData.value['first-name'] }
+                    defaultValue={ formData.firstName }
                     onChange={ 
-                        event => 
-                            dispatch( 
-                                handleInput( 
-                                    { 
-                                        name: 'first-name', 
-                                        value: event.target.value 
-                                    } 
-                                ) 
-                            ) 
+                        event => handleFormInput( 'firstName', event.target.value )
                     }
                 />
                 {
-                    ( !isValid['first-name'] && !formIsValid ) 
+                    ( formData.firstName === '' && !formIsValid ) 
                     && <FormHelperText className="fs-7 text-danger mt-1">
                             You should enter the author first name
                         </FormHelperText> 
                 }
             </FormControl>
-            <FormControl className={`mb-3 ${ !addAuthorModalData.inputStatus.middleName ? 'read-only' : '' }`}>
+            <FormControl className={`mb-3 ${ !inputStatus.middleName ? 'read-only' : '' }`}>
                 <FormLabel className="fw-bold mb-1">
                     Middle Name
                 </FormLabel>
                 <Input
                     required
-                    readOnly={ !addAuthorModalData.inputStatus.middleName }
+                    readOnly={ !inputStatus.middleName }
                     variant="soft"
                     name="authorMiddleName"
                     id="authorMiddleName"
                     placeholder="Middle Name"
-                    defaultValue={ addAuthorModalData.value['middle-name'] }
+                    defaultValue={ formData.middleName }
                     onChange={ 
-                        event => 
-                            dispatch( 
-                                handleInput( 
-                                    { 
-                                        name: 'middle-name', 
-                                        value: event.target.value 
-                                    } 
-                                ) 
-                            ) 
+                        event => handleFormInput( 'middleName', event.target.value ) 
                     }
                 />
             </FormControl>
             <FormControl 
                 className={`mb-3 required ${ 
-                    !addAuthorModalData.inputStatus.lastName 
+                    !inputStatus.lastName 
                         ? 'read-only' 
                         : '' 
                 }`} 
-                error={ !isValid['last-name'] && !formIsValid }
+                error={ formData.lastName === '' && !formIsValid }
             >
                 <FormLabel className="fw-bold mb-1">
                     Last Name
                 </FormLabel>
                 <Input
                     required
-                    readOnly={ !addAuthorModalData.inputStatus.lastName }
+                    readOnly={ !inputStatus.lastName }
                     variant="soft"
                     name="authorLastName"
                     id="authorLastName"
                     placeholder="Last Name"
-                    defaultValue={ addAuthorModalData.value['last-name'] }
+                    defaultValue={ formData.lastName }
                     onChange={ 
-                        event => 
-                            dispatch( 
-                                handleInput( 
-                                    { 
-                                        name: 'last-name', 
-                                        value: event.target.value 
-                                    } 
-                                ) 
-                            ) 
+                        event => handleFormInput( 'lastName', event.target.value )
                     }
                 />
                 {
-                    ( !isValid['last-name'] && !formIsValid ) 
+                    ( formData.lastName === '' && !formIsValid ) 
                     && <FormHelperText className="fs-7 text-danger mt-1">
                             You should enter the author last name
                         </FormHelperText> 
@@ -283,16 +468,9 @@ const AddAuthorModal = () => {
                     name="authorOrcId"
                     id="authorOrcId"
                     placeholder="Orcid"
-                    defaultValue={ addAuthorModalData.value['orcid-id'] }
+                    defaultValue={ formData.orcId }
                     onChange={ 
-                        event => dispatch( 
-                            handleInput( 
-                                { 
-                                    name: 'orcid-id', 
-                                    value: event.target.value.toString() 
-                                } 
-                            ) 
-                        ) 
+                        event => handleFormInput( 'orcId', event.target.value.toString() )
                     }
                 />
             </FormControl>
@@ -308,13 +486,9 @@ const AddAuthorModal = () => {
                     options={ countries }
                     value={ authorCountryInputValue }
                     onChange={ ( event, value ) => {
-                        dispatch( 
-                            handleInput( 
-                                { 
-                                    name: 'country', 
-                                    value: value?.id || '' 
-                                } 
-                            ) 
+                        handleFormInput( 
+                            'country', 
+                            value?.id || ''
                         ) 
                     }}
                     slotProps={{
@@ -348,13 +522,9 @@ const AddAuthorModal = () => {
                             onChange={ ( event: any, value: any ) => 
                                 {
                                     setPhoneState( { ...phoneState, phoneType: value || '' } );
-                                    dispatch( 
-                                        handleInputAsArray( 
-                                            { 
-                                                name: 'phone_type', 
-                                                value: value?.value || '' 
-                                            } 
-                                        ) 
+                                    handleFormInput( 
+                                        'phoneType', 
+                                        value?.value || ''
                                     )
                                 }
                             }
@@ -380,13 +550,9 @@ const AddAuthorModal = () => {
                             value={ authorPhoneCountryInputValue }
                             onChange={ ( event: any, value: any ) => {
                                 setPhoneState( { ...phoneState, countryPhone: value || '' } );
-                                dispatch( 
-                                    handleInputAsArray( 
-                                        { 
-                                            name: 'country_phone', 
-                                            value: value?.id.toString() || '' 
-                                        } 
-                                    ) 
+                                handleFormInput( 
+                                    'countryPhone', 
+                                    value?.id.toString() || ''
                                 ) 
                             }}
                             slotProps={{
@@ -409,16 +575,12 @@ const AddAuthorModal = () => {
                             name="authorPhoneNumber"
                             id="authorPhoneNumber"
                             placeholder="Phone Number"
-                            value={ addAuthorModalData.value['phone_number'] }
+                            defaultValue={ formData.phoneNumber }
                             onChange={ ( event: any ) => {
                                 setPhoneState( { ...phoneState, phoneNumber: event.target.value || '' } );
-                                dispatch( 
-                                    handleInputAsArray( 
-                                        { 
-                                            name: 'phone_number', 
-                                            value: event.target.value 
-                                        } 
-                                    ) 
+                                handleFormInput( 
+                                    'phoneNumber', 
+                                    event.target.value 
                                 ) 
                             }}
                         />
@@ -446,7 +608,7 @@ const AddAuthorModal = () => {
                         key={affiliation.id} 
                         error={ 
                             index === 0 && 
-                            !isValid['affiliations'] && 
+                            formData.affiliations.length === 0 && 
                             !formIsValid 
                         }
                     >
@@ -463,7 +625,7 @@ const AddAuthorModal = () => {
                             onChange={ event => handleAffiliationChange( event, index ) }
                         />
                         {
-                            ( index === 0 && !isValid['affiliations'] && !formIsValid ) 
+                            ( index === 0 && formData.affiliations.length === 0  && !formIsValid ) 
                                 && <FormHelperText className="fs-7 text-danger mt-1">
                                         You should enter at least one affiliation
                                     </FormHelperText>
@@ -478,60 +640,61 @@ const AddAuthorModal = () => {
             </fieldset>
             <FormControl 
                 className={`required mb-3 ${ 
-                    addAuthorModalData?.value['is_corresponding'] !== 'on' && 'd-none' 
+                    formData.isCorresponding !== 'on' && 'd-none' 
                 }`}
-                error={ !isValid['correspond_affiliation'] && !formIsValid }>
+                error={ 
+                    formData.isCorresponding === 'on' && 
+                    formData.correspondAffiliation === '' && 
+                    !formIsValid 
+                }
+            >
                 <FormLabel className="fw-bold mb-1">
                     Corresponding Affiliation
                 </FormLabel>
                 <Input
-                    required={ addAuthorModalData?.value['is_corresponding'] === 'on' }
+                    required={ formData.isCorresponding === 'on' }
                     variant="soft"
                     name="authorCorrespondAffiliation"
                     id="authorCorrespondAffiliation"
                     placeholder="Corresponding Affiliation"
-                    defaultValue={ addAuthorModalData.value['correspond_affiliation'] }
+                    defaultValue={ formData.correspondAffiliation }
                     onChange={ event => 
-                        dispatch( 
-                            handleInput( 
-                                { 
-                                    name: 'correspond_affiliation', 
-                                    value: event.target.value 
-                                } 
-                            ) 
+                        handleFormInput( 
+                            'correspondAffiliation', 
+                            event.target.value 
                         ) 
                     }
                 />
                 {
-                    ( !isValid['correspond_affiliation'] && !formIsValid ) 
-                        && <FormHelperText className="fs-7 text-danger mt-1">
-                                You should enter correspond affiliation
-                            </FormHelperText>
+                    ( 
+                        formData.isCorresponding === 'on' && 
+                        formData.correspondAffiliation === '' && 
+                        !formIsValid 
+                    ) && 
+                        <FormHelperText className="fs-7 text-danger mt-1">
+                            You should enter correspond affiliation
+                        </FormHelperText>
                 }
             </FormControl>
             <FormControl className="mb-4">
                 <Checkbox
                     required
-                    readOnly={ !addAuthorModalData.inputStatus.isCorresponding }
+                    readOnly={ !inputStatus.isCorresponding }
                     label="This author is corresponding"
                     name="isCorresponding"
                     id="isCorrsponding"
-                    checked={ addAuthorModalData.value['is_corresponding'] === 'on' || false }
+                    checked={ formData.isCorresponding === 'on' || false }
                     onChange={ 
                         event => 
-                            dispatch ( 
-                                handleCheckbox( 
-                                    { 
-                                        name: 'is_corresponding', 
-                                        value: addAuthorModalData.value['is_corresponding'] 
-                                    } 
-                                ) 
+                            handleFormInput( 
+                                'isCorresponding', 
+                                formData.isCorresponding === 'on' ? 'off' : 'on'
                             ) 
                     }
                 />
             </FormControl>
         </>
     );
-}
+});
 
 export default AddAuthorModal;

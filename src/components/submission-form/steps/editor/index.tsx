@@ -5,7 +5,6 @@ import { useAppDispatch } from '@/app/store'
 import { Alert } from '@mui/material'
 import { Autocomplete, FormLabel, FormControl } from '@mui/joy'
 import { formValidator } from '@features/wizard/wizardSlice'
-import { handleLoading } from '@features/submission/steps/editor/editorSlice'
 import { useGetEditorsQuery } from '@/app/services/steps/editor'
 import { 
     useGetStepDataQuery, 
@@ -43,8 +42,7 @@ const EditorStep = forwardRef(
         }
     }, [stepData]);
     useImperativeHandle(ref, () => ({
-        async submitForm () {
-          dispatch( handleLoading( true ) );  
+        async submitForm () {  
           let isAllowed = false;   
           try {
             await updateStepDataTrigger( 

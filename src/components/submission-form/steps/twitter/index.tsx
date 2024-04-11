@@ -5,7 +5,6 @@ import { useEffect, forwardRef, useImperativeHandle, useState } from 'react'
 import { Alert } from '@mui/material'
 import { FormControl, FormLabel, Textarea } from '@mui/joy'
 import { formValidator } from '@features/wizard/wizardSlice'
-import { handleLoading } from '@features/submission/steps/twitter/twitterSlice'
 import { 
     useGetStepDataQuery, 
     useGetStepGuideQuery, 
@@ -37,8 +36,7 @@ const TwitterStep = forwardRef(
         dispatch( formValidator( true ) );
     }, []);
     useImperativeHandle(ref, () => ({
-        async submitForm () {
-          dispatch( handleLoading( true ) );  
+        async submitForm () { 
           let isAllowed = false;   
           try {
             await updateStepDataTrigger( 
