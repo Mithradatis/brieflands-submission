@@ -1,71 +1,112 @@
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { useAppSelector } from '@/app/store'
+import { useAppSelector } from '@/store/store'
 import Logo from '@/assets/images/brieflands-logo.png'
 import { useLazyGetUserQuery } from '@/app/services/apiSlice'
 import { Journal, User } from '@/app/services/types'
+import { Box, Stack, Typography } from '@mui/material'
 
 const Header = () => {
-    const journal: Journal = useAppSelector( ( state: any ) => state.wizard.journal );
-    const [ user, setUser ] = useState<User>();
-    const [getUserTrigger]= useLazyGetUserQuery();
+    const journal: Journal = useAppSelector((state: any) => state.wizard.journal);
+    const [user, setUser] = useState<User>();
+    const [getUserTrigger] = useLazyGetUserQuery();
     useEffect(() => {
-        const user = getUserTrigger( 'journal/profile' ).then( 
-            ( response: any ) => { 
-                setUser( response.data ); 
-            } 
+        getUserTrigger('journal/profile').then(
+            (response: any) => {
+                setUser(response.data);
+            }
         );
     }, []);
 
     return (
-        <div id="logo" className="d-flex align-items-center justify-content-between">
-            <div className="logo w-100 w-md-auto">
-                <div className="d-flex align-items-center">
-                    <div className="image ms-4">
+        <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            sx={{ width: '100%' }}
+            id="logo"
+        >
+            <Box className="logo">
+                <Stack direction="row" alignItems="center">
+                    <Box pl={{ xs: 1, md: 3 }}>
                         <Image
-                            src={ Logo }
+                            src={Logo}
                             alt="Brieflands"
-                            width={40}
-                            height={25}
+                            style={{ width: '45px', height: 'auto' }}
                         />
-                    </div>
-                    <h1 className="fw-bold ms-3 mb-0 fs-3">
+                    </Box>
+                    <Typography variant="h1" pl={2} pr={1}>
                         Brieflands
-                    </h1>
+                    </Typography>
                     {
-                        ( 
-                            journal !== undefined && 
-                            Object.keys( journal ).length > 0 
+                        (
+                            journal !== undefined &&
+                            Object.keys(journal).length > 0
                         ) &&
-                            <span className="ms-2 d-none d-md-block fw-bold text-shadow-light">
-                                { 
-                                    journal?.attributes?.title 
-                                        ? `| ${ journal?.attributes?.title }` 
-                                        : '' 
+                        <Typography
+                            variant="shadowLight"
+                            fontWeight="bold"
+                            fontSize={16}
+                            pt={.25}
+                            sx={{
+                                display: {
+                                    xs: 'none',
+                                    md: 'block'
                                 }
-                            </span>
+                            }} className="text-shadow-light"
+                        >
+                            {
+                                journal.attributes?.title && (
+                                    <>
+                                        <Typography component="span" fontWeight={700} pr={1}>|</Typography>
+                                        <Typography component="span" fontWeight={700}>
+                                            {journal.attributes.title}
+                                        </Typography>
+                                    </>
+                                )
+                            }
+                        </Typography>
                     }
-                </div>
-            </div>
+                </Stack>
+            </Box>
             {
-                ( 
-                    user !== undefined && 
-                    Object.keys( user ).length > 0 
+                (
+                    user !== undefined &&
+                    Object.keys(user).length > 0
                 ) &&
-                    <div className="logo px-3 d-flex align-items-center">
-                        <span 
-                            className="me-2 d-none d-md-block text-nowrap fs-7 fw-bold text-blue-light text-shadow-dark">
-                            { user.attributes?.full_name }
-                        </span>
-                        <img 
-                            className="img-circle img-tiny box-shadow" 
-                            src={ user?.attributes?.avatar } 
-                            alt={ user?.attributes?.full_name } 
-                            title={ user?.attributes?.full_name } 
-                        />
-                    </div>
-            }  
-        </div>
+                <Stack
+                    direction="row"
+                    alignItems="center"
+                    pr={{ xs: 1, md: 2 }}
+                >
+                    <Typography
+                        p={1}
+                        variant="shadowDark"
+                        fontWeight="bold"
+                        sx={{
+                            display: {
+                                xs: 'none',
+                                sm: 'block',
+                                md: 'block'
+                            },
+                            whiteSpace: 'nowrap'
+                        }}
+                        className="text-sm"
+                    >
+                        {user.attributes?.full_name}
+                    </Typography>
+                    <Image
+                        className="rounded-full img-tiny box-shadow"
+                        src={user?.attributes?.avatar}
+                        alt={user?.attributes?.full_name}
+                        title={user?.attributes?.full_name}
+                        width={30}
+                        height={30}
+                        style={{ width: '30px', height: 'auto' }}
+                    />
+                </Stack>
+            }
+        </Stack>
     )
 }
 

@@ -1,26 +1,50 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, forwardRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { List, ListItem, ListItemText } from '@mui/material'
-import { Autocomplete, Input, FormControl, FormLabel, FormHelperText, Textarea, Button, Divider, createFilterOptions } from '@mui/joy'
 import { handleNestedOpen, handleNestedClose } from '@features/modal/modalSlice'
-import { handleInput, handleClassifications } from '@features/modal/addReviewerModalSlice' 
-import { getClassificationsList } from '@api/steps/classifications'
-import { Modal, ModalDialog } from '@mui/joy'
+import { handleInput, handleClassifications } from '@features/modal/addReviewerModalSlice'
+import { Reviewer } from '@/app/services/types/reviewers'
+import { Modal } from '@mui/material'
 import { Scrollbars } from 'react-custom-scrollbars'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleRight, faRemove } from '@fortawesome/pro-duotone-svg-icons'
+import {
+    Autocomplete,
+    Box,
+    Button,
+    createFilterOptions,
+    Divider,
+    FormControl,
+    FormLabel,
+    FormHelperText,
+    List,
+    ListItem,
+    ListItemText,
+    Stack,
+    TextField,
+    Typography
+} from '@mui/material'
 
-const AddReviewerModal = () => {
+const AddReviewerModal = forwardRef(
+    (
+        props: {
+            isEditing: boolean,
+            workflowId: string,
+            modalFormData: Reviewer
+        },
+        ref
+    ) => {
     const filter = createFilterOptions();
     const dispatch: any = useDispatch();
-    const wizard = useSelector( ( state: any ) => state.wizard );
-    const modalData = useSelector( ( state: any ) => state.modal );
-    const addReviewerFormData = useSelector( ( state: any ) => state.addReviewerModal );
-    const [ selectedClassifications , setSelectedClassifications ] = useState<{ classification: string }[]>([]);
-    const [ disabledClassifications, setDisabledClassifications ] = useState<{ [key: string]: boolean }>({});
+    const wizard = useSelector((state: any) => state.wizard);
+    const modalData = useSelector((state: any) => state.modal);
+    const addReviewerFormData = useSelector((state: any) => state.addReviewerModal);
+    const [selectedClassifications, setSelectedClassifications] = useState<{ classification: string }[]>([]);
+    const [disabledClassifications, setDisabledClassifications] = useState<{ [key: string]: boolean }>({});
     const formIsValid = true;
-    const [ reviewerSuggestedOrOpposed, setReviewerSuggestedOrOpposed ]: any = useState({});
-    const [ reviewerAcademicDegree, setReviewerAcademicDegree ]: any = useState({});
-    const [ reviewerClassifications, setReviewerClassifications ]: any = useState([]);
-    const [ isValid, setIsValid ] = useState( {
+    const [reviewerSuggestedOrOpposed, setReviewerSuggestedOrOpposed]: any = useState({});
+    const [reviewerAcademicDegree, setReviewerAcademicDegree]: any = useState({});
+    const [reviewerClassifications, setReviewerClassifications]: any = useState([]);
+    const [isValid, setIsValid] = useState({
         reviewerEmail: modalData.modalFormData.reviewerEmail && modalData.modalFormData.reviewerEmail !== '',
         reviewerFirstName: modalData.modalFormData.reviewerFirstName && modalData.modalFormData.reviewerFirstName !== '',
         reviewerLastName: modalData.modalFormData.reviewerLastName && modalData.modalFormData.reviewerLastName !== '',
@@ -28,61 +52,72 @@ const AddReviewerModal = () => {
     const selectClassification = (classification: any) => {
         setSelectedClassifications((prevClassifications) => [...prevClassifications, classification]);
         setDisabledClassifications((prevDisabledClassifications) => ({
-          ...prevDisabledClassifications,
-          [classification]: true,
+            ...prevDisabledClassifications,
+            [classification]: true,
         }));
     };
     const removeClassification = (index: any, classification: any) => {
         setSelectedClassifications((prevClassifications) => {
-          const updatedClassifications = [...prevClassifications];
-          updatedClassifications.splice(index, 1);
-          return updatedClassifications;
+            const updatedClassifications = [...prevClassifications];
+            updatedClassifications.splice(index, 1);
+            return updatedClassifications;
         });
         setDisabledClassifications((prevDisabledClassifications) => ({
             ...prevDisabledClassifications,
             [classification]: false,
         }));
     };
-    useEffect( () => {
-        const classificationsUrl = `${ process.env.API_URL }/journal/classification`;
-        dispatch( getClassificationsList( classificationsUrl ) );
+    useEffect(() => {
+        const classificationsUrl = `${process.env.API_URL}/journal/classification`;
+        // dispatch( getClassificationsList( classificationsUrl ) );
         const isValidKeys = Object.keys(isValid);
-        for ( const [key, value] of Object.entries( modalData.modalFormData ) ) {   
-            if ( isValidKeys.includes(key) ) {
-                if ( value === '' ) {
+        for (const [key, value] of Object.entries(modalData.modalFormData)) {
+            if (isValidKeys.includes(key)) {
+                if (value === '') {
                     setIsValid({ ...isValid, [key]: false });
                 } else {
                     setIsValid({ ...isValid, [key]: true });
                 }
             }
         }
-        const suggestedOrOpposed: any = addReviewerFormData.suggestOrOpposeList.find( ( item: any ) => item.id === parseInt( addReviewerFormData.value['suggest-or-oppose'] ) )?.title;
-        const academicDegree: any = addReviewerFormData.academicDegreeList.find( ( item: any ) => item.id === parseInt( addReviewerFormData.value['academic-degree'] ) )?.title;
+        const suggestedOrOpposed: any = addReviewerFormData.suggestOrOpposeList.find(
+            (item: any) =>
+                item.id === parseInt(
+                    addReviewerFormData.value['suggest-or-oppose'])
+        )?.title;
+        const academicDegree: any = addReviewerFormData.academicDegreeList.find(
+            (item: any) =>
+                item.id === parseInt(
+                    addReviewerFormData.value['academic-degree'])
+        )?.title;
         const selectedClassificationIds = addReviewerFormData.value['classifications'];
         const classifications: any[] = selectedClassificationIds?.map((classificationId: string) => {
-            return addReviewerFormData.classificationsList.find( ( item: any ) => item.id === classificationId ).id;
+            return addReviewerFormData.classificationsList.find((item: any) => item.id === classificationId).id;
         });
-        setReviewerSuggestedOrOpposed( suggestedOrOpposed ? suggestedOrOpposed : '' );
-        setReviewerAcademicDegree( academicDegree ? academicDegree : '' );
-        setReviewerClassifications( classifications ? classifications : [] );
+        setReviewerSuggestedOrOpposed(suggestedOrOpposed ? suggestedOrOpposed : '');
+        setReviewerAcademicDegree(academicDegree ? academicDegree : '');
+        setReviewerClassifications(classifications ? classifications : []);
     }, [addReviewerFormData.value]);
-    
+
 
     return (
         <>
-            <Modal id="classificationsModal"
+            <Modal
                 open={modalData.nestedModalOpen}
                 aria-labelledby="nested-modal-title"
                 aria-describedby="nested-modal-description">
-                <ModalDialog sx={{ width: 600 }}>
-                    <div className="modal-header d-block">
-                        <h2 id="parent-modal-title" 
-                        className="fs-4 text-center text-green fw-bold container-fluid mb-4">
+                <Box sx={{ width: 600 }}>
+                    <Box className="modal-header block">
+                        <Typography
+                            variant="h2"
+                            id="parent-modal-title"
+                            className="fs-4 text-center text-green fw-bold container-fluid mb-4"
+                        >
                             Classifications
-                        </h2>
-                        <Divider className="container-fluid mb-4"/>
-                    </div>
-                    <div className="modal-body">
+                        </Typography>
+                        <Divider className="container-fluid mb-4" />
+                    </Box>
+                    <Box className="modal-body">
                         <Scrollbars
                             className="mb-4"
                             style={{ width: 100 + '%', height: 300 }}
@@ -90,301 +125,422 @@ const AddReviewerModal = () => {
                             autoHide
                             autoHideTimeout={300}
                             autoHideDuration={300}>
-                            <div className="d-flex align-items-start">
-                                <div className="border-end flex-fill pe-4">
-                                    <h5 className="fs-7 fw-bold text-muted">Available Classifications</h5>
+                            <Stack direction="row" alignItems="center">
+                                <Box className="border-end flex-fill pe-4">
+                                    <Typography 
+                                        variant="h5"
+                                        color="muted" 
+                                    >
+                                        Available Classifications
+                                    </Typography>
                                     <List>
-                                        {addReviewerFormData.classificationsList?.map((item: any, index: number) => {
-                                            return (
-                                            <ListItem className="mb-2 bg-light rounded" key={index}>
-                                                <ListItemText>
-                                                    { item.attributes.title }
-                                                </ListItemText>
-                                                <Button
-                                                    size="sm"
-                                                    onClick={ () => {
-                                                        const selectedIds: any = [];
-                                                        selectedIds.push( item.id );
-                                                        selectClassification( item.attributes.title );
-                                                        dispatch( handleInput( { name: 'classifications', value: selectedIds } ) );
-                                                    }}
-                                                    disabled={disabledClassifications[item.attributes.title]}
-                                                >
-                                                <i className="fa-duotone fa-angle-right"></i>
-                                                </Button>
-                                            </ListItem>
-                                            );
-                                        })}
+                                        {
+                                            addReviewerFormData.classificationsList?.map((item: any, index: number) => {
+                                                return (
+                                                    <ListItem 
+                                                        className="mb-2 bg-light rounded" 
+                                                        key={index}
+                                                    >
+                                                        <ListItemText>
+                                                            {item.attributes.title}
+                                                        </ListItemText>
+                                                        <Button
+                                                            size="small"
+                                                            onClick={() => {
+                                                                const selectedIds: any = [];
+                                                                selectedIds.push(item.id);
+                                                                selectClassification(item.attributes.title);
+                                                                dispatch(
+                                                                    handleInput(
+                                                                        {
+                                                                            name: 'classifications',
+                                                                            value: selectedIds
+                                                                        }
+                                                                    )
+                                                                );
+                                                            }}
+                                                            disabled={
+                                                                disabledClassifications[item.attributes.title]
+                                                            }
+                                                        >
+                                                            <FontAwesomeIcon icon={faAngleRight} />
+                                                        </Button>
+                                                    </ListItem>
+                                                );
+                                            })
+                                        }
                                     </List>
-                                </div>
-                                <div className="flex-fill ps-4">
-                                    <h5 className="fs-7 fw-bold text-muted">Selected Classifications</h5>
+                                </Box>
+                                <Box className="flex-fill ps-4">
+                                    <Typography 
+                                        variant="h5" 
+                                        className="fs-7 fw-bold text-muted"
+                                    >
+                                        Selected Classifications
+                                    </Typography>
                                     <List id="selected-classifications">
                                         {selectedClassifications.map((item: any, index: any) => (
                                             <ListItem className="mb-2 bg-light rounded" key={index}>
-                                                <ListItemText>{ item }</ListItemText>
-                                                <Button color="danger" size="sm" onClick={ () => removeClassification( index, item )}>
-                                                    <i className="fa-duotone fa-remove"></i>
+                                                <ListItemText>
+                                                    {item}
+                                                </ListItemText>
+                                                <Button
+                                                    color="error"
+                                                    size="small"
+                                                    onClick={() => removeClassification(index, item)}
+                                                >
+                                                    <FontAwesomeIcon icon={faRemove} />
                                                 </Button>
                                             </ListItem>
                                         ))}
                                     </List>
-                                </div>
-                            </div>
+                                </Box>
+                            </Stack>
                         </Scrollbars>
-                    </div>
-                    <div className="modal-footer">
+                    </Box>
+                    <Box className="modal-footer">
                         <Button className="button btn_primary"
-                            onClick={() =>  {
-                                    dispatch( handleClassifications( selectedClassifications ) );
-                                    dispatch( handleNestedClose() );
-                                }
+                            onClick={() => {
+                                dispatch(handleClassifications(selectedClassifications));
+                                dispatch(handleNestedClose());
+                            }
                             }>
                             Add
                         </Button>
-                    </div>
-                </ModalDialog>
+                    </Box>
+                </Box>
             </Modal>
-            <FormControl className="mb-3">
-                <FormLabel className="fw-bold mb-1">
-                    Suggest or Oppose
+            <FormControl 
+                fullWidth 
+                required 
+                sx={{ mb: 2 }}
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        Suggest or Oppose
+                    </Typography>
                 </FormLabel>
                 <Autocomplete
-                    required
-                    color="neutral"
-                    size="md"
-                    variant="soft"
-                    placeholder="Choose one…"
-                    disableClearable={true}
-                    name="suggestOrOppose"
-                    id="suggestOrOppose"
+                    size="small"
+                    disableClearable
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            variant="filled"
+                            placeholder="Choose one…"
+                        />
+                    )}
                     options={
-                        Array.isArray( addReviewerFormData.suggestOrOpposeList ) 
-                        ? addReviewerFormData.suggestOrOpposeList.map( 
-                            ( item: any ) => {
-                                return item.title || '' 
-                            }
-                           ) : []
+                        Array.isArray(addReviewerFormData.suggestOrOpposeList)
+                            ? addReviewerFormData.suggestOrOpposeList.map(
+                                (item: any) => {
+                                    return item.title || ''
+                                }
+                            ) : []
                     }
-                    value={ reviewerSuggestedOrOpposed }
+                    value={reviewerSuggestedOrOpposed}
                     onChange={(event, value) => {
-                        dispatch( handleInput({ 
-                                name: 'suggest-or-oppose',
-                                value: addReviewerFormData.suggestOrOpposeList.find( 
-                                    ( item: any ) => item.title === value )?.id || '' } 
-                                    ) 
-                                )
+                        dispatch(handleInput({
+                            name: 'suggest-or-oppose',
+                            value: addReviewerFormData.suggestOrOpposeList.find(
+                                (item: any) => item.title === value)?.id || ''
+                        }
+                        )
+                        )
                     }}
                 />
             </FormControl>
-            <FormControl className="mb-3" error={ !isValid.reviewerEmail && !formIsValid }>
-                <FormLabel className="fw-bold mb-1">
-                    Email
+            <FormControl 
+                fullWidth
+                sx={{ mb: 2 }} 
+                error={
+                    !isValid.reviewerEmail && 
+                    !formIsValid
+                }
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        Email
+                    </Typography>
                 </FormLabel>
-                <Input
+                <TextField
                     required
-                    variant="soft"
-                    name="reviewerEmail"
-                    id="reviewerEmail"
+                    variant="filled"
+                    size="small"
                     placeholder="Reviewer's Email"
-                    defaultValue={ addReviewerFormData.value['email'] }
-                    onChange={ event => dispatch( handleInput( { name: 'email', value: event.target.value } ) ) }
+                    defaultValue={addReviewerFormData.value['email']}
+                    onChange={
+                        event => dispatch(
+                            handleInput(
+                                { 
+                                    name: 'email', 
+                                    value: event.target.value 
+                                }
+                            )
+                        )
+                    }
                 />
                 {
-                    ( !isValid.reviewerEmail && !formIsValid ) 
-                    && <FormHelperText className="fs-7 text-danger mt-1">Please enter reviewer email</FormHelperText> 
+                    (
+                        !isValid.reviewerEmail &&
+                        !formIsValid
+                    ) &&
+                    <FormHelperText>
+                        <Typography variant="body-sm" color="error">
+                            Please enter reviewer email
+                        </Typography>
+                    </FormHelperText>
                 }
             </FormControl>
-            <FormControl className="mb-3" error={ !isValid.reviewerFirstName && !formIsValid }>
-                <FormLabel className="fw-bold mb-1">
-                    First Name
+            <FormControl
+                fullWidth
+                sx={{ mb: 2 }}
+                error={
+                    !isValid.reviewerFirstName &&
+                    !formIsValid
+                }
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        First Name
+                    </Typography>
                 </FormLabel>
-                <Input
+                <TextField
                     required
-                    variant="soft"
-                    name="reviewerFirstName"
-                    id="reviewerFirstName"
+                    variant="filled"
+                    size="small"
                     placeholder="Reviewer's First Name"
-                    defaultValue={ addReviewerFormData.value['first-name'] }
-                    onChange={ event => dispatch( handleInput( { name: 'first-name', value: event.target.value } ) ) }
+                    defaultValue={addReviewerFormData.value['first-name']}
+                    onChange={event => dispatch(handleInput({ name: 'first-name', value: event.target.value }))}
                 />
                 {
-                    ( !isValid.reviewerFirstName && !formIsValid ) 
-                    && <FormHelperText className="fs-7 text-danger mt-1">Please enter reviewer first name</FormHelperText> 
+                    (!isValid.reviewerFirstName && !formIsValid)
+                    && <FormHelperText className="fs-7 text-danger mt-1">Please enter reviewer first name</FormHelperText>
                 }
             </FormControl>
-            <FormControl className="mb-3">
-                <FormLabel className="fw-bold mb-1">
-                    Middle Name
+            <FormControl
+                fullWidth
+                sx={{ mb: 2 }}
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        Middle Name
+                    </Typography>
                 </FormLabel>
-                <Input
-                    variant="soft"
-                    name="reviewerMiddleName"
-                    id="reviewerMiddleName"
+                <TextField
+                    variant="filled"
+                    size="small"
                     placeholder="Reviewer's Middle Name"
-                    defaultValue={ addReviewerFormData.value['middle-name'] }
-                    onChange={ event => dispatch( handleInput( { name: 'middle-name', value: event.target.value } ) ) }
+                    defaultValue={addReviewerFormData.value['middle-name']}
+                    onChange={event => dispatch(handleInput({ name: 'middle-name', value: event.target.value }))}
                 />
             </FormControl>
-            <FormControl className="mb-3" error={ !isValid.reviewerLastName && !formIsValid }>
-                <FormLabel className="fw-bold mb-1">
-                    Last Name
+            <FormControl
+                fullWidth
+                sx={{ mb: 2 }}
+                error={
+                    !isValid.reviewerLastName &&
+                    !formIsValid
+                }
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        Last Name
+                    </Typography>
                 </FormLabel>
-                <Input
+                <TextField
                     required
-                    variant="soft"
-                    name="reviewerLastName"
-                    id="reviewerLastName"
+                    variant="filled"
+                    size="small"
                     placeholder="Reviewer's Last Name"
-                    defaultValue={ addReviewerFormData.value['last-name'] }
-                    onChange={ event => dispatch( handleInput( { name: 'last-name', value: event.target.value } ) ) }
+                    defaultValue={addReviewerFormData.value['last-name']}
+                    onChange={event => dispatch(handleInput({ name: 'last-name', value: event.target.value }))}
                 />
                 {
-                    ( !isValid.reviewerLastName && !formIsValid ) 
-                    && <FormHelperText className="fs-7 text-danger mt-1">Please enter reviewer last name</FormHelperText> 
+                    (
+                        !isValid.reviewerLastName &&
+                        !formIsValid
+                    ) &&
+                    <FormHelperText>
+                        <Typography variant="body-sm" color="error">
+                            Please enter reviewer last name
+                        </Typography>
+                    </FormHelperText>
                 }
             </FormControl>
-            <FormControl className="mb-3">
-                <FormLabel className="fw-bold mb-1">
-                    Academic Degree
+            <FormControl 
+                fullWidth 
+                sx={{ mb: 2 }}
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        Academic Degree
+                    </Typography>
                 </FormLabel>
                 <Autocomplete
-                    required
-                    color="neutral"
-                    size="md"
-                    variant="soft"
-                    placeholder="Choose one…"
-                    disabled={false}
-                    disableClearable={true}
-                    name="academicDegree"
-                    id="academicDegree"
-                    // options={ addReviewerFormData.academicDegreeList }
-                    // value={ reviewerAcademicDegree }
-                    // onChange={(event, value) => {
-                    //     dispatch( handleInput({ name: 'academic-degree' , value: value.toString() } ) );
-                    // }}
+                    size="small"
+                    disableClearable
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            variant="filled"
+                            placeholder="Choose one…"
+                        />
+                    )}
                     options={
-                        Array.isArray( addReviewerFormData.academicDegreeList ) 
-                        ? addReviewerFormData.academicDegreeList.map( 
-                            ( item: any ) => {
-                                return item.title || '' 
-                            }
-                           ) : []
+                        Array.isArray(addReviewerFormData.academicDegreeList)
+                            ? addReviewerFormData.academicDegreeList.map(
+                                (item: any) => {
+                                    return item.title || ''
+                                }
+                            ) : []
                     }
-                    value={ reviewerAcademicDegree }
+                    value={reviewerAcademicDegree}
                     onChange={(event, value) => {
-                        dispatch( handleInput({ 
-                                name: 'academic-degree',
-                                value: addReviewerFormData.academicDegreeList.find( 
-                                    ( item: any ) => item.title === value )?.id || '' } 
-                                    ) 
-                                )
+                        dispatch(handleInput({
+                            name: 'academic-degree',
+                            value: addReviewerFormData.academicDegreeList.find(
+                                (item: any) => item.title === value)?.id || ''
+                        }
+                        )
+                        )
                     }}
                 />
             </FormControl>
-            <FormControl className="mb-3">
-                <FormLabel className="fw-bold mb-1">
-                    Department
+            <FormControl 
+                fullWidth
+                sx={{ mb: 2 }}
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        Department
+                    </Typography>
                 </FormLabel>
-                <Input
-                    variant="soft"
-                    name="reviewerDepartment"
-                    id="reviewerDepartment"
+                <TextField
+                    variant="filled"
+                    size="small"
                     placeholder="Reviewer's Department"
-                    defaultValue={ addReviewerFormData.value['department'] }
-                    onChange={ event => dispatch( handleInput( { name: 'department', value: event.target.value } ) ) }
+                    defaultValue={addReviewerFormData.value['department']}
+                    onChange={event => dispatch(handleInput({ name: 'department', value: event.target.value }))}
                 />
             </FormControl>
             <FormControl className="mb-3">
-                <FormLabel className="fw-bold mb-1">
-                    University
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        University
+                    </Typography>
                 </FormLabel>
-                <Input
-                    variant="soft"
-                    name="reviewerUniversity"
-                    id="reviewerUniversity"
+                <TextField
+                    variant="filled"
+                    size="small"
                     placeholder="Reviewer's University"
-                    defaultValue={ addReviewerFormData.value['university'] }
-                    onChange={ event => dispatch( handleInput( { name: 'university', value: event.target.value } ) ) }
+                    defaultValue={addReviewerFormData.value['university']}
+                    onChange={event => dispatch(handleInput({ name: 'university', value: event.target.value }))}
                 />
             </FormControl>
-            <FormControl className="mb-3">
-                <FormLabel className="fw-bold mb-1">
-                    Type Classifications
+            <FormControl
+                fullWidth 
+                sx={{ mb: 2 }}
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        Type Classifications
+                    </Typography>
                 </FormLabel>
-                <div className="d-flex align-items-center">
+                <Stack direction="row" alignItems="center">
                     <Autocomplete
                         multiple
                         className="flex-fill"
-                        color="neutral"
-                        size="md"
-                        variant="soft"
-                        placeholder="Classification Name"
-                        disabled={false}
-                        disableClearable={true}
-                        name="classifications"
-                        id="classifications"
+                        size="small"
+                        disableClearable
                         onInputChange={handleInput}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="filled"
+                                placeholder="Classification Name…"
+                            />
+                        )}
                         options={
-                            Array.isArray( addReviewerFormData.classificationsList ) 
-                            ? addReviewerFormData.classificationsList.map( 
-                                ( item: any ) => {
-                                    return item.attributes?.title || '' 
-                                }
-                               ) : []
+                            Array.isArray(addReviewerFormData.classificationsList)
+                                ? addReviewerFormData.classificationsList.map(
+                                    (item: any) => {
+                                        return item.attributes?.title || ''
+                                    }
+                                ) : []
                         }
                         value={
-                            Array.isArray( addReviewerFormData.classificationsList )
-                              ? addReviewerFormData.classificationsList
-                                  .filter( ( item: any ) => reviewerClassifications.includes( item.id ) )
-                                  .map( ( item: any ) => item.attributes.title )
-                              : []
+                            Array.isArray(addReviewerFormData.classificationsList)
+                                ? addReviewerFormData.classificationsList
+                                    .filter((item: any) => reviewerClassifications.includes(item.id))
+                                    .map((item: any) => item.attributes.title)
+                                : []
                         }
-                        onChange={(event, value) => {
-                            const selectedIds = value.map( ( selectedItem: any ) => {
-                              const selectedOption = addReviewerFormData.classificationsList.find(
-                                ( item: any ) => item.attributes.title === selectedItem
-                              );
-                              return selectedOption ? selectedOption.id : '';
+                        onChange={(event, value: any) => {
+                            const selectedIds = value.map((selectedItem: any) => {
+                                const selectedOption = addReviewerFormData.classificationsList.find(
+                                    (item: any) => item.attributes.title === selectedItem
+                                );
+                                return selectedOption ? selectedOption.id : '';
                             });
-                            setSelectedClassifications( value );
-                            dispatch( handleInput( { name: 'classifications', value: selectedIds } ) );
+                            setSelectedClassifications(value);
+                            dispatch(handleInput({ name: 'classifications', value: selectedIds }));
                         }}
                         filterOptions={(options, params) => {
-                            const filtered = filter( options, params );
+                            const filtered = filter(options, params);
                             const { inputValue } = params;
                             const isExisting = options.some((option) => inputValue === option);
-                    
                             if (inputValue !== '' && !isExisting) {
                                 filtered.push('Nothing found');
                             }
-                    
-                            return filtered.filter( ( option: any ) => {
+
+                            return filtered.filter((option: any) => {
                                 return option !== 'Nothing found' || isExisting;
                             });
                         }}
                     />
-                    <Button className="btn btn-primary ms-2" onClick={ () => dispatch( handleNestedOpen() ) }>
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        sx={{ mb: 1 }}
+                        onClick={() => dispatch(handleNestedOpen())}
+                    >
                         Add
                     </Button>
-                </div>
+                </Stack>
             </FormControl>
-            <FormControl className="mb-3">
-                <FormLabel className="fw-bold mb-1">
-                    Reason
+            <FormControl 
+                fullWidth 
+                sx={{ mb: 2 }}
+            >
+                <FormLabel>
+                    <Typography variant="title-sm">
+                        Reason
+                    </Typography>
                 </FormLabel>
-                <Textarea
-                    variant="soft"
-                    name="reviewerReason"
-                    id="reviewerReason"
+                <TextField
+                    multiline
+                    variant="filled"
+                    size="small"
                     minRows={3}
                     aria-label="textarea"
                     placeholder="Describe your Reason..."
-                    onChange={ event => dispatch( handleInput( { name: 'reason', value: event.target.value } ) ) }
+                    onChange={
+                        event => dispatch(
+                            handleInput(
+                                {
+                                    name: 'reason',
+                                    value: event.target.value
+                                }
+                            )
+                        )
+                    }
                 />
             </FormControl>
         </>
     );
-}
+});
+
+AddReviewerModal.displayName = 'AddReviewerModal';
 
 export default AddReviewerModal;

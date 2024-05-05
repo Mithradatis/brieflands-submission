@@ -157,10 +157,26 @@ export const deleteReviewer = createAsyncThunk(
   }
 );
 
-export const handleCloseReviewersModal = createAsyncThunk(
-  'addReviewersModal/handleCloseReviewersModal',
-  async () => {
-    return true;
+export const createReviewersTable = ( reviewers: any ) => {
+  const reviewersList = [];
+  const keys = Object.keys(reviewers);
+  if ( keys.length ) {
+    for (let index = 0; index < keys.length; index++) {
+      const key: any = keys[index];
+      const value: any = reviewers[key];
+      reviewersList.push(
+        {
+          id: ( index + 1 ),
+          email: value['email'],
+          firstname: value['first-name'] || '',
+          lastname: value['last-name'] || '',
+          department: value['department'],
+          suggestOrOppose: value['suggest-or-oppose'] || ''
+        }
+      );
+    }
   }
-);
+
+  return reviewersList;
+}
 

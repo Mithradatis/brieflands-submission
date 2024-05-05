@@ -1,16 +1,13 @@
 'use client'
 
 import React from 'react'
-import { Provider } from 'react-redux'
-import { store } from '@/app/store'
-import styles from '@/page.module.css'
-import Container from '@/components/partials/general'
 import Header from '@/components/partials/header'
 import Footer from '@/components/partials/footer'
-import '@/assets/fontawesome-6/css/all.min.css'
-import 'bootstrap/dist/css/bootstrap.min.css'
-import '@/assets/css/global.scss'
-import '@/assets/css/formWizard.scss'
+import { Box, ThemeProvider, CssBaseline, Stack } from '@mui/material'
+import { Provider } from 'react-redux'
+import { store } from '@/store/store'
+import { GlobalStyle } from '@/styles/global/globalStyles'
+import { theme } from '@/styles/theme/theme'
 
 export default function RootLayout({
   children,
@@ -22,18 +19,42 @@ export default function RootLayout({
       <html>
         <head>
           <title>Submission</title>
-          <link rel="shortcut icon" type="image/png" href="/favicon.png"/>
+          <link
+            rel="shortcut icon"
+            type="image/png"
+            href="/favicon.png"
+          />
         </head>
         <body>
           <Provider store={store}>
-            <Container />
-            <div className="main-container bg-texture d-flex flex-column">
-              <Header />
-              <main className={`${styles.main} pt-4 px-4 pb-5 pb-md-4 flex-grow-1`}>
-                { children }
-              </main>
-              <Footer />
-            </div>
+            <ThemeProvider theme={theme}>
+              <CssBaseline />
+              <GlobalStyle />
+              <Stack
+                className="bg-main border-t-2 border-t-dark-blue bg-texture"
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+                px={0}
+                pb={{ xs: 4 }}
+                sx={{ height: '100%', minHeight: '100svh' }}
+              >
+                <Header />
+                <Box
+                  pt={{ xs: 2, md: 4 }}
+                  px={{ xs: 0, md: 4 }}
+                  pb={{ xs: 3, md: 5 }}
+                  display="flex"
+                  sx={{ 
+                    maxWidth: { xs: '100%' },
+                    flexGrow: 1 
+                  }}
+                >
+                  {children}
+                </Box>
+                <Footer />
+              </Stack>
+            </ThemeProvider>
           </Provider>
         </body>
       </html>

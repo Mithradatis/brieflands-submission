@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { handleCloseReviewersModal } from '@api/steps/reviewers'
-import { getClassificationsList } from '@api/steps/classifications'
 
 const suggestOrOpposeList = [ 
   { id: 1 , title: 'Suggest Reviewer' }, 
@@ -78,19 +77,7 @@ export const addReviewerModalSlice = createSlice({
         }
       };
     }
-  },
-  extraReducers: (builder) => {
-    builder
-      .addCase(getClassificationsList.fulfilled, ( state, action ) => {
-        state.classificationsList = action.payload.data;
-      })
-      .addCase(handleCloseReviewersModal.pending, ( state ) => {
-        state.isLoading = true;
-      }).addCase(handleCloseReviewersModal.fulfilled, ( state ) => {
-        state.isLoading = false;
-        state.isEditing = false;
-      });
-  },
+  }
 });
 
 export const {

@@ -1,26 +1,4 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { fetchDataFromApi, deleteCache } from '@api/client'
-
-export const getEditorStepGuide = createAsyncThunk(
-  'submission/getEditorStepGuide',
-  async ( url: string ) => {
-    return fetchDataFromApi( url );
-  }
-);
-
-export const getEditors = createAsyncThunk(
-  'submission/getEditors',
-  async ( url: string ) => {
-    return fetchDataFromApi( url );
-  }
-);
-
-export const getEditorStepData = createAsyncThunk(
-  'submission/getEditorStepData',
-  async ( url: string ) => {
-    return fetchDataFromApi( url );
-  }
-);
 
 export const updateEditorStepData = createAsyncThunk(
   'submission/updateEditorStepData',

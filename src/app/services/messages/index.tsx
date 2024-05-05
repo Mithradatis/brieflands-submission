@@ -1,4 +1,4 @@
-import { useAppDispatch } from '@/app/store'
+import { useAppDispatch } from '@/store/store'
 import { handleSnackbarOpen } from '@/lib/features/snackbar/snackbarSlice'
 import { handleModalSnackbarOpen } from '@/lib/features/snackbar/modalSnackbarSlice'
 

@@ -22,7 +22,7 @@ const nextConfig = {
         DEFAULT_STEP: localEnv.NEXT_PUBLIC_DEFAULT_STEP,
         DEFAULT_WORKFLOW_ID: localEnv.NEXT_PUBLIC_DEFAULT_WORKFLOW_ID,
         CACHE_DURATION: localEnv.NEXT_PUBLIC_CACHE_DURATION
-    },
+    }
 }
 
 if ( process.env.NODE_ENV === 'production' ) {

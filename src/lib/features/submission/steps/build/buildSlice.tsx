@@ -1,5 +1,4 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { getFinalAgreementGuide } from '@api/steps/build'
 
 type Value = {
   terms: boolean;
@@ -71,17 +70,7 @@ export const buildSlice = createSlice({
         state.stepGuide = action.payload.data.value;
       }
     }
-  },
-  extraReducers( builder ) {
-    builder
-      .addCase(getFinalAgreementGuide.pending, ( state ) => {
-        state.isLoading = true;
-      })
-      .addCase(getFinalAgreementGuide.fulfilled, ( state, action: any ) => {
-        state.isLoading = false;
-        state.finalAgreementGuide = action.payload.data.value;
-      });
-  },
+  }
 });
 
 export const {

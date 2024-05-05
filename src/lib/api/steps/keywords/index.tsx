@@ -1,38 +1,37 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { fetchDataFromApi } from '@api/client'
 
 export const getKeywordsStepGuide = createAsyncThunk(
   'submission/getKeywordsStepGuide',
   async ( url: string ) => {
-    return fetchDataFromApi( url );
+    // return fetchDataFromApi( url );
   }
 );
 
 export const getKeywordsList = createAsyncThunk(
   'submission/getKeywordsList',
   async ( url: string ) => {
-    return fetchDataFromApi( url );
+    // return fetchDataFromApi( url );
   }
 );
 
 export const getKeywords = createAsyncThunk(
   'submission/getKeywords',
   async (url: string ) => {
-    return fetchDataFromApi( url );
+    // return fetchDataFromApi( url );
   }
 );
 
 export const findKeywords = createAsyncThunk(
   'submission/findKeywords',
   async ( url: string ) => {
-    return fetchDataFromApi( url );
+    // return fetchDataFromApi( url );
   }
 );
 
 export const getKeywordsStepData = createAsyncThunk(
   'submission/getKeywordsStepData',
   async (  url: string ) => {
-    return fetchDataFromApi( url );
+    // return fetchDataFromApi( url );
   }
 );
 

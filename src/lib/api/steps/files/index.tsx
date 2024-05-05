@@ -1,14 +1,5 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 import { handleSnackbarOpen } from '@features/snackbar/snackbarSlice'
-import { setLoading } from '@features/submission/steps/files/filesSlice'
-import { fetchDataFromApi, deleteCache } from '@api/client'
-
-export const getFiles = createAsyncThunk(
-  'submission/getFiles',
-  async ( url: string ) => {
-    return fetchDataFromApi( url );
-  }
-);
 
 export const getFileTypes = createAsyncThunk(
   'submission/getFileTypes',
@@ -93,7 +84,6 @@ export const addFile = createAsyncThunk(
       } else {
         dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to add file', vertical: 'top', horizontal: 'center' } ) );
       }
-      dispatch( setLoading( false ) );
       throw new Error('Failed to add file.');
     }
     dispatch( handleSnackbarOpen( { severity: 'success', message: 'File uploaded successfuly' } ) );
@@ -148,7 +138,6 @@ export const deleteFile = createAsyncThunk(
         } else {
           dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to delete file', vertical: 'top', horizontal: 'center' } ) );
         }
-        dispatch( setLoading( false ) );
         throw new Error('Failed to delete file');
       }
       dispatch( handleSnackbarOpen( { severity: 'success', message: 'File deleted successfuly' } ) );
@@ -206,7 +195,6 @@ export const reuseFile = createAsyncThunk(
         } else {
           dispatch( handleSnackbarOpen({  severity: 'error', message: 'Failed to reuse the file', vertical: 'top', horizontal: 'center' } ) );
         }
-        dispatch( setLoading( false ) );
         throw new Error('Failed to reuse file.');
       }
       const getStepDataFromApi = `${ process.env.SUBMISSION_API_URL }/${ state.wizard.workflowId }/files`;

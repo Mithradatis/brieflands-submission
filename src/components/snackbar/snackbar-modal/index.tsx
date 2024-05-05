@@ -1,6 +1,5 @@
-import { useAppDispatch, useAppSelector } from '@/app/store'
-import { Alert } from '@mui/material'
-import Snackbar from '@mui/material/Snackbar'
+import { useAppDispatch, useAppSelector } from '@/store/store'
+import { Alert, Snackbar } from '@mui/material'
 import { handleModalSnackbarClose } from '@features/snackbar/modalSnackbarSlice'
 
 const ModalFlashMessage = ( prop: any ) => {
@@ -15,7 +14,7 @@ const ModalFlashMessage = ( prop: any ) => {
             onClose={ () => dispatch( handleModalSnackbarClose() ) }
             autoHideDuration={5000}
         >
-            <Alert onClose={ () => dispatch( handleModalSnackbarClose() ) } severity={ snackbar.severity }>
+            <Alert color={ snackbar.severity }>
                 { snackbar.message }
             </Alert>
         </Snackbar>

@@ -1,6 +1,4 @@
-import { finishSubmission } from '@/lib/api/client';
 import { createApi, fetchBaseQuery, retry } from '@reduxjs/toolkit/query/react'
-import { error } from 'console';
 
 // Create our baseQuery instance
 const baseQuery = fetchBaseQuery({
@@ -60,8 +58,8 @@ export const submissionApi: any = createApi({
 export const enhancedApi = submissionApi.injectEndpoints({
   endpoints: ( builder: any ) => ({
     buildNewWorkflow: builder.mutation({
-      query: ( url: string ) => ({
-        url: `${process.env.SUBMISSION_API_URL}/${url}`,
+      query: () => ({
+        url: `${process.env.SUBMISSION_API_URL}`,
         method: 'POST'
       })
     }),
@@ -153,13 +151,13 @@ export const {
   useBuildNewWorkflowMutation,
   useFinishSubmissionMutation,
   useGetCountriesQuery,
-  useGetScreeningQuery,
   useGetStepDataQuery, 
   useGetStepGuideQuery,
   useGetWorkflowQuery,
   useLazyGetJournalQuery,
   useLazyGetSameArticlesQuery,
   useLazyGetSameArticlesGuideQuery,
+  useLazyGetScreeningQuery,
   useLazyGetSubmissionStepsQuery,
   useLazyGetUserQuery,
   useLazyGetWorkflowQuery,

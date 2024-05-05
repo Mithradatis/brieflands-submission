@@ -1,20 +1,35 @@
 import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import { useState, useEffect, forwardRef } from 'react'
-import { useAppDispatch, useAppSelector } from '@/app/store'
-import { Alert } from '@mui/material'
-import { Checkbox, FormControl, Card, CardContent } from '@mui/joy'
+import { useAppDispatch, useAppSelector } from '@/store/store'
 import { useLazyGetFinalAgreementGuideQuery } from '@/app/services/steps/build'
 import { handleDialogOpen } from '@features/dialog/dialogSlice'
 import { handleSnackbarOpen } from '@features/snackbar/snackbarSlice'
-import { 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faFilePdf, faDownload } from '@fortawesome/pro-duotone-svg-icons'
+import { useGetStepDataQuery, useGetStepGuideQuery } from '@/app/services/apiSlice'
+import {
     formValidator,
     loadStep,
-    prevStep, 
-    handleIsVerified, 
-    Wizard 
-} from '@features/wizard/wizardSlice'
-import { useGetStepDataQuery, useGetStepGuideQuery } from '@/app/services/apiSlice'
+    prevStep,
+    handleIsVerified,
+    Wizard
+} from '@/app/features/wizard/wizardSlice'
+import {
+    Alert,
+    Box,
+    Button,
+    Card,
+    CardContent,
+    Checkbox,
+    Divider,
+    FormControl,
+    FormControlLabel,
+    Link,
+    Stack,
+    styled,
+    Typography
+} from '@mui/material'
 
 export type Build = {
     terms: boolean;
@@ -26,229 +41,322 @@ export type Build = {
     journal_agreement_message?: string;
     files?: {
         full?: string;
-
     };
 }
 
-const BuildStep = forwardRef(
-    ( 
-        props: { 
-            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string }, 
-            details: string 
-        }, 
-        ref 
-    ) => {
-    const dispatch = useAppDispatch();
-    const wizard: Wizard = useAppSelector( ( state: any ) => state.wizard );
-    const [getFinalAgreementTrigger] = useLazyGetFinalAgreementGuideQuery();
-    const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery( props.apiUrls.stepGuideApiUrl );
-    const { data: stepData, isLoading: stepDataIsLoading, isError, error } = useGetStepDataQuery( props.apiUrls.stepDataApiUrl );
-    if ( isError ) {
-        let unfinishedStep = error.data.data.step;
-        const footnotes = ['authors_contribution', 'funding_support', 'conflict_of_interests'];
-        const ethicalStatements = ['clinical_trial_registration_code', 'ethical_approval', 'informed_consent', 'data_availability'];
-        if ( footnotes.includes( unfinishedStep ) ) {
-          unfinishedStep = 'footnotes';
-        }
-        if ( ethicalStatements.includes( unfinishedStep ) ) {
-          unfinishedStep = 'ethical_statements';
-        }
-        dispatch( loadStep( unfinishedStep ) );
-        dispatch( handleSnackbarOpen( { severity: 'error', message: error.data.data.message } ) );
-      }
-    const isLoading: boolean = ( stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string' );
-    const [ finalAgreementGuide, setFinalAgreementGuide ] = useState('');
-    const [ formData, setFormData ] = useState<Build>({
-        terms: true
-    });
-    const finishWorkflowUrl = 
-        `${ process.env.SUBMISSION_API_URL }/${ wizard.workflowId }/finish`;
-    useEffect( () => {
-        if ( stepData ) {
-            setFormData( stepData );
-        }
-    }, [stepData]);
-    useEffect(() => {
-        const formIsValid = formData?.terms;
-        dispatch( formValidator( formIsValid ) );
-    }, [wizard.formStep, formData]);
-    useEffect( () => {
-        let getFinalAgreementDictionary = '';
-        if( wizard.journal?.attributes?.shopping_status ) {
-            getFinalAgreementDictionary = 
-                `${ process.env.API_URL }/dictionary/get/journal.submission.final.agreement.apc`;
-        } else {
-            getFinalAgreementDictionary = 
-                `${ process.env.API_URL }/dictionary/get/journal.submission.final.agreement`;
-        }
-        setFinalAgreementGuide( getFinalAgreementTrigger( getFinalAgreementDictionary ) );
-    }, [wizard.journal]);
+const DashboardStat = styled(Box)({
+    position: 'relative',
+    backgroundColor: '#096bde',
+    borderRadius: 10,
+    '.dashboard-stat-icon': {
+        fontSize: '5rem',
+        position: 'absolute',
+        zIndex: 0,
+        top: '-.5rem',
+        left: '-.5rem'
+    },
+    '.dashboard-stat-footer': {
+        position: 'absolute',
+        zIndex: 1,
+        borderRadius: '0 0 12px 12px',
+        backgroundColor: '#0a54ab',
+        width: '100%',
+        bottom: 0,
+        left: 0
+    }
+});
 
-    return (
-        isLoading
-            ? <StepPlaceholder/>
-            :
-                <div id="build" className="tab">
-                    <h3 className="mb-4 text-shadow-white">Build</h3>
+const BuildStep = forwardRef(
+    (
+        props: {
+            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string },
+            details: string
+        },
+        ref
+    ) => {
+        const dispatch = useAppDispatch();
+        const wizard: Wizard = useAppSelector((state: any) => state.wizard);
+        const [getFinalAgreementTrigger] = useLazyGetFinalAgreementGuideQuery();
+        const {
+            data: stepGuide,
+            isLoading: stepGuideIsLoading
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const {
+            data: stepData,
+            isLoading: stepDataIsLoading,
+            isError,
+            error
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        console.log(stepData);
+        if (isError) {
+            let unfinishedStep = error?.data?.data?.step;
+            const footnotes = [
+                'authors_contribution',
+                'funding_support',
+                'conflict_of_interests'
+            ];
+            const ethicalStatements = [
+                'clinical_trial_registration_code',
+                'ethical_approval',
+                'informed_consent',
+                'data_availability'
+            ];
+            if (footnotes.includes(unfinishedStep)) {
+                unfinishedStep = 'footnotes';
+            }
+            if (ethicalStatements.includes(unfinishedStep)) {
+                unfinishedStep = 'ethical_statements';
+            }
+            dispatch(loadStep(unfinishedStep));
+            dispatch(handleSnackbarOpen({ severity: 'error', message: error?.data?.data?.message }));
+        }
+        const isLoading: boolean = (
+            stepGuideIsLoading &&
+            stepDataIsLoading &&
+            typeof stepGuide !== 'string'
+        );
+        const [finalAgreementGuide, setFinalAgreementGuide] = useState('');
+        const [formData, setFormData] = useState<Build>({
+            terms: true
+        });
+        const finishWorkflowUrl =
+            `${process.env.SUBMISSION_API_URL}/${wizard.workflowId}/finish`;
+        useEffect(() => {
+            if (stepData) {
+                setFormData(stepData);
+            }
+        }, [stepData]);
+        useEffect(() => {
+            const formIsValid = formData?.terms;
+            dispatch(formValidator(formIsValid));
+        }, [wizard.formStep, formData]);
+        useEffect(() => {
+            let getFinalAgreementDictionary = '';
+            if (wizard.journal?.attributes?.shopping_status) {
+                getFinalAgreementDictionary =
+                    `${process.env.API_URL}/dictionary/get/journal.submission.final.agreement.apc`;
+            } else {
+                getFinalAgreementDictionary =
+                    `${process.env.API_URL}/dictionary/get/journal.submission.final.agreement`;
+            }
+            setFinalAgreementGuide(getFinalAgreementTrigger(getFinalAgreementDictionary));
+        }, [wizard.journal]);
+
+        return (
+            isLoading
+                ? <StepPlaceholder />
+                :
+                <Box>
+                    <Typography variant="h3" mb={2}>
+                        Build
+                    </Typography>
                     {
-                        ( props.details && props.details !== '' ) &&
-                            <Alert severity="error" className="mb-4">
-                                { ReactHtmlParser( props.details ) }
-                            </Alert>
+                        (props.details && props.details !== '') &&
+                        <Alert severity="error" className="mb-4">
+                            {ReactHtmlParser(props.details)}
+                        </Alert>
                     }
-                    {   stepGuide &&     
-                            <Alert severity="info" className="mb-4">
-                                { ReactHtmlParser( stepGuide ) }
-                            </Alert>
+                    {stepGuide &&
+                        <Alert severity="info" className="mb-4">
+                            {ReactHtmlParser(stepGuide)}
+                        </Alert>
                     }
-                    <div className="d-flex align-items-center">
+                    <Stack direction="column" alignItems="start" justifyContent="center" py={3}>
                         {
                             formData?.files?.full !== '' &&
-                            <div className="w-50 w-md-50">
-                                <a 
-                                    href={ formData?.files?.full } 
-                                    target="_blank" 
-                                    rel="noopener noreferrer">
-                                    <Card 
-                                        variant="solid" 
-                                        color="primary" 
-                                        className="dashboard-stat pb-0 px-0 pt-4 mb-4">
-                                        <CardContent>
-                                            <div className="overflow-hidden mb-3">
-                                                <i className="dashboard-stat-icon fa-duotone fa-file-pdf text-white opacity-50"></i>
-                                                <span className="fs-4 ps-5 pt-1 ms-3">
+                            <Box width={50 + '%'}>
+                                <Link
+                                    href={formData?.files?.full}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    <DashboardStat color="primary">
+                                        <CardContent sx={{ display: 'flex', minHeight: 120 }}>
+                                            <Box overflow="hidden" position="relative">
+                                                <FontAwesomeIcon
+                                                    className="dashboard-stat-icon"
+                                                    color="white"
+                                                    opacity={.5}
+                                                    fontSize={42}
+                                                    icon={faFilePdf}
+                                                />
+                                                <Typography
+                                                    component="span"
+                                                    color="white"
+                                                    fontSize={30}
+                                                    pl={10}
+                                                    pt={5}
+                                                    mt={2}
+                                                >
                                                     Full File
-                                                </span>
-                                            </div>
-                                            <div className="dashboard-stat-footer text-light fs-7 px-3 py-1">
-                                                <i className="fa-duotone fa-download me-1"></i>
-                                                <span>
+                                                </Typography>
+                                            </Box>
+                                            <Box px={2} py={.5} className="dashboard-stat-footer">
+                                                <FontAwesomeIcon
+                                                    color="white"
+                                                    icon={faDownload}
+                                                />
+                                                <Typography variant="body-sm" pl={.25} color="white">
                                                     Get File
-                                                </span>
-                                            </div>
+                                                </Typography>
+                                            </Box>
                                         </CardContent>
-                                    </Card>
-                                </a>
-                            </div>
+                                    </DashboardStat>
+                                </Link>
+                            </Box>
                         }
-                    </div>
-                    <Alert severity="info" className="mb-4">
-                        { ReactHtmlParser( finalAgreementGuide ) }
-                        <hr/>
-                        { 
-                            formData?.standard_word_count && 
-                            <div>
-                                Standard cord count is: { formData?.standard_word_count }
-                            </div> 
-                        }
+                    </Stack>
+                    <Alert color="info" sx={{ mb: 3 }}>
                         {
-                            formData?.word_count && 
-                            <div>
-                                Word count(Total) of manuscript is about: 
-                                <span className="fw-bold">
-                                    { formData?.word_count }
-                                </span>
-                            </div> 
+                            ReactHtmlParser(finalAgreementGuide)
                         }
-                        { 
-                            ( 
-                                wizard.journal?.attributes?.shopping_status === 'active' && 
-                                formData?.word_count_include_in_fee 
-                            ) && 
-                                <div>
-                                    Word count(include in fee) of manuscript is about: 
-                                    <span className="fw-bold">
-                                        { formData?.word_count_include_in_fee }
-                                    </span>
-                                </div> 
-                        }
+                        <Divider sx={{ my: 1 }} />
                         {
-                            ( 
-                                wizard.journal?.attributes?.shopping_status === 'active' && 
-                                formData?.prices && 
-                                Object.keys( formData?.prices ).length > 0 
-                            ) && 
-                                <div>
-                                    Invoice amount(VAT included) will be: 
+                            formData?.standard_word_count &&
+                            <Box>
+                                <Typography component="span" variant="body-sm">
+                                    Standard word count is:
+                                </Typography>
+                                <Typography component="span" variant="title-sm" px={1}>
                                     {
-                                        Object.entries( 
-                                            formData?.prices['Acceptance Fee']).map(
-                                                ( [ currency, value ] ) => (
-                                                    <span key={currency} className="fw-bold">
-                                                        { ` ${ value } ${ currency }` }
-                                                    </span>
-                                                )
-                                            )
+                                        formData?.standard_word_count
                                     }
-                                </div> 
+                                </Typography>
+                            </Box>
+                        }
+                        {
+                            formData?.word_count &&
+                            <Box>
+                                <Typography component="span" variant="body-sm">
+                                    Word count(Total) of manuscript is about:
+                                </Typography>
+                                <Typography component="span" variant="title-sm" px={1}>
+                                    {
+                                        formData?.word_count
+                                    }
+                                </Typography>
+                            </Box>
+                        }
+                        {
+                            (
+                                wizard.journal?.attributes?.shopping_status === 'active' &&
+                                formData?.word_count_include_in_fee
+                            ) &&
+                            <Box>
+                                <Typography component="span" variant="body-sm">
+                                    Word count(include in fee) of manuscript is about:
+                                </Typography>
+                                <Typography component="span" variant="title-sm" px={1}>
+                                    {
+                                        formData?.word_count_include_in_fee
+                                    }
+                                </Typography>
+                            </Box>
+                        }
+                        {
+                            (
+                                wizard.journal?.attributes?.shopping_status === 'active' &&
+                                formData?.prices &&
+                                Object.keys(formData?.prices).length > 0
+                            ) &&
+                            <Box>
+                                <Typography component="span" variant="body-sm">
+                                    Invoice amount(VAT included) will be:
+                                </Typography>
+                                {
+                                    Object.entries(
+                                        formData?.prices['Acceptance Fee']).map(
+                                            ([currency, value]) => (
+                                                <Typography 
+                                                    component="span" 
+                                                    variant="title-sm" 
+                                                    key={currency} 
+                                                    px={1}
+                                                >
+                                                    {` ${value} ${currency}`}
+                                                </Typography>
+                                            )
+                                        )
+                                }
+                            </Box>
                         }
                     </Alert>
-                    <form name="build-form" id="build-form">
-                        <FormControl className="mb-4">
-                            <Checkbox
+                    <Box 
+                        component="form"
+                        mb={3}
+                    >
+                        <FormControl>
+                            <FormControlLabel
                                 required
-                                name="terms"
-                                id="terms"
-                                label={ <span className="fs-7 text-muted">{ 
-                                    formData?.journal_agreement_message 
-                                    }</span> 
+                                control={
+                                    <Checkbox
+                                        name="terms"
+                                        id="terms"
+                                        checked={formData?.terms || false}
+                                        onChange={event => {
+                                            !wizard.isVerified && dispatch(handleIsVerified());
+                                            setFormData(
+                                                {
+                                                    terms: formData?.terms
+                                                }
+                                            )
+                                        }}
+                                    />
                                 }
-                                checked={ formData?.terms || false }
-                                onChange={ event => {
-                                        !wizard.isVerified && dispatch( handleIsVerified() );
-                                        setFormData( 
-                                            {
-                                                terms: formData?.terms 
-                                            } 
-                                        )
-                                    } 
+                                label={
+                                    <Typography variant="body-sm" color="muted">
+                                        {
+                                            formData?.journal_agreement_message
+                                        }
+                                    </Typography>
                                 }
                             />
                             {
-                                ( 
-                                    wizard.isVerified && 
+                                (
+                                    wizard.isVerified &&
                                     !formData?.terms
                                 )
-                                && 
-                                    <div className="fs-7 text-danger">
-                                        Please check the agreement to continue
-                                    </div> 
+                                &&
+                                <Typography variant="body-sm" color="error">
+                                    Please check the agreement to continue
+                                </Typography>
                             }
                         </FormControl>
-                    </form>
-                    <div className="d-flex align-items-center justify-content-end mt-4">
-                        <button
-                            type="button" 
-                            id="previous-step" 
-                            className={`button btn_secondary me-2 ${ 
-                                wizard.formStep === wizard.formSteps[0]?.attributes.title ? 'd-none' : '' 
-                            }`} 
-                            onClick={ () =>dispatch( prevStep() )}>
-                            Back
-                        </button>
-                        <button
-                            type="button"
-                            id="next-step"
+                    </Box>
+                    <Stack direction="row" alignItems="center" justifyContent="flex-end">
+                        {
+                            wizard.formStep !== wizard.formSteps[0]?.attributes.title &&
+                            <Button
+                                sx={{ mr: 2 }}
+                                className="button btn_secondary"
+                                onClick={() => dispatch(prevStep())}
+                            >
+                                Back
+                            </Button>
+                        }
+                        <Button
                             className={`button btn_primary`}
-                            onClick={ () => {
-                                if ( formData?.terms ) {
-                                    dispatch( handleDialogOpen({ 
+                            onClick={() => {
+                                if (formData?.terms) {
+                                    dispatch(handleDialogOpen({
                                         actions: { finishWorkflow: finishWorkflowUrl },
                                         data: '',
-                                        dialogTitle: 'Finish Submission', 
-                                        dialogContent: { content: formData?.final_message }, 
-                                        dialogAction: 'finish-submission' } 
-                                        ) );
+                                        dialogTitle: 'Finish Submission',
+                                        dialogContent: { content: formData?.final_message },
+                                        dialogAction: 'finish-submission'
+                                    }
+                                    ));
                                 } else {
                                     setFormData({ terms: false });
                                 }
-                            }}>
+                            }}
+                        >
                             Finish
-                        </button>
-                    </div>
-                </div>
-    );
-});
+                        </Button>
+                    </Stack>
+                </Box>
+        );
+    });
 
 BuildStep.displayName = 'BuildStep';
 

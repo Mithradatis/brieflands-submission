@@ -1,16 +1,15 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { fetchDataFromApi } from '@api/client'
 
 export const getZeroStepGuide = createAsyncThunk(
   'submission/getZeroStepGuide',
   async (url: string) => {
-    return fetchDataFromApi(url, 'getZeroStepGuide');
+    // return fetchDataFromApi(url, 'getZeroStepGuide');
   }
 );
 
 export const getZeroStepData = createAsyncThunk(
   'submission/getZeroStepData',
   async (url: string) => {
-    return fetchDataFromApi(url, 'getZeroStepData');
+    // return fetchDataFromApi(url, 'getZeroStepData');
   }
 );

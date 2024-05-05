@@ -2,26 +2,11 @@ import { createAsyncThunk } from '@reduxjs/toolkit';
 import { handleOpen, setModalActionButton, saveModal, setFormIsValid, setFormIsInvalid } from '@features/modal/modalSlice'
 import { saveReviewerModal, setModalData } from '@features/modal/addReviewerModalSlice'
 import { handleSnackbarOpen } from '@features/snackbar/snackbarSlice'
-import { fetchDataFromApi } from '@api/client'
-
-export const getReviewersStepGuide = createAsyncThunk(
-  'submission/getReviewersStepGuide',
-  async ( url: string ) => {
-    return fetchDataFromApi( url );
-  }
-);
 
 export const getReviewers = createAsyncThunk(
   'submission/getReviewers',
   async ( url: string ) => {
-    return fetchDataFromApi( url );
-  }
-);
-
-export const getReviewersStepData = createAsyncThunk(
-  'submission/getReviewersStepData',
-  async (url: string) => {
-    return fetchDataFromApi( url );
+    // return fetchDataFromApi( url );
   }
 );
 

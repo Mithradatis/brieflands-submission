@@ -3,8 +3,8 @@ import ReactHtmlParser from 'react-html-parser'
 import { ThunkDispatch } from '@reduxjs/toolkit'
 import { useEffect, forwardRef, useImperativeHandle } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import { formValidator, Wizard } from '@features/wizard/wizardSlice'
-import { Alert } from '@mui/material'
+import { formValidator } from '@/app/features/wizard/wizardSlice'
+import { Alert, Box, Typography } from '@mui/material'
 import { handleLoading, Zero } from '@features/submission/steps/zero/zeroSlice'
 
 const ZeroStep = forwardRef(
@@ -17,7 +17,6 @@ const ZeroStep = forwardRef(
     ) => {
     const dispatch: ThunkDispatch<any, void, any> = useDispatch();
     const formState: Zero = useSelector( ( state: any ) => state.zero );
-    const wizard: Wizard = useSelector( ( state: any ) => state.wizard );
     useEffect( () => {
         dispatch( formValidator( true ) );
     }, []);
@@ -33,26 +32,25 @@ const ZeroStep = forwardRef(
     return (
         <>
             <StepPlaceholder/>
-            <div 
-                id="zero" 
+            <Box 
                 className={ `tab ${ 
                     ( formState.isLoading || typeof formState.stepGuide !== 'string' ) 
-                        ? ' d-none' 
-                        : ' d-block' 
+                        ? ' hidden'
+                        : ' block' 
                     }` 
                 }
             >
-                <h3 className="mb-4 text-shadow-white">
+                <Typography variant="h3" mb={2}>
                     Revise/Revission Message
-                </h3>
+                </Typography>
                 {
                     typeof formState.stepGuide === 'string' && formState.stepGuide.trim() !== '' && (
-                        <Alert severity="info" className="mb-4">
+                        <Alert color="info" className="mb-4">
                             { ReactHtmlParser( formState.stepGuide ) }
                         </Alert>
                     )
                 }
-                <Alert severity="info" className="mb-4 break-word">
+                <Alert color="info" className="mb-4 break-word">
                     { formState.value?.revise_message !== undefined 
                         && ReactHtmlParser( formState.value?.revise_message )
                     }
@@ -79,7 +77,7 @@ const ZeroStep = forwardRef(
                         </table> 
                     }
                 </Alert>
-            </div>
+            </Box>
         </>
     );
 });
