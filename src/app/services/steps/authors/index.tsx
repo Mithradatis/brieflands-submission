@@ -1,16 +1,5 @@
 import { submissionApi } from '@/app/services/apiSlice'
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { handleModalSnackbarOpen } from '@features/snackbar/modalSnackbarSlice'
-import { 
-  setModalData, 
-  handleDisabledInputs, 
-  saveAuthorModal 
-} from '@features/modal/addAuthorModalSlice'
-import { 
-  handleOpen, 
-  setModalActionButton, 
-  saveModal 
-} from '@features/modal/modalSlice'
 import { type Author } from '@/app/services/types/author'
 
 export const authorApi = submissionApi.injectEndpoints({

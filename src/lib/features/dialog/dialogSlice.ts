@@ -1,8 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-export const dialogSlice = createSlice({
-  name: 'dialog',
-  initialState: {
+const initialState = {
     isOpen: false,
     actions: {},
     approvePhrase: 'Yes',
@@ -11,7 +9,11 @@ export const dialogSlice = createSlice({
     dialogTitle: '',
     dialogContent: {},
     dialogAction: '',
-  },
+}
+
+export const dialogSlice = createSlice({
+  name: 'dialog',
+  initialState: initialState,
   reducers: {
     handleDialogOpen: ( state, action ) => {
       return {
@@ -40,6 +42,9 @@ export const dialogSlice = createSlice({
   },
 });
 
-export const { handleDialogOpen, handleDialogClose } = dialogSlice.actions;
+export const { 
+    handleDialogOpen, 
+    handleDialogClose 
+} = dialogSlice.actions;
 
 export default dialogSlice.reducer;

@@ -87,7 +87,6 @@ const BuildStep = forwardRef(
             isError,
             error
         } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
-        console.log(stepData);
         if (isError) {
             let unfinishedStep = error?.data?.data?.step;
             const footnotes = [
@@ -111,8 +110,8 @@ const BuildStep = forwardRef(
             dispatch(handleSnackbarOpen({ severity: 'error', message: error?.data?.data?.message }));
         }
         const isLoading: boolean = (
-            stepGuideIsLoading &&
-            stepDataIsLoading &&
+            stepGuideIsLoading ||
+            stepDataIsLoading ||
             typeof stepGuide !== 'string'
         );
         const [finalAgreementGuide, setFinalAgreementGuide] = useState('');

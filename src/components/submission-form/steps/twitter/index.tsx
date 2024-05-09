@@ -14,7 +14,10 @@ import {
 const TwitterStep = forwardRef(
     (
         props: {
-            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string },
+            apiUrls: { 
+                stepDataApiUrl: string, 
+                stepGuideApiUrl: string 
+            },
             details: string
         },
         ref
@@ -23,9 +26,19 @@ const TwitterStep = forwardRef(
             text: ''
         });
         const dispatch = useAppDispatch();
-        const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
-        const isLoading: boolean = (stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string');
+        const { 
+            data: stepGuide, 
+            isLoading: stepGuideIsLoading 
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const { 
+            data: stepData, 
+            isLoading: stepDataIsLoading
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        const isLoading: boolean = (
+            stepGuideIsLoading || 
+            stepDataIsLoading || 
+            typeof stepGuide !== 'string'
+        );
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
         useEffect(() => {
             if (stepData) {
@@ -71,7 +84,10 @@ const TwitterStep = forwardRef(
                         Twitter
                     </Typography>
                     {
-                        (props.details !== undefined && props.details !== '') &&
+                        (
+                            props.details !== undefined && 
+                            props.details !== ''
+                        ) &&
                         <Alert color="error" sx={{ mb: 3, p: 2 }}>
                             {
                                 ReactHtmlParser(props.details)
@@ -79,7 +95,10 @@ const TwitterStep = forwardRef(
                         </Alert>
                     }
                     {
-                        typeof stepGuide === 'string' && stepGuide.trim() !== '' && (
+                        (
+                            typeof stepGuide === 'string' && 
+                            stepGuide.trim() !== ''
+                        ) && (
                             <Alert color="info" sx={{ mb: 3, p: 2 }}>
                                 {
                                     ReactHtmlParser(stepGuide)

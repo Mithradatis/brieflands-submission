@@ -1,4 +1,4 @@
-import useMessageHandler from '@/app/services/messages'
+import useMessageHandler from '@/app/hooks/messages'
 import { useAppDispatch, useAppSelector } from '@/store/store'
 import { handleDialogClose } from '@features/dialog/dialogSlice'
 import { useDeleteReviewerMutation } from '@/app/services/steps/reviewers'

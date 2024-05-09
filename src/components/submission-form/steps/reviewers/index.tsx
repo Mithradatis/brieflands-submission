@@ -1,7 +1,7 @@
 import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import DataTable, { TableColumn } from 'react-data-table-component'
-import useMessageHandler from '@/app/services/messages'
+import useMessageHandler from '@/app/hooks/messages'
 import ModalContent from '@/components/modal'
 import AddReviewerModal from '@/components/modal/forms/add-reviewer'
 import { useState, useEffect, useMemo, forwardRef, useImperativeHandle, useRef } from 'react'
@@ -74,22 +74,19 @@ const ReviewersStep = forwardRef(
         const [isEditing, setIsEditing] = useState<boolean>(false);
         const [filteredItems, setFilteredItems] = useState<any>([]);
         const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+        const [reviewersList, setReviewersList] = useState([]);
         const [modalFormData, setModalFormData] = useState<Reviewer>({
-            email: '',
-            firstName: '',
-            middleName: '',
-            lastName: '',
-            department: '',
-            reason: '',
-            university: '',
-            suggestOrOppose: 0,
-            academicDegree: '',
-            classification: 0
+            'email': '',
+            'first-name': '',
+            'middle-name': '',
+            'last-name': '',
+            'department': '',
+            'reason': '',
+            'university': '',
+            'suggest-or-oppose': 0,
+            'academic-degree': '',
+            'classification': 0
         });
-        const {
-            data: reviewersList,
-            isLoading: reviewersListIsLoading
-        } = useGetReviewersQuery(props.apiUrls.stepGuideApiUrl);
         const {
             data: stepGuide,
             isLoading: stepGuideIsLoading
@@ -99,8 +96,8 @@ const ReviewersStep = forwardRef(
             isLoading: stepDataIsLoading
         } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
         const isLoading: boolean = (
-            stepGuideIsLoading &&
-            stepDataIsLoading &&
+            stepGuideIsLoading ||
+            stepDataIsLoading ||
             typeof stepGuide !== 'string'
         );
         const isInitialMount = useRef(true);
@@ -127,16 +124,16 @@ const ReviewersStep = forwardRef(
         const setModalClose = () => {
             childRef.current && childRef.current.resetForm();
             setModalFormData({
-                email: '',
-                firstName: '',
-                middleName: '',
-                lastName: '',
-                department: '',
-                reason: '',
-                university: '',
-                suggestOrOppose: 0,
-                academicDegree: '',
-                classification: 0
+                'email': '',
+                'first-name': '',
+                'middle-name': '',
+                'last-name': '',
+                'department': '',
+                'reason': '',
+                'university': '',
+                'suggest-or-oppose': 0,
+                'academic-degree': '',
+                'classification': 0
             });
             setIsModalOpen(false);
             setIsEditing(false);

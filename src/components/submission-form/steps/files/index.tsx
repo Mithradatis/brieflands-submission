@@ -1,7 +1,7 @@
 import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
-import useMessageHandler from '@/app/services/messages'
-import { DataGrid, type GridRowsProp, type GridColDef } from '@mui/x-data-grid'
+import useMessageHandler from '@/app/hooks/messages'
+import { DataGrid, type GridRowsProp, type GridColDef, GridActionsCellItem } from '@mui/x-data-grid'
 import { useState, useEffect, forwardRef, useImperativeHandle, useMemo } from 'react'
 import { useAppDispatch } from '@/store/store'
 import { useDropzone } from 'react-dropzone'
@@ -47,9 +47,10 @@ const FilterComponent = (
             autoComplete="off"
             onChange={onFilter}
             InputProps={{
-                startAdornment: <InputAdornment position="start">
-                    <FontAwesomeIcon icon={faRemove} onClick={onClear} />
-                </InputAdornment>,
+                startAdornment:
+                    <InputAdornment position="start">
+                        <FontAwesomeIcon icon={faRemove} onClick={onClear} />
+                    </InputAdornment>
             }}
         />
     </>
@@ -85,11 +86,25 @@ const FilesStep = forwardRef(
         });
         const getFileTypesFromApi =
             `${process.env.SUBMISSION_API_URL}/${props.workflowId}/files/get_file_types`;
-        const { data: fileTypes, isLoading: fileTypesIsLoading } = useGetFileTypesQuery(getFileTypesFromApi);
-        const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        const {
+            data: fileTypes,
+            isLoading: fileTypesIsLoading
+        } = useGetFileTypesQuery(getFileTypesFromApi);
+        const {
+            data: stepGuide,
+            isLoading: stepGuideIsLoading
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const {
+            data: stepData,
+            isLoading: stepDataIsLoading
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
         const [addFileTrigger] = useAddFileMutation();
-        const isLoading: boolean = (fileTypesIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string');
+        const isLoading: boolean = (
+            fileTypesIsLoading ||
+            stepGuideIsLoading ||
+            stepDataIsLoading ||
+            typeof stepGuide !== 'string'
+        );
         useEffect(() => {
             setCaption(prevState => ({
                 ...prevState,
@@ -165,32 +180,66 @@ const FilesStep = forwardRef(
                 headerName: 'Caption',
                 width: 80
             },
-            // {
-            //     field: 'fileSize'
-            //     headerName: 'File Size',
-            //     selector: row => {
-            //         const fileSizeInKB: any = (parseInt(row.fileSize) / 1024).toFixed(2);
-            //         const fileSizeInMB: any = (parseInt(fileSizeInKB) / 1024).toFixed(2);
-
-            //         if (fileSizeInMB >= 1) {
-            //             return `${fileSizeInMB} MB`;
-            //         } else {
-            //             return `${fileSizeInKB} KB`;
-            //         }
-            //     },
-            //     sortable: true,
-            //     reorder: true
-            // },
+            {
+                field: 'fileSize',
+                headerName: 'File Size',
+                width: 80,
+                valueFormatter: (value: number) => {
+                    const fileSizeInKB: number = parseInt((value / 1024).toFixed(2));
+                    const fileSizeInMB: number = parseInt((fileSizeInKB / 1024).toFixed(2));
+                    if (fileSizeInMB >= 1) {
+                        return `${fileSizeInMB} MB`;
+                    } else {
+                        return `${fileSizeInKB} KB`;
+                    }
+                }
+            },
             {
                 field: 'wordCount',
                 headerName: 'Word Count',
                 width: 80,
-                type: 'number'
+                type: 'number',
+                align: 'left'
             },
             {
-                field: 'uploadData',
+                field: 'uploadDate',
                 headerName: 'Upload Date',
-                width: 100
+                width: 105
+            },
+            {
+                field: 'actions',
+                headerName: 'Actions',
+                align: 'left',
+                renderCell: (params: any) => (
+                    <Stack 
+                        direction="row" 
+                        alignItems="center" 
+                        justifyContent="start"
+                    >
+                        <GridActionsCellItem
+                            icon={<FontAwesomeIcon icon={faTrash} />}
+                            label="Delete"
+                            onClick={
+                                () => dispatch(handleDialogOpen(
+                                    {
+                                        actions: { deleteFile: deleteFileUrl },
+                                        data: params.row.uuid,
+                                        dialogTitle: 'Delete File',
+                                        dialogContent: { content: 'Are you sure?' },
+                                        dialogAction: 'delete-file'
+                                    }
+                                ))
+                            }
+                        />
+                        <Link href={`/cdn/dl/${params.row.uuid}`}>
+                            <GridActionsCellItem
+                                icon={<FontAwesomeIcon icon={faDownload} />}
+                                label="Download"
+                            />
+                        </Link>
+                    </Stack>
+
+                ),
             },
             // {
             //     name: 'Actions',

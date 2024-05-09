@@ -43,7 +43,12 @@ const AgreementStep = forwardRef(
         const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
         const { data: stepData, isLoading: stepDataIsLoading } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
-        const isLoading: boolean = (agreementTermsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string')
+        const isLoading: boolean = (
+            agreementTermsIsLoading || 
+            stepGuideIsLoading || 
+            stepDataIsLoading || 
+            typeof stepGuide !== 'string'
+        );
         const [formData, setFormData] = useState<Value>({ terms: false });
         useEffect(() => {
             if (stepData) {

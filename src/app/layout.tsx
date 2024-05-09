@@ -8,6 +8,7 @@ import { Provider } from 'react-redux'
 import { store } from '@/store/store'
 import { GlobalStyle } from '@/styles/global/globalStyles'
 import { theme } from '@/styles/theme/theme'
+import { ErrorBoundary } from '@/app/services/errors/error-boundry'
 
 export default function RootLayout({
   children,
@@ -50,7 +51,9 @@ export default function RootLayout({
                     flexGrow: 1 
                   }}
                 >
-                  {children}
+                  <ErrorBoundary>
+                    {children}
+                  </ErrorBoundary>
                 </Box>
                 <Footer />
               </Stack>

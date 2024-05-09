@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import { useAppDispatch } from '@/store/store'
 import { handleSnackbarOpen } from '@/lib/features/snackbar/snackbarSlice'
-import { Box, FormControl, FormHelperText, FormLabel, TextField, Typography } from '@mui/material'
+import { 
+    Box, 
+    FormControl, 
+    FormHelperText, 
+    FormLabel, 
+    TextField, 
+    Typography 
+} from '@mui/material'
 
 const Textarea = (
     {
@@ -56,7 +63,10 @@ const Textarea = (
             sx={{ mb: 2 }}
         >
             <FormLabel>
-                <Typography variant="title-sm" textTransform="capitalize">
+                <Typography 
+                    variant="title-sm"
+                    textTransform="capitalize"
+                >
                     {
                         label
                     }
@@ -71,7 +81,10 @@ const Textarea = (
                 maxRows={10}
                 value={value}
                 onChange={(event: any) => {
-                    countValidation(event.target.value, wordCountLimit);
+                    countValidation(
+                        event.target.value, 
+                        wordCountLimit
+                    );
                 }}
                 sx={{ pb: wordCountLimit ? 3 : 0 }}
             />
@@ -87,7 +100,11 @@ const Textarea = (
                     >
                         {wordCount || 0}
                     </Typography>
-                    <Typography component="span" variant="body-sm" sx={{ opacity: .5 }}>
+                    <Typography 
+                        component="span" 
+                        variant="body-sm" 
+                        sx={{ opacity: .5 }}
+                    >
                         {`/ ${wordCountLimit} words`}
                     </Typography>
                 </Box>
@@ -95,7 +112,10 @@ const Textarea = (
             {
                 error &&
                 <FormHelperText>
-                    <Typography color="error" variant="body-sm">
+                    <Typography 
+                        color="error" 
+                        variant="body-sm"
+                    >
                         This field is required
                     </Typography>
                 </FormHelperText>

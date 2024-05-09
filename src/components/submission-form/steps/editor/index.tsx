@@ -1,9 +1,16 @@
 import StepPlaceholder from '@components/partials/placeholders/step-placeholder'
 import ReactHtmlParser from 'react-html-parser'
 import { useAppDispatch } from '@/store/store'
-import { useEffect, forwardRef, useImperativeHandle, useState } from 'react'
 import { formValidator } from '@/app/features/wizard/wizardSlice'
 import { useGetEditorsQuery } from '@/app/services/steps/editor'
+import {
+    useEffect,
+    forwardRef,
+    useImperativeHandle,
+    useState,
+    useMemo,
+    useRef
+} from 'react'
 import {
     useGetStepDataQuery,
     useGetStepGuideQuery,
@@ -19,6 +26,11 @@ import {
     Typography
 } from '@mui/material'
 
+type Editor = {
+    id: string,
+    name: string
+}
+
 const EditorStep = forwardRef(
     (
         props: {
@@ -29,14 +41,46 @@ const EditorStep = forwardRef(
         ref
     ) => {
         const dispatch = useAppDispatch();
+        const [editorsList, setEditorsList] = useState<Editor[]>([]);
         const [formData, setFormData] = useState({
             id: ''
         });
         const getAllTypesFromApi = `${process.env.SUBMISSION_API_URL}/${props.workflowId}/editor/get_all`;
-        const { data: editors, isLoading: editorsIsLoading } = useGetEditorsQuery(getAllTypesFromApi);
-        const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
-        const isLoading: boolean = (editorsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string');
+        const {
+            data: editors,
+            isLoading: editorsIsLoading
+        } = useGetEditorsQuery(getAllTypesFromApi);
+        const isEditorsInitialized = useRef(false);
+        useMemo(() => {
+            if (editors) {
+                if (!isEditorsInitialized.current) {
+                    editors.forEach((element: any) => {
+                        setEditorsList((prevState: any) => [...prevState, {
+                            id: element.id,
+                            name: `${element.attributes.first_name
+                                }${element.attributes.middle_name && ` ${element.attributes.middle_name}`
+                                } ${element.attributes.last_name
+                                }`
+                        }]);
+                    });
+                    isEditorsInitialized.current = true;
+                }
+            }
+        }, [editors]);
+        const {
+            data: stepGuide,
+            isLoading: stepGuideIsLoading
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const {
+            data: stepData,
+            isLoading: stepDataIsLoading
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        const isLoading: boolean = (
+            editorsIsLoading ||
+            stepGuideIsLoading ||
+            stepDataIsLoading ||
+            typeof stepGuide !== 'string'
+        );
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
         useEffect(() => {
             dispatch(formValidator(true));
@@ -108,30 +152,25 @@ const EditorStep = forwardRef(
                                         />
                                     )}
                                     options={
-                                        Array.isArray(editors)
-                                            ? editors.map(
+                                        Array.isArray(editorsList)
+                                            ? editorsList.map(
                                                 item => {
-                                                    return `${item.attributes.first_name
-                                                        } ${item.attributes.middle_name
-                                                        } ${item.attributes.last_name
-                                                        }` || ''
+                                                    return item.name || ''
                                                 }
                                             ) : []
                                     }
                                     value={
-                                        (formData?.id !== '' && editors.length > 0)
-                                            ? editors
-                                                .find((item: any) => formData?.id === item.id)?.name
+                                        (formData?.id !== '' && editorsList?.length > 0)
+                                            ? editorsList?.find((item: any) => formData?.id === item.id)?.name
                                             : null
                                     }
                                     onChange={(event, value) => {
-                                        setFormData({
-                                            id: editors.find(
-                                                (item: any) => `${item.attributes.first_name
-                                                    } ${item.attributes.middle_name
-                                                    } ${item.attributes.last_name
-                                                    }` === value)?.id || ''
-                                        }
+                                        setFormData(
+                                            {
+                                                id: editorsList?.find(
+                                                    (item: any) => item.name === value
+                                                )?.id || ''
+                                            }
                                         )
                                     }}
                                 />

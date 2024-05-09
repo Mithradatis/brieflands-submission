@@ -24,7 +24,10 @@ import {
 const SectionStep = forwardRef(
     (
         props: {
-            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string },
+            apiUrls: { 
+                stepDataApiUrl: string, 
+                stepGuideApiUrl: string 
+            },
             details: string,
             workflowId: string
         },
@@ -36,10 +39,24 @@ const SectionStep = forwardRef(
             id: 0,
         });
         const getAllTypesFromApi = 'journal/section';
-        const { data: sections, isLoading: sectionsIsLoading } = useGetSectionsQuery(getAllTypesFromApi);
-        const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
-        const isLoading: boolean = (sectionsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string');
+        const {
+            data: sections,
+            isLoading: sectionsIsLoading
+        } = useGetSectionsQuery(getAllTypesFromApi);
+        const {
+            data: stepGuide,
+            isLoading: stepGuideIsLoading
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const {
+            data: stepData,
+            isLoading: stepDataIsLoading
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        const isLoading: boolean = (
+            sectionsIsLoading ||
+            stepGuideIsLoading ||
+            stepDataIsLoading ||
+            typeof stepGuide !== 'string'
+        );
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
         useEffect(() => {
             if (stepData) {
@@ -83,7 +100,9 @@ const SectionStep = forwardRef(
                         Section
                     </Typography>
                     {
-                        (props.details !== undefined && props.details !== '') &&
+                        (
+                            props.details !== undefined && props.details !== ''
+                        ) &&
                         <Alert color="error" sx={{ mb: 3, p: 2 }}>
                             {
                                 ReactHtmlParser(props.details)
@@ -91,7 +110,9 @@ const SectionStep = forwardRef(
                         </Alert>
                     }
                     {
-                        typeof stepGuide === 'string' && stepGuide.trim() !== '' && (
+                        (
+                            typeof stepGuide === 'string' && stepGuide.trim() !== ''
+                        ) && (
                             <Alert color="info" sx={{ mb: 3, p: 2 }}>
                                 {
                                     ReactHtmlParser(stepGuide)
@@ -101,13 +122,15 @@ const SectionStep = forwardRef(
                     }
                     <FormControl
                         fullWidth
+                        required
                         error={
-                            isVerified && formData?.id === 0
+                            isVerified &&
+                            formData?.id === 0
                         }
                     >
                         <FormLabel sx={{ mb: .5 }}>
                             <Typography variant="title-sm">
-                                Please Choose
+                                Section
                             </Typography>
                         </FormLabel>
                         <Autocomplete
@@ -157,8 +180,10 @@ const SectionStep = forwardRef(
                             (
                                 isVerified && formData?.id === 0
                             ) &&
-                            <FormHelperText sx={{ mt: 1, fontSize: 12 }} className="text-danger">
-                                You should choose a section.
+                            <FormHelperText>
+                                <Typography variant="body-sm" color="error">
+                                    You should choose a section.
+                                </Typography>
                             </FormHelperText>
                         }
                     </FormControl>

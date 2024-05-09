@@ -12,7 +12,7 @@ import { useGetStepDataQuery, useGetStepGuideQuery } from '@/app/services/apiSli
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faUserPlus, faEdit, faTrash } from '@fortawesome/pro-duotone-svg-icons'
 import { type Author } from '@/app/services/types/author'
-import useMessageHandler from '@/app/services/messages'
+import useMessageHandler from '@/app/hooks/messages'
 import AddAuthorModal from '@/components/modal/forms/add-author'
 import {
   useGetAuthorsAffiliationsQuery,
@@ -69,9 +69,9 @@ const AuthorsStep = forwardRef(
     } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
     const [updateAuthorsOrderTrigger] = useUpdateAuthorsOrderMutation();
     const isLoading: boolean = (
-      authorsAffiliationsIsLoading &&
-      stepGuideIsLoading &&
-      stepDataIsLoading &&
+      authorsAffiliationsIsLoading ||
+      stepGuideIsLoading ||
+      stepDataIsLoading ||
       typeof stepGuide !== 'string'
     );
     const isInitialMount = useRef(true);

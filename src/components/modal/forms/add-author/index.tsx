@@ -7,7 +7,7 @@ import { handleModalSnackbarOpen } from '@/lib/features/snackbar/modalSnackbarSl
 import { Author } from '@/app/services/types/author'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faSearch, faAdd } from '@fortawesome/pro-duotone-svg-icons'
-import useMessageHandler from '@/app/services/messages'
+import useMessageHandler from '@/app/hooks/messages'
 import {
     Autocomplete,
     Box,

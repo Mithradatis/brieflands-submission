@@ -13,7 +13,7 @@ const ModalContent = (
   }: {
     children: React.ReactNode,
     isOpen: boolean,
-    onClose: () => void,
+    onClose?: () => void,
     modalTitle: string,
     modalActions: React.ReactNode
   }

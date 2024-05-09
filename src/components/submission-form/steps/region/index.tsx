@@ -33,10 +33,24 @@ const RegionStep = forwardRef(
         const [formData, setFormData] = useState({
             id: ''
         });
-        const { data: regions, isLoading: regionsIsLoading } = useGetRegionsQuery();
-        const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
-        const isLoading: boolean = (regionsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string');
+        const { 
+            data: regions, 
+            isLoading: regionsIsLoading 
+        } = useGetRegionsQuery();
+        const { 
+            data: stepGuide, 
+            isLoading: stepGuideIsLoading 
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const { 
+            data: stepData, 
+            isLoading: stepDataIsLoading 
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        const isLoading: boolean = (
+            regionsIsLoading || 
+            stepGuideIsLoading || 
+            stepDataIsLoading || 
+            typeof stepGuide !== 'string'
+        );
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
         useEffect(() => {
             if (stepData) {
@@ -100,6 +114,7 @@ const RegionStep = forwardRef(
                     }
                     <FormControl
                         fullWidth
+                        required
                         className="mb-3"
                         error={
                             isVerified &&
@@ -133,7 +148,8 @@ const RegionStep = forwardRef(
                                     (formData?.id !== '' && regions.length > 0)
                                         ? regions
                                             .find(
-                                                (item: any) => formData?.id === item.id)?.attributes?.title
+                                                (item: any) => formData?.id === item.id
+                                            )?.attributes?.title
                                         : null
                                 }
                                 onChange={(event, value) => {
@@ -154,8 +170,13 @@ const RegionStep = forwardRef(
                                 isVerified &&
                                 formData?.id === ''
                             ) &&
-                            <FormHelperText sx={{ fontSize: 12, mt: 1 }} color="error">
-                                Please select a region
+                            <FormHelperText>
+                                <Typography 
+                                    variant="body-sm" 
+                                    color="error"
+                                >
+                                    Please select a region
+                                </Typography>
                             </FormHelperText>
                         }
                     </FormControl>

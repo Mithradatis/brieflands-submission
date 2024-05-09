@@ -14,7 +14,10 @@ import {
 const AbstractStep = forwardRef(
     (
         props: {
-            apiUrls: { stepDataApiUrl: string, stepGuideApiUrl: string },
+            apiUrls: { 
+                stepDataApiUrl: string, 
+                stepGuideApiUrl: string 
+            },
             details: string,
             workflowId: string
         },
@@ -24,9 +27,19 @@ const AbstractStep = forwardRef(
             text: ''
         });
         const dispatch = useAppDispatch();
-        const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
-        const isLoading: boolean = (stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string');
+        const { 
+            data: stepGuide, 
+            isLoading: stepGuideIsLoading 
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const { 
+            data: stepData, 
+            isLoading: stepDataIsLoading 
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        const isLoading: boolean = (
+            stepGuideIsLoading || 
+            stepDataIsLoading ||
+            typeof stepGuide !== 'string'
+        );
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
         useEffect(() => {
             if (stepData) {
@@ -89,6 +102,7 @@ const AbstractStep = forwardRef(
                         )
                     }
                     <Textarea
+                        required
                         label="abstract"
                         value={formData?.text || ''}
                         onChange={handleChange}

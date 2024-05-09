@@ -7,7 +7,6 @@ import {
     Alert,
     Autocomplete,
     Box,
-    Chip,
     FormControl,
     FormLabel,
     FormHelperText,
@@ -60,9 +59,9 @@ const KeywordsStep = forwardRef(
             isLoading: stepDataIsLoading
         } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
         const isLoading: boolean = (
-            allKeywordsIsLoading &&
-            stepGuideIsLoading &&
-            stepDataIsLoading &&
+            allKeywordsIsLoading ||
+            stepGuideIsLoading ||
+            stepDataIsLoading ||
             typeof stepGuide !== 'string'
         );
         const [getKeywordsTrigger] = useLazyGetKeywordsQuery();
@@ -170,18 +169,6 @@ const KeywordsStep = forwardRef(
                                     placeholder="Choose one…"
                                 />
                             )}
-                            renderTags={(tags) =>
-                                tags.map((item, index) => (
-                                    <Chip
-                                        key={`keyword-label-${index}`}
-                                        size="small"
-                                        variant="filled"
-                                        color="primary"
-                                        label={item}
-                                        sx={{ minWidth: 0, mr: 1, fontSize: 12 }}
-                                    />
-                                ))
-                            }
                             options={keywordsBuffer?.length > 0
                                 ? keywordsBuffer.map((item: any) => item.attributes?.title)
                                 : []

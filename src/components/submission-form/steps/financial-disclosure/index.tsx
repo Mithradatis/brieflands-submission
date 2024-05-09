@@ -23,9 +23,19 @@ const FinancialDisclosureStep = forwardRef(
             text: ''
         });
         const dispatch = useAppDispatch();
-        const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
-        const isLoading: boolean = (stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string');
+        const { 
+            data: stepGuide, 
+            isLoading: stepGuideIsLoading 
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const { 
+            data: stepData, 
+            isLoading: stepDataIsLoading
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        const isLoading: boolean = (
+            stepGuideIsLoading || 
+            stepDataIsLoading || 
+            typeof stepGuide !== 'string'
+        );
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
         useEffect(() => {
             dispatch(formValidator(true));

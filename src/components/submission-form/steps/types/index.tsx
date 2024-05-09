@@ -15,10 +15,8 @@ import {
     Autocomplete,
     Box,
     FormControl,
-    FormControlLabel,
     FormHelperText,
     FormLabel,
-    Input,
     Stack,
     Typography,
     TextField
@@ -51,20 +49,20 @@ const TypesStep = forwardRef(
             doc_type: '',
             manuscript_title: ''
         });
-        const { 
-            data: stepGuide, 
-            isLoading: stepGuideIsLoading 
+        const {
+            data: stepGuide,
+            isLoading: stepGuideIsLoading
         } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { 
-            data: stepData, 
-            isLoading: stepDataIsLoading 
+        const {
+            data: stepData,
+            isLoading: stepDataIsLoading
         } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
         const [getSameArticlesTrigger] = useLazyGetSameArticlesQuery();
         const [getSameArticlesGuideTrigger] = useLazyGetSameArticlesGuideQuery();
         const isLoading: boolean = (
-            stepGuideIsLoading && 
-            stepDataIsLoading && 
+            stepGuideIsLoading ||
+            stepDataIsLoading ||
             typeof stepGuide !== 'string'
         );
         const getSameArticlesFromApi = `${props.workflowId}/type/same_articles`;
@@ -104,14 +102,14 @@ const TypesStep = forwardRef(
                                 if (sameArticles !== undefined && sameArticles.length > 0) {
                                     const sameArticlesTable = <Box className="alert alert-warning" role="alert">
                                         <Stack className="fs-7 mb-4 d-flex align-items-start justify-content-start">
-                                            <FontAwesomeIcon 
-                                                icon={faTriangleExclamation} 
+                                            <FontAwesomeIcon
+                                                icon={faTriangleExclamation}
                                                 style={
-                                                    { 
-                                                        marginRight: '.5rem', 
-                                                        fontSize: '1.25rem' 
+                                                    {
+                                                        marginRight: '.5rem',
+                                                        fontSize: '1.25rem'
                                                     }
-                                                } 
+                                                }
                                             />
                                             <Box display="block">
                                                 {
@@ -195,7 +193,10 @@ const TypesStep = forwardRef(
                                 Types
                             </Typography>
                             {
-                                (props.details !== undefined && props.details !== '') &&
+                                (
+                                    props.details !== undefined &&
+                                    props.details !== ''
+                                ) &&
                                 <Alert color="error" sx={{ mb: 3, p: 2 }}>
                                     {
                                         ReactHtmlParser(props.details)
@@ -203,7 +204,10 @@ const TypesStep = forwardRef(
                                 </Alert>
                             }
                             {
-                                typeof stepGuide === 'string' && stepGuide.trim() !== '' && (
+                                (
+                                    typeof stepGuide === 'string' &&
+                                    stepGuide.trim() !== ''
+                                ) && (
                                     <Alert color="info" sx={{ mb: 3, p: 2 }}>
                                         {
                                             ReactHtmlParser(stepGuide)
@@ -279,8 +283,10 @@ const TypesStep = forwardRef(
                                             formData?.doc_type === ''
                                         )
                                     ) &&
-                                    <FormHelperText className="fs-7 text-danger mt-1">
-                                        You should select a document type
+                                    <FormHelperText>
+                                        <Typography variant="body-sm" color="error">
+                                            You should select a document type
+                                        </Typography>
                                     </FormHelperText>
                                 }
                             </FormControl>
@@ -324,8 +330,10 @@ const TypesStep = forwardRef(
                                             formData?.manuscript_title === ''
                                         )
                                     ) &&
-                                    <FormHelperText className="fs-7 text-danger mt-1">
-                                        You should enter a title for your manuscript
+                                    <FormHelperText>
+                                        <Typography variant="body-sm" color="error">
+                                            You should enter a title for your manuscript
+                                        </Typography>
                                     </FormHelperText>
                                 }
                             </FormControl>

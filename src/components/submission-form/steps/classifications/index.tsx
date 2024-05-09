@@ -33,10 +33,24 @@ const ClassificationsStep = forwardRef(
         });
         const dispatch = useAppDispatch();
         const isVerified = useAppSelector((state: any) => state.wizard.isVerified);
-        const { data: classifications, isLoading: classificationsIsLoading } = useGetClassificationsQuery();
-        const { data: stepGuide, isLoading: stepGuideIsLoading } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
-        const { data: stepData, isLoading: stepDataIsLoading, error } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
-        const isLoading: boolean = (classificationsIsLoading && stepGuideIsLoading && stepDataIsLoading && typeof stepGuide !== 'string');
+        const { 
+            data: classifications, 
+            isLoading: classificationsIsLoading 
+        } = useGetClassificationsQuery();
+        const { 
+            data: stepGuide, 
+            isLoading: stepGuideIsLoading 
+        } = useGetStepGuideQuery(props.apiUrls.stepGuideApiUrl);
+        const { 
+            data: stepData, 
+            isLoading: stepDataIsLoading 
+        } = useGetStepDataQuery(props.apiUrls.stepDataApiUrl);
+        const isLoading: boolean = (
+            classificationsIsLoading || 
+            stepGuideIsLoading || 
+            stepDataIsLoading || 
+            typeof stepGuide !== 'string'
+        );
         const [updateStepDataTrigger] = useUpdateStepDataMutation();
         const filter = createFilterOptions();
         useEffect(() => {

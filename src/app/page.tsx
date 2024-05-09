@@ -132,7 +132,7 @@ export default function Page({ params }: { params: { slug: string } }) {
       : workflowHasError
         ? (() => {
           return (
-            workflowError.status === 'FETCH_ERROR' || !workflow?.locked
+            workflowError.status === 'FETCH_ERROR' || workflow?.locked
               ? <NotPermission message="You have no permission" />
               : workflowError.status === 'PARSING_ERROR'
                 ? <NotFound />

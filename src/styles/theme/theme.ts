@@ -1,4 +1,5 @@
 
+import { Opacity } from '@mui/icons-material';
 import { createTheme } from '@mui/material'
 
 declare module "@mui/material/styles" {
@@ -150,6 +151,15 @@ export const theme = createTheme({
         },
       },
     },
+    MuiFormLabel: {
+      styleOverrides: {
+        root: {
+          '.MuiFormLabel-asterisk': {
+            color: '#f00'
+          },
+        },
+      },
+    },
     MuiTextField: {
       styleOverrides: {
         root: {
@@ -191,6 +201,14 @@ export const theme = createTheme({
         root: {
           '& .MuiFilledInput-root': {
             padding: '7.5px !important',
+          },
+          '.MuiChip-filled': {
+            color: 'white',
+            backgroundColor: '#559399'
+          },
+          '.MuiChip-deleteIcon': {
+            opacity: .5,
+            color: 'white'
           }
         }
       }
